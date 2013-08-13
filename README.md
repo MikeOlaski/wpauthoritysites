@@ -1,4 +1,4 @@
-=== WP Authorities ===
+=== WP Authorities ===<br />
 Contributors: 1Website, HTMLGuys<br />
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=UNDSCARF3ZPBC<br />
 Tags: Wordpress, Authority Site List, Top Websites, Top Wordpress Websites<br />
