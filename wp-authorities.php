@@ -337,16 +337,19 @@ function awp_options_handle(){
 
 function awp_register_pages(){
 	$ofpage = add_menu_page(
-		__('WP Authorities'),
-		__('Overview'),
+		__('WP Authority Sites'),
+		__('WP Authority Sites'),
 		'manage_options',
 		'wpauthorities',
 		'awp_overview_page',
 		PLUGINURL . 'images/favicon.ico'
 	);
 	
-	add_submenu_page( 'wpauthorities', __('Settings'), __('Settings'), 'manage_options', 'wpauthority', 'awp_admin_pages' );
+	add_submenu_page( 'wpauthorities', __('Sites'), __('Sites'), 'manage_options', 'wpauthorities', 'awp_overview_page' );
 	add_submenu_page( 'wpauthorities', __('WP Sites'), __('WP Sites'), 'manage_options', 'edit.php?post_type=site');
+	add_submenu_page( 'wpauthorities', __('Site Category'), __('Site Category'), 'manage_options', 'edit-tags.php?taxonomy=site-category&post_type=site');
+	add_submenu_page( 'wpauthorities', __('Site Tags'), __('Site Tags'), 'manage_options', 'edit-tags.php?taxonomy=site-tag&post_type=site');
+	add_submenu_page( 'wpauthorities', __('Settings'), __('Settings'), 'manage_options', 'wpauthority', 'awp_admin_pages' );
 	
 	add_action( "load-$ofpage", 'base_screen_options' ); // Custom table screen options
 }
