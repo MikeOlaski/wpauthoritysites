@@ -1,4 +1,5 @@
 <?php
+!defined( 'ABSPATH' ) ? exit : '';
 
 global $fields;
 $fields = array();
@@ -648,6 +649,7 @@ class Sites_CPT{
 		switch($column_name){
 			case 'rank':
 				$rank = get_post_meta($post_ID, 'rating', true);
+				$rank = ($rank) ? $rank : get_post_meta($post_ID, 'awp-alexa-rank', true);
 				echo ($rank) ? __( $rank ) : __(0);
 				break;
 			
@@ -903,9 +905,30 @@ class Sites_CPT{
 		}
 	}
 	
+	function save_post( $post_id ){
+		global $fields;
+		
+		if(!$post_id)
+			return;
+		
+		foreach( $fields as $fl ){
+			if('heading' == $fl['type']){
+				continue;
+			} else {
+				if( isset($_POST[$fl['id']]) and (NULL != $_POST[$fl['id']]) ){
+					update_post_meta( $post_id, $fl['id'], $_POST[$fl['id']] );
+				} else {
+					delete_post_meta( $post_id, $fl['id'] );
+				}
+			}
+		}
+		
+		return;
+	}
+	
 	function site_manager_scripts(){
 		wp_enqueue_script('jquery');
-		wp_enqueue_style( 'awpmain', PLUGINURL . '/css/main.css' );
+		wp_enqueue_style( 'awpeditor', PLUGINURL . '/css/editor.css' );
 	}
 }
 
@@ -937,3 +960,4 @@ add_action( 'pre_get_posts', array('Sites_CPT', 'site_orderby_rank') );
 
 // Add meta boxes
 add_action( 'add_meta_boxes', array('Sites_CPT', 'add_meta_boxes') );
+add_action( 'save_post', array('Sites_CPT', 'save_post') );

@@ -1,4 +1,6 @@
 <?php
+!defined( 'ABSPATH' ) ? exit : '';
+
 /**
  * Make a request for AWIS for top sites.
  *

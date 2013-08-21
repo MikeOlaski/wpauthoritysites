@@ -1,4 +1,6 @@
 <?php
+!defined( 'ABSPATH' ) ? exit : '';
+
 /**
  * Use to scrape multiple site to determine if the is using wordpress.
  * This class will check the html data of a site for wp-includes, wp-content, or wp-admin.
@@ -72,9 +74,26 @@ class scrapeWordpress {
 			
 			foreach($links as $po){
 				// Create post object
+				
+				$slugs = explode('.', $po['name']); // Exclude TLD for post name eg. /mashable.com/ -> /mashable/
+				// We have to check the slug to include subdomains eg. /play.google.com/ -> /play-google/
+				$slugCount = count($slugs);
+				$slug = '';
+				$i = 1;
+				foreach($slugs as $sg){
+					if($i < $slugCount){
+						if( $i == 1){
+							$slug .= $sg;
+						} else {
+							$slug .= '-'.$sg;
+						}
+					}
+					$i++;
+				}
+				
 				$cpost = array(
 					'post_title' => $po['name'],
-					'post_name' => $po['name'],
+					'post_name' => $slug,
 					'post_type' => 'site',
 					'post_status' => 'publish'
 				);
@@ -95,7 +114,11 @@ class scrapeWordpress {
 				
 				// Add or update all custom meta values
 				if($post_id){
-					update_post_meta($post_id, 'rating', $po['rating']);
+					update_post_meta( $post_id, 'rating', $po['rating'] );
+					update_post_meta( $post_id, 'awp-alexa-rank', $po['rating'] );
+					update_post_meta( $post_id, 'awp-name', $slug );
+					update_post_meta( $post_id, 'awp-domain', $slugs[$slugCount - 1] );
+					update_post_meta( $post_id, 'awp-url', 'http://'.$po['name'] );
 				}
 			}
 		}

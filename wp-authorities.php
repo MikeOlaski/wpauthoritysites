@@ -1,4 +1,5 @@
 <?php
+!defined( 'ABSPATH' ) ? exit : '';
 /*
  * Plugin Name: WP Authority Sites
  * Plugin URI: http://onewebsite.ca/
@@ -16,6 +17,7 @@ load_template( trailingslashit( PLUGINPATH ) . 'classes/base.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/cron.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/scrapewp.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/topSites.class.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/template-loader.php' );
 
 register_activation_hook( __FILE__, 'awp_activate' );
 register_deactivation_hook( __FILE__, 'awp_deactivate' );
@@ -47,6 +49,19 @@ function awp_deactivate(){
 	
 	// On deactivation, remove all functions from the scheduled action hook.
 	wp_clear_scheduled_hook( 'wp_authority_update' );
+}
+
+add_action( 'init', 'awp_sidebars' );
+
+function awp_sidebars(){
+	register_sidebar( array(
+		'name' => __( 'AWP Site Sidebar', 'awp' ),
+		'id' => 'sidebar-site',
+		'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+		'after_widget' => "</aside>",
+		'before_title' => '<h3 class="widget-title">',
+		'after_title' => '</h3>',
+	) );
 }
 
 add_action( 'admin_init', 'awp_options_handle' );
@@ -422,15 +437,15 @@ function awp_overview_page(){
 			$base = new Base_Table();
 			
 			$freshlinks = array();
-			if( isset($_POST['checked']) && ('' != $_POST['checked']) ){
+			if( isset($_REQUEST['checked']) && ('' != $_REQUEST['checked']) ){
 				
-				if('true' == $_POST['checked']){
+				if('true' == $_REQUEST['checked']){
 					foreach($websites as $fl){
 						if($fl['check'] == true){
 							$freshlinks[] = $fl;
 						}
 					}
-				} elseif( ($fl['check'] == false) && ('false' == $_POST['checked']) ){
+				} elseif( ($fl['check'] == false) && ('false' == $_REQUEST['checked']) ){
 					foreach($websites as $fl){
 						if($fl['check'] == false){
 							$freshlinks[] = $fl;
@@ -458,17 +473,26 @@ function awp_overview_page(){
             $base->prepare_items();
 			
 			?><div class="alignleft actions">
-                <select name="checked" id="checked" onchange="this.form.submit()">
-                    <option value="0" <?php selected($_POST['checked'], 0); ?>>Show All</option>
-                    <option value="true" <?php selected($_POST['checked'], 'true'); ?>>Show all scanned</option>
-                    <option value="false" <?php selected($_POST['checked'], 'false'); ?>>Show all not scanned</option>
+                <select name="checked" id="awp-checked">
+                    <option value="0" <?php selected($_REQUEST['checked'], 0); ?>>Show All</option>
+                    <option value="true" <?php selected($_REQUEST['checked'], 'true'); ?>>Show all scanned</option>
+                    <option value="false" <?php selected($_REQUEST['checked'], 'false'); ?>>Show all not scanned</option>
                 </select>
+                <script type="text/javascript">
+					jQuery(document).ready(function($) {
+                        $('#awp-checked').change(function(e) {
+                            e.preventDefault();
+							window.location.href = "<?php echo admin_url('admin.php?page=wpauthorities&checked='); ?>" + $(this).val();
+                        });
+                    });
+				</script>
 			</div><?php
 			
             $base->search_box('search', 'search_cpt');
             $base->display();
             
         	?><h3>Cron Statistics</h3><?php
+			
             $count_posts = wp_count_posts( 'site' );
 			
 			// Count all scanned websites
