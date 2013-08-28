@@ -17,7 +17,11 @@ get_header(); ?>
 		<section id="primary">
 			<div id="content" role="main">
 
-			<?php if ( have_posts() ) : ?>
+			<?php global $wp_query;
+			wp_reset_query();
+			/*?><pre><?php print_r( count( $wp_query->posts ) ); ?></pre><? wp_die();*/
+			
+			if ( $wp_query->have_posts() ) : ?>
 
 				<header class="page-header">
 					<h1 class="page-title">
@@ -26,15 +30,35 @@ get_header(); ?>
 				</header>
 
 				<?php /* Start the Loop */ ?>
-				<?php while ( have_posts() ) : the_post(); ?>
-
-					<?php
-						/* Include the Post-Format-specific template for the content.
-						 * If you want to overload this in a child theme then include a file
-						 * called content-___.php (where ___ is the Post Format name) and that will be used instead.
-						 */
-						load_template( trailingslashit( PLUGINPATH ) . '/templates/content-site.php' );
-					?>
+				<?php while ( $wp_query->have_posts() ) : $wp_query->the_post();
+				
+					?><article id="post-<?php the_ID(); ?>" <?php post_class(); ?>><?php
+						
+						if(is_singular() && has_post_thumbnail()){
+							?><div class="alignleft"><?php
+								the_post_thumbnail();
+							?></div><?php
+						}
+						
+						?><header class="entry-header">
+							<?php if ( is_sticky() ) : ?>
+								<hgroup>
+									<h2 class="entry-title"><a href="<?php the_permalink(); ?>" title="<?php echo esc_attr( sprintf( __( 'Permalink to %s', 'awp' ), the_title_attribute( 'echo=0' ) ) ); ?>" rel="bookmark"><?php the_title(); ?></a></h2>
+									<h3 class="entry-format"><?php _e( 'Featured', 'awp' ); ?></h3>
+								</hgroup>
+							<?php else : ?>
+							<h1 class="entry-title"><a href="<?php the_permalink(); ?>" title="<?php echo esc_attr( sprintf( __( 'Permalink to %s', 'awp' ), the_title_attribute( 'echo=0' ) ) ); ?>" rel="bookmark"><?php the_title(); ?></a></h1>
+							<span><a href="http://<?php the_title(); ?>/" target="_blank"><?php the_title(); ?></a></span>
+							<?php endif; ?>
+						</header><!-- .entry-header -->
+						
+						<div class="clear"></div>
+					
+						<div class="entry-summary">
+							<?php the_excerpt(); ?>
+						</div><!-- .entry-summary -->
+					
+                    </article>
 
 				<?php endwhile; ?>
 
@@ -53,7 +77,10 @@ get_header(); ?>
 
 			<?php endif; ?>
 
+			<div class="clear"></div>
 			</div><!-- #content -->
 		</section><!-- #primary -->
+        
+        <div class="clear"></div>
 
 <?php get_footer(); ?>

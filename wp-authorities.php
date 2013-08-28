@@ -12,6 +12,12 @@
 define( 'PLUGINURL', plugin_dir_url( __FILE__ ) );
 define( 'PLUGINPATH', plugin_dir_path( __FILE__ ) );
 
+load_template( trailingslashit( PLUGINPATH ) . 'classes/TwitterAPIExchange.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/whois.class.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/majestic/APIService.php' );
+
+load_template( trailingslashit( PLUGINPATH ) . 'classes/simple_html_dom.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/admin-ajax.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/posts.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/base.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/cron.class.php' );
@@ -217,7 +223,28 @@ function awp_options_handle(){
 		// Update Settings
 		if(isset($_POST['awp_submit']) && '' != $_POST['awp_submit']){
 			
-			// API Settings
+			// Evaluation Settings
+			$settings['evaluation'] = $awp_settings['evaluation'];
+			
+			// twitter API Settings
+			$settings['twitter_access_token'] = $awp_settings['twitter_access_token'];
+			$settings['twitter_access_secret'] = $awp_settings['twitter_access_secret'];
+			$settings['twitter_cons_key'] = $awp_settings['twitter_cons_key'];
+			$settings['twitter_cons_secret'] = $awp_settings['twitter_cons_secret'];
+			
+			// Compete API Settings
+			$settings['compete_api_key'] = $awp_settings['compete_api_key'];
+			
+			// Google API Settings
+			$settings['goolge_api_key'] = $awp_settings['goolge_api_key'];
+			
+			// Yahoo API Settings
+			$settings['yahoo_api_key'] = $awp_settings['yahoo_api_key'];
+			
+			// Majestic API Settings
+			$settings['majestic_api_key'] = $awp_settings['majestic_api_key'];
+			
+			// Alexa API Settings
 			$settings['access_id'] = $awp_settings['access_id'];
 			$settings['access_secret'] = $awp_settings['access_secret'];
 			$settings['StartNum'] = $awp_settings['StartNum'];
@@ -352,8 +379,8 @@ function awp_options_handle(){
 
 function awp_register_pages(){
 	$ofpage = add_menu_page(
-		__('WP Authority Sites'),
-		__('WP Authority Sites'),
+		__('WPA Sites'),
+		__('WPA Sites'),
 		'manage_options',
 		'wpauthorities',
 		'awp_overview_page',
@@ -634,7 +661,81 @@ function awp_admin_pages(){
 				}
 				
 				?><form name="awp_settings" method="post" action="<?php admin_url('options-general.php?page=wpauthority'); ?>">
-                	<h3>API Settings</h3>
+                	<h3>Evaluation Settings</h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="evaluation">Evaluate WP Site for:</label></th>
+                            <td><select name="awp_settings[evaluation]" id="evaluation">
+                            	<option value="google" <?php selected($settings['evaluation'], 'google'); ?>>Google</option>
+                                <option value="fb" <?php selected($settings['evaluation'], 'fb'); ?>>Facebook</option>
+                                <option value="raven" <?php selected($settings['evaluation'], 'raven'); ?>>Raven Tools</option>
+                            </select></td>
+                        </tr>
+                    </table>
+                    
+                    <h3>Twitter API Settings</h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="twitter_access_token">OAUTH Access Token:</label></th>
+                            <td><input type="text" name="awp_settings[twitter_access_token]" id="twitter_access_token" value="<?php echo $settings['twitter_access_token']; ?>" class="regular-text" /></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="twitter_access_secret">OAUTH Access Token Secret:</label></th>
+                            <td><input type="text" name="awp_settings[twitter_access_secret]" id="twitter_access_secret" value="<?php echo $settings['twitter_access_secret']; ?>" class="regular-text" /></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="twitter_cons_key">Consumer Key:</label></th>
+                            <td><input type="text" name="awp_settings[twitter_cons_key]" id="twitter_cons_key" value="<?php echo $settings['twitter_cons_key']; ?>" class="regular-text" /></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="twitter_cons_secret">Consumer Secret:</label></th>
+                            <td><input type="text" name="awp_settings[twitter_cons_secret]" id="twitter_cons_secret" value="<?php echo $settings['twitter_cons_secret']; ?>" class="regular-text" /></td>
+                        </tr>
+                    </table>
+                    
+                    <h3>Compete API Settings</h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="compete_api_key">API Key</label></th>
+                            <td><input type="text" name="awp_settings[compete_api_key]" id="compete_api_key" value="<?php echo $settings['compete_api_key']; ?>" class="regular-text" /><br />
+                            <span class="description">You can get your api service <a href="https://developer.compete.com/" target="_blank">here.</a></td>
+                        </tr>
+                    </table>
+                    
+                    <h3>Google API Settings</h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="goolge_api_key">API Key</label></th>
+                            <td><input type="text" name="awp_settings[goolge_api_key]" id="goolge_api_key" value="<?php echo $settings['goolge_api_key']; ?>" class="regular-text" /><br />
+                            <span class="description">You can get your api service <a href="http://api.exslim.net/signup" target="_blank">here</a></td>
+                        </tr>
+                    </table>
+                    
+                    <h3>Yahoo API Settings</h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="yahoo_api_key">API Key</label></th>
+                            <td><input type="text" name="awp_settings[yahoo_api_key]" id="yahoo_api_key" value="<?php echo $settings['yahoo_api_key']; ?>" class="regular-text" /><br />
+                            <span class="description">You can get your api service <a href="https://developer.apps.yahoo.com/wsregapp/" target="_blank">here</a></td>
+                        </tr>
+                    </table>
+                    
+                    <h3>Majestic API Settings</h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="majestic_api_key">API Key</label></th>
+                            <td><input type="text" name="awp_settings[majestic_api_key]" id="majestic_api_key" value="<?php echo $settings['majestic_api_key']; ?>" class="regular-text" /><br />
+                            <span class="description">You can get your api service <a href="https://www.majesticseo.com/account/api/" target="_blank">here</a></td>
+                        </tr>
+                    </table>
+                    
+                	<h3>Alexa API Settings</h3>
                     
 					<table class="form-table">
                     	<tr>

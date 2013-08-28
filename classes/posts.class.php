@@ -6,503 +6,599 @@ $fields = array();
 
 $shortname = 'awp';
 
-// General
+// Departments
 $fields[] = array(
-	'name' => 'General',
-	'id' => $shortname.'-general',
-	'type' => 'heading'
+	'name' => 'Departments',
+	'id' => $shortname.'-departments',
+	'type' => 'separator'
 );
 
+	// General
+	$fields[] = array(
+		'name' => 'Site',
+		'id' => $shortname.'-general',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Name',
+		'id' => $shortname.'-name',
+		'type' => 'text',
+		'group' => $shortname.'-general'
+	);
+	
+	$fields[] = array(
+		'name' => 'Domain',
+		'id' => $shortname.'-domain',
+		'type' => 'text',
+		'group' => $shortname.'-general'
+	);
+	
+	$fields[] = array(
+		'name' => 'TLD',
+		'id' => $shortname.'-tld',
+		'type' => 'text',
+		'group' => $shortname.'-general'
+	);
+	
+	$fields[] = array(
+		'name' => 'URL – Link',
+		'id' => $shortname.'-url',
+		'type' => 'text',
+		'group' => $shortname.'-general'
+	);
+	
+	$fields[] = array(
+		'name' => 'Date Founded',
+		'id' => $shortname.'-date',
+		'type' => 'text',
+		'group' => $shortname.'-general'
+	);
+	
+	$fields[] = array(
+		'name' => 'Network IN?',
+		'id' => $shortname.'-networked',
+		'type' => 'text',
+		'group' => $shortname.'-general'
+	);
+	
+	$fields[] = array(
+		'name' => 'Location',
+		'id' => $shortname.'-location',
+		'type' => 'text',
+		'group' => $shortname.'-general'
+	);
+	
+	$fields[] = array(
+		'name' => 'Language',
+		'id' => $shortname.'-language',
+		'type' => 'text',
+		'group' => $shortname.'-general'
+	);
+	
+	// Owners
+	$fields[] = array(
+		'name' => 'Owners',
+		'id' => $shortname.'-owners',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Founder',
+		'id' => $shortname.'-founder',
+		'type' => 'text',
+		'group' => $shortname.'-owners'
+	);
+	
+	$fields[] = array(
+		'name' => 'Owner',
+		'id' => $shortname.'-owner',
+		'type' => 'text',
+		'group' => $shortname.'-owners'
+	);
+	
+	$fields[] = array(
+		'name' => 'Publisher',
+		'id' => $shortname.'-publisher',
+		'type' => 'text',
+		'group' => $shortname.'-owners'
+	);
+	
+	$fields[] = array(
+		'name' => 'Producer',
+		'id' => $shortname.'-producer',
+		'type' => 'text',
+		'group' => $shortname.'-owners'
+	);
+
+// Signals
 $fields[] = array(
-	'name' => 'Name',
-	'id' => $shortname.'-name',
-	'type' => 'text',
-	'group' => $shortname.'-general'
+	'name' => 'Signals',
+	'id' => $shortname.'-signals',
+	'type' => 'separator'
 );
 
-$fields[] = array(
-	'name' => 'Domain',
-	'id' => $shortname.'-domain',
-	'type' => 'text',
-	'group' => $shortname.'-general'
-);
+	// Links
+	$fields[] = array(
+		'name' => 'Links',
+		'id' => $shortname.'-links',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Google',
+		'id' => $shortname.'-google',
+		'type' => 'text',
+		'group' => $shortname.'-links'
+	);
+	
+	$fields[] = array(
+		'name' => 'Alexa',
+		'id' => $shortname.'-alexa',
+		'type' => 'text',
+		'group' => $shortname.'-links'
+	);
+	
+	$fields[] = array(
+		'name' => 'Yahoo',
+		'id' => $shortname.'-yahoo',
+		'type' => 'text',
+		'group' => $shortname.'-links'
+	);
+	
+	$fields[] = array(
+		'name' => 'Majestic',
+		'id' => $shortname.'-majestic',
+		'type' => 'text',
+		'group' => $shortname.'-links'
+	);
+	
+	$fields[] = array(
+		'name' => 'Shares and Likes',
+		'id' => $shortname.'-subscriber',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Google Plus',
+		'id' => $shortname.'-shares-goolgeplus',
+		'type' => 'text',
+		'group' => $shortname.'-subscriber'
+	);
+	
+	$fields[] = array(
+		'name' => 'Facebook Shares',
+		'id' => $shortname.'-shares-facebook',
+		'type' => 'text',
+		'group' => $shortname.'-subscriber'
+	);
+	
+	$fields[] = array(
+		'name' => 'Facebook Likes',
+		'id' => $shortname.'-likes-facebook',
+		'type' => 'text',
+		'group' => $shortname.'-subscriber'
+	);
+	
+	$fields[] = array(
+		'name' => 'Twitter',
+		'id' => $shortname.'-shares-twitter',
+		'type' => 'text',
+		'group' => $shortname.'-subscriber'
+	);
+	
+	$fields[] = array(
+		'name' => 'Pinterest',
+		'id' => $shortname.'-shares-pinterest',
+		'type' => 'text',
+		'group' => $shortname.'-subscriber'
+	);
+	
+	$fields[] = array(
+		'name' => 'LinkedIn',
+		'id' => $shortname.'-shares-linkedin',
+		'type' => 'text',
+		'group' => $shortname.'-subscriber'
+	);
+	
+	// Network
+	$fields[] = array(
+		'name' => 'Network',
+		'id' => $shortname.'-social',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Google Plus',
+		'id' => $shortname.'-googleplus',
+		'type' => 'text',
+		'group' => $shortname.'-social'
+	);
+	
+	$fields[] = array(
+		'name' => 'Facebook',
+		'id' => $shortname.'-facebook',
+		'type' => 'text',
+		'group' => $shortname.'-social'
+	);
+	
+	$fields[] = array(
+		'name' => 'Twitter',
+		'id' => $shortname.'-twitter',
+		'type' => 'text',
+		'group' => $shortname.'-social'
+	);
+	
+	$fields[] = array(
+		'name' => 'Pinterest',
+		'id' => $shortname.'-pinterest',
+		'type' => 'text',
+		'group' => $shortname.'-social'
+	);
+	
+	$fields[] = array(
+		'name' => 'LinkedIn',
+		'id' => $shortname.'-linkedin',
+		'type' => 'text',
+		'group' => $shortname.'-social'
+	);
+	
+	// Management
+	$fields[] = array(
+		'name' => 'Management',
+		'id' => $shortname.'-management',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Staff',
+		'id' => $shortname.'-staff',
+		'type' => 'text',
+		'group' => $shortname.'-management'
+	);
+	
+	$fields[] = array(
+		'name' => 'Automated Processes',
+		'id' => $shortname.'-automated-processes',
+		'type' => 'text',
+		'group' => $shortname.'-management'
+	);
 
-$fields[] = array(
-	'name' => 'TLD',
-	'id' => $shortname.'-tld',
-	'type' => 'text',
-	'group' => $shortname.'-general'
-);
-
-$fields[] = array(
-	'name' => 'URL – Link',
-	'id' => $shortname.'-url',
-	'type' => 'text',
-	'group' => $shortname.'-general'
-);
-
-$fields[] = array(
-	'name' => 'Date Founded',
-	'id' => $shortname.'-date',
-	'type' => 'text',
-	'group' => $shortname.'-general'
-);
-
-$fields[] = array(
-	'name' => 'Network IN?',
-	'id' => $shortname.'-networked',
-	'type' => 'text',
-	'group' => $shortname.'-general'
-);
-
-$fields[] = array(
-	'name' => 'Location',
-	'id' => $shortname.'-location',
-	'type' => 'text',
-	'group' => $shortname.'-general'
-);
-
-$fields[] = array(
-	'name' => 'Language',
-	'id' => $shortname.'-language',
-	'type' => 'text',
-	'group' => $shortname.'-general'
-);
-
-$fields[] = array(
-	'name' => 'Owners',
-	'id' => $shortname.'-owners',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Founder',
-	'id' => $shortname.'-founder',
-	'type' => 'text',
-	'group' => $shortname.'-owners'
-);
-
-$fields[] = array(
-	'name' => 'Owner',
-	'id' => $shortname.'-owner',
-	'type' => 'text',
-	'group' => $shortname.'-owners'
-);
-
-$fields[] = array(
-	'name' => 'Publisher',
-	'id' => $shortname.'-publisher',
-	'type' => 'text',
-	'group' => $shortname.'-owners'
-);
-
-$fields[] = array(
-	'name' => 'Producer',
-	'id' => $shortname.'-producer',
-	'type' => 'text',
-	'group' => $shortname.'-owners'
-);
-
-$fields[] = array(
-	'name' => 'Links',
-	'id' => $shortname.'-links',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Google',
-	'id' => $shortname.'-google',
-	'type' => 'text',
-	'group' => $shortname.'-links'
-);
-
-$fields[] = array(
-	'name' => 'Yahoo',
-	'id' => $shortname.'-yahoo',
-	'type' => 'text',
-	'group' => $shortname.'-links'
-);
-
-$fields[] = array(
-	'name' => 'Majestic',
-	'id' => $shortname.'-majestic',
-	'type' => 'text',
-	'group' => $shortname.'-links'
-);
-
-$fields[] = array(
-	'name' => 'Social Network',
-	'id' => $shortname.'-social',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Google Plus',
-	'id' => $shortname.'-googleplus',
-	'type' => 'text',
-	'group' => $shortname.'-social'
-);
-
-$fields[] = array(
-	'name' => 'Facebook',
-	'id' => $shortname.'-facebook',
-	'type' => 'text',
-	'group' => $shortname.'-social'
-);
-
-$fields[] = array(
-	'name' => 'Twitter',
-	'id' => $shortname.'-twitter',
-	'type' => 'text',
-	'group' => $shortname.'-social'
-);
-
-$fields[] = array(
-	'name' => 'Pinterest',
-	'id' => $shortname.'-pinterest',
-	'type' => 'text',
-	'group' => $shortname.'-social'
-);
-
-$fields[] = array(
-	'name' => 'LinkedIn',
-	'id' => $shortname.'-linkedin',
-	'type' => 'text',
-	'group' => $shortname.'-social'
-);
-
-$fields[] = array(
-	'name' => 'Ranks',
-	'id' => $shortname.'-ranks',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Alexa Rank',
-	'id' => $shortname.'-alexa-rank',
-	'type' => 'text',
-	'group' => $shortname.'-ranks'
-);
-
-$fields[] = array(
-	'name' => 'Compete Rank',
-	'id' => $shortname.'-compete-rank',
-	'type' => 'text',
-	'group' => $shortname.'-ranks'
-);
-
-$fields[] = array(
-	'name' => 'SEM Rush Rank',
-	'id' => $shortname.'-semrush-rank',
-	'type' => 'text',
-	'group' => $shortname.'-ranks'
-);
-
-$fields[] = array(
-	'name' => 'One Rank',
-	'id' => $shortname.'-one-rank',
-	'type' => 'text',
-	'group' => $shortname.'-ranks'
-);
-
-$fields[] = array(
-	'name' => 'Traffic',
-	'id' => $shortname.'-traffic',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Monthly Unique Visitors',
-	'id' => $shortname.'-unique-visitors',
-	'type' => 'text',
-	'group' => $shortname.'-traffic'
-);
-
-$fields[] = array(
-	'name' => 'Monthly Page Views',
-	'id' => $shortname.'-page-views',
-	'type' => 'text',
-	'group' => $shortname.'-traffic'
-);
-
-$fields[] = array(
-	'name' => 'Engagement',
-	'id' => $shortname.'-engagement',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Pages Per Visit',
-	'id' => $shortname.'-pages-per-visit',
-	'type' => 'text',
-	'group' => $shortname.'-engagement'
-);
-
-$fields[] = array(
-	'name' => 'Time Per Visit',
-	'id' => $shortname.'-time-per-visit',
-	'type' => 'text',
-	'group' => $shortname.'-engagement'
-);
-
-$fields[] = array(
-	'name' => 'Comments Active',
-	'id' => $shortname.'-comments-active',
-	'type' => 'text',
-	'group' => $shortname.'-engagement'
-);
-
-$fields[] = array(
-	'name' => 'Comment System',
-	'id' => $shortname.'-comment-system',
-	'type' => 'text',
-	'group' => $shortname.'-engagement'
-);
-
-$fields[] = array(
-	'name' => 'Comments Per Post',
-	'id' => $shortname.'-comments-per-post',
-	'type' => 'text',
-	'group' => $shortname.'-engagement'
-);
-
-$fields[] = array(
-	'name' => 'Percent Longer than 15 Seconds',
-	'id' => $shortname.'-percent-longer-15',
-	'type' => 'text',
-	'group' => $shortname.'-engagement'
-);
-
-$fields[] = array(
-	'name' => '0-10 Seconds under 55%',
-	'id' => $shortname.'-10-seconds-under-55',
-	'type' => 'text',
-	'group' => $shortname.'-engagement'
-);
-
-$fields[] = array(
-	'name' => 'Financials',
-	'id' => $shortname.'-financials',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Net Income',
-	'id' => $shortname.'-net-income',
-	'type' => 'text',
-	'group' => $shortname.'-financials'
-);
-
-$fields[] = array(
-	'name' => 'Gross Revenue',
-	'id' => $shortname.'-gross-revenue',
-	'type' => 'text',
-	'group' => $shortname.'-financials'
-);
-
-$fields[] = array(
-	'name' => 'Trailing 12 Months',
-	'id' => $shortname.'-trailing-12-months',
-	'type' => 'text',
-	'group' => $shortname.'-financials'
-);
-
+// Valuation
 $fields[] = array(
 	'name' => 'Valuation',
 	'id' => $shortname.'-valuation',
-	'type' => 'heading'
+	'type' => 'separator'
 );
 
-$fields[] = array(
-	'name' => 'Last Sale Value',
-	'id' => $shortname.'-sale-value',
-	'type' => 'text',
-	'group' => $shortname.'-valuation'
-);
+	// Ranks
+	$fields[] = array(
+		'name' => 'Ranks',
+		'id' => $shortname.'-ranks',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Alexa Rank',
+		'id' => $shortname.'-alexa-rank',
+		'type' => 'text',
+		'group' => $shortname.'-ranks'
+	);
+	
+	$fields[] = array(
+		'name' => 'Google Rank',
+		'id' => $shortname.'-google-rank',
+		'type' => 'text',
+		'group' => $shortname.'-ranks'
+	);
+	
+	$fields[] = array(
+		'name' => 'Compete Rank',
+		'id' => $shortname.'-compete-rank',
+		'type' => 'text',
+		'group' => $shortname.'-ranks'
+	);
+	
+	$fields[] = array(
+		'name' => 'SEM Rush Rank',
+		'id' => $shortname.'-semrush-rank',
+		'type' => 'text',
+		'group' => $shortname.'-ranks'
+	);
+	
+	$fields[] = array(
+		'name' => 'One Rank',
+		'id' => $shortname.'-one-rank',
+		'type' => 'text',
+		'group' => $shortname.'-ranks'
+	);
 
-$fields[] = array(
-	'name' => 'Last Sale Price',
-	'id' => $shortname.'-sale-price',
-	'type' => 'text',
-	'group' => $shortname.'-valuation'
-);
+	// Traffic
+	$fields[] = array(
+		'name' => 'Traffic',
+		'id' => $shortname.'-traffic',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Monthly Unique Visitors',
+		'id' => $shortname.'-unique-visitors',
+		'type' => 'text',
+		'group' => $shortname.'-traffic'
+	);
+	
+	$fields[] = array(
+		'name' => 'Monthly Page Views',
+		'id' => $shortname.'-page-views',
+		'type' => 'text',
+		'group' => $shortname.'-traffic'
+	);
 
-$fields[] = array(
-	'name' => 'Revenue Value Multiplier',
-	'id' => $shortname.'-revenue-multiplier',
-	'type' => 'text',
-	'group' => $shortname.'-valuation'
-);
+	// Engagement
+	$fields[] = array(
+		'name' => 'Engagement',
+		'id' => $shortname.'-engagement',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Pages Per Visit',
+		'id' => $shortname.'-pages-per-visit',
+		'type' => 'text',
+		'group' => $shortname.'-engagement'
+	);
+	
+	$fields[] = array(
+		'name' => 'Time Per Visit',
+		'id' => $shortname.'-time-per-visit',
+		'type' => 'text',
+		'group' => $shortname.'-engagement'
+	);
+	
+	$fields[] = array(
+		'name' => 'Comments Active',
+		'id' => $shortname.'-comments-active',
+		'type' => 'text',
+		'group' => $shortname.'-engagement'
+	);
+	
+	$fields[] = array(
+		'name' => 'Comment System',
+		'id' => $shortname.'-comment-system',
+		'type' => 'text',
+		'group' => $shortname.'-engagement'
+	);
+	
+	$fields[] = array(
+		'name' => 'Comments Per Post',
+		'id' => $shortname.'-comments-per-post',
+		'type' => 'text',
+		'group' => $shortname.'-engagement'
+	);
+	
+	$fields[] = array(
+		'name' => 'Percent Longer than 15 Seconds',
+		'id' => $shortname.'-percent-longer-15',
+		'type' => 'text',
+		'group' => $shortname.'-engagement'
+	);
+	
+	$fields[] = array(
+		'name' => '0-10 Seconds under 55%',
+		'id' => $shortname.'-10-seconds-under-55',
+		'type' => 'text',
+		'group' => $shortname.'-engagement'
+	);
 
-$fields[] = array(
-	'name' => 'Income value Multiplier',
-	'id' => $shortname.'-income-multiplier',
-	'type' => 'text',
-	'group' => $shortname.'-valuation'
-);
+	// Financials
+	$fields[] = array(
+		'name' => 'Financials',
+		'id' => $shortname.'-financials',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Net Income',
+		'id' => $shortname.'-net-income',
+		'type' => 'text',
+		'group' => $shortname.'-financials'
+	);
+	
+	$fields[] = array(
+		'name' => 'Gross Revenue',
+		'id' => $shortname.'-gross-revenue',
+		'type' => 'text',
+		'group' => $shortname.'-financials'
+	);
+	
+	$fields[] = array(
+		'name' => 'Trailing 12 Months',
+		'id' => $shortname.'-trailing-12-months',
+		'type' => 'text',
+		'group' => $shortname.'-financials'
+	);
 
-$fields[] = array(
-	'name' => 'Daily Worth (From Income Diary)',
-	'id' => $shortname.'-daily-worth',
-	'type' => 'text',
-	'group' => $shortname.'-valuation'
-);
+	// valuation
+	$fields[] = array(
+		'name' => 'Valuation',
+		'id' => $shortname.'-valuation',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Last Sale Value',
+		'id' => $shortname.'-sale-value',
+		'type' => 'text',
+		'group' => $shortname.'-valuation'
+	);
+	
+	$fields[] = array(
+		'name' => 'Last Sale Price',
+		'id' => $shortname.'-sale-price',
+		'type' => 'text',
+		'group' => $shortname.'-valuation'
+	);
+	
+	$fields[] = array(
+		'name' => 'Revenue Value Multiplier',
+		'id' => $shortname.'-revenue-multiplier',
+		'type' => 'text',
+		'group' => $shortname.'-valuation'
+	);
+	
+	$fields[] = array(
+		'name' => 'Income value Multiplier',
+		'id' => $shortname.'-income-multiplier',
+		'type' => 'text',
+		'group' => $shortname.'-valuation'
+	);
+	
+	$fields[] = array(
+		'name' => 'Daily Worth (From Income Diary)',
+		'id' => $shortname.'-daily-worth',
+		'type' => 'text',
+		'group' => $shortname.'-valuation'
+	);
+	
+	$fields[] = array(
+		'name' => 'Sale URL',
+		'id' => $shortname.'-sale-url',
+		'type' => 'text',
+		'group' => $shortname.'-valuation'
+	);
+	
+	$fields[] = array(
+		'name' => 'Sale Date',
+		'id' => $shortname.'-sale-date',
+		'type' => 'text',
+		'group' => $shortname.'-valuation'
+	);
+	
+	$fields[] = array(
+		'name' => 'Sale Type',
+		'id' => $shortname.'-sale-type',
+		'type' => 'text',
+		'group' => $shortname.'-valuation'
+	);
 
-$fields[] = array(
-	'name' => 'Sale URL',
-	'id' => $shortname.'-sale-url',
-	'type' => 'text',
-	'group' => $shortname.'-valuation'
-);
+	// Content
+	$fields[] = array(
+		'name' => 'Content',
+		'id' => $shortname.'-content',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Number of Defined Silos',
+		'id' => $shortname.'-silos-number',
+		'type' => 'text',
+		'group' => $shortname.'-content'
+	);
+	
+	$fields[] = array(
+		'name' => 'Silos',
+		'id' => $shortname.'-silos-tag',
+		'type' => 'text',
+		'group' => $shortname.'-content'
+	);
+	
+	$fields[] = array(
+		'name' => 'Number of Rich Snippet Types',
+		'id' => $shortname.'-rich-snippet-types',
+		'type' => 'text',
+		'group' => $shortname.'-content'
+	);
+	
+	$fields[] = array(
+		'name' => 'Number of Rich Snippets',
+		'id' => $shortname.'-rich-snippets',
+		'type' => 'text',
+		'group' => $shortname.'-content'
+	);
 
-$fields[] = array(
-	'name' => 'Sale Date',
-	'id' => $shortname.'-sale-date',
-	'type' => 'text',
-	'group' => $shortname.'-valuation'
-);
+	// Developments
+	$fields[] = array(
+		'name' => 'Development',
+		'id' => $shortname.'-development',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Percent Customized',
+		'id' => $shortname.'-percent-customized',
+		'type' => 'text',
+		'group' => $shortname.'-development'
+	);
+	
+	$fields[] = array(
+		'name' => 'Cost to Build',
+		'id' => $shortname.'-cost-to-build',
+		'type' => 'text',
+		'group' => $shortname.'-development'
+	);
+	
+	$fields[] = array(
+		'name' => 'Cost to Maintain',
+		'id' => $shortname.'-cost-to-maintain',
+		'type' => 'text',
+		'group' => $shortname.'-development'
+	);
 
-$fields[] = array(
-	'name' => 'Sale Type',
-	'id' => $shortname.'-sale-type',
-	'type' => 'text',
-	'group' => $shortname.'-valuation'
-);
+	// Authors
+	$fields[] = array(
+		'name' => 'Authors',
+		'id' => $shortname.'-authors',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Number of Authors',
+		'id' => $shortname.'-authors-number',
+		'type' => 'text',
+		'group' => $shortname.'-authors'
+	);
+	
+	$fields[] = array(
+		'name' => 'Bio Type',
+		'id' => $shortname.'-bio-type',
+		'type' => 'text',
+		'group' => $shortname.'-authors'
+	);
+	
+	$fields[] = array(
+		'name' => 'Byline Type',
+		'id' => $shortname.'-byline-type',
+		'type' => 'text',
+		'group' => $shortname.'-authors'
+	);
+	
+	$fields[] = array(
+		'name' => 'Author Page Type',
+		'id' => $shortname.'-author-page-type',
+		'type' => 'text',
+		'group' => $shortname.'-authors'
+	);
+	
+	$fields[] = array(
+		'name' => 'Number of Connected Profiles',
+		'id' => $shortname.'-profiles-number',
+		'type' => 'text',
+		'group' => $shortname.'-authors'
+	);
 
-$fields[] = array(
-	'name' => 'Content',
-	'id' => $shortname.'-content',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Number of Defined Silos',
-	'id' => $shortname.'-silos-number',
-	'type' => 'text',
-	'group' => $shortname.'-content'
-);
-
-$fields[] = array(
-	'name' => 'Silos',
-	'id' => $shortname.'-silos-tag',
-	'type' => 'text',
-	'group' => $shortname.'-content'
-);
-
-$fields[] = array(
-	'name' => 'Number of Rich Snippet Types',
-	'id' => $shortname.'-rich-snippet-types',
-	'type' => 'text',
-	'group' => $shortname.'-content'
-);
-
-$fields[] = array(
-	'name' => 'Number of Rich Snippets',
-	'id' => $shortname.'-rich-snippets',
-	'type' => 'text',
-	'group' => $shortname.'-content'
-);
-
-$fields[] = array(
-	'name' => 'Development',
-	'id' => $shortname.'-development',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Percent Customized',
-	'id' => $shortname.'-percent-customized',
-	'type' => 'text',
-	'group' => $shortname.'-development'
-);
-
-$fields[] = array(
-	'name' => 'Cost to Build',
-	'id' => $shortname.'-cost-to-build',
-	'type' => 'text',
-	'group' => $shortname.'-development'
-);
-
-$fields[] = array(
-	'name' => 'Cost to Maintain',
-	'id' => $shortname.'-cost-to-maintain',
-	'type' => 'text',
-	'group' => $shortname.'-development'
-);
-
-$fields[] = array(
-	'name' => 'Authors',
-	'id' => $shortname.'-authors',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Number of Authors',
-	'id' => $shortname.'-authors-number',
-	'type' => 'text',
-	'group' => $shortname.'-authors'
-);
-
-$fields[] = array(
-	'name' => 'Bio Type',
-	'id' => $shortname.'-bio-type',
-	'type' => 'text',
-	'group' => $shortname.'-authors'
-);
-
-$fields[] = array(
-	'name' => 'Byline Type',
-	'id' => $shortname.'-byline-type',
-	'type' => 'text',
-	'group' => $shortname.'-authors'
-);
-
-$fields[] = array(
-	'name' => 'Author Page Type',
-	'id' => $shortname.'-author-page-type',
-	'type' => 'text',
-	'group' => $shortname.'-authors'
-);
-
-$fields[] = array(
-	'name' => 'Number of Connected Profiles',
-	'id' => $shortname.'-profiles-number',
-	'type' => 'text',
-	'group' => $shortname.'-authors'
-);
-
-$fields[] = array(
-	'name' => 'Management',
-	'id' => $shortname.'-management',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Staff',
-	'id' => $shortname.'-staff',
-	'type' => 'text',
-	'group' => $shortname.'-management'
-);
-
-$fields[] = array(
-	'name' => 'Automated Processes',
-	'id' => $shortname.'-automated-processes',
-	'type' => 'text',
-	'group' => $shortname.'-management'
-);
-
-$fields[] = array(
-	'name' => 'Brand',
-	'id' => $shortname.'-brand',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Brand Keywords',
-	'id' => $shortname.'-brand-keywords',
-	'type' => 'text',
-	'group' => $shortname.'-brand'
-);
+	// Brand
+	$fields[] = array(
+		'name' => 'Brand',
+		'id' => $shortname.'-brand',
+		'type' => 'heading'
+	);
+	
+	$fields[] = array(
+		'name' => 'Brand Keywords',
+		'id' => $shortname.'-brand-keywords',
+		'type' => 'text',
+		'group' => $shortname.'-brand'
+	);
 
 class Sites_CPT{
 	
@@ -615,7 +711,24 @@ class Sites_CPT{
 				$tax,
 				'site',
 				array(
-					'label' => __( $label ),
+					'labels' => array(
+						'name'                       => _x( $label, 'taxonomy general name' ),
+						'singular_name'              => _x( $label, 'taxonomy singular name' ),
+						'search_items'               => __( 'Search '.$label ),
+						'popular_items'              => __( 'Popular '.$label ),
+						'all_items'                  => __( 'All '.$label ),
+						'parent_item'                => null,
+						'parent_item_colon'          => null,
+						'edit_item'                  => __( 'Edit '.$label ),
+						'update_item'                => __( 'Update '.$label ),
+						'add_new_item'               => __( 'Add New '.$label ),
+						'new_item_name'              => __( 'New '.$label.' Name' ),
+						'separate_items_with_commas' => __( 'Separate '.$label.' with commas' ),
+						'add_or_remove_items'        => __( 'Add or remove '.$label ),
+						'choose_from_most_used'      => __( 'Choose from the most used '.$label ),
+						'not_found'                  => __( 'No '.$label.' found.' ),
+						'menu_name'                  => __( $label ),
+					),
 					'rewrite' => array( 'slug' => $tax ),
 					'hierarchical' => true,
 				)
@@ -696,10 +809,26 @@ class Sites_CPT{
 	function add_meta_boxes(){
 		add_meta_box(
             __('site_manage_meta'),
-            __( 'Site Custom Settings', 'awp' ),
+            __( 'WordPress Authority Site Details', 'awp' ),
             array('Sites_CPT', 'metabox_fields'),
 			'site'
         );
+		
+		add_meta_box(
+            __('site_manage_evaluate'),
+            __( 'Site Evaluator', 'awp' ),
+            array('Sites_CPT', 'metabox_evaluate'),
+			'site',
+			'side',
+			'high'
+        );
+	}
+	
+	function metabox_evaluate(){
+		?><p>Click "<tt>Run Evaluator</tt>" to evaluate this site</p>
+        <input name="awp-evaluate" type="button" class="button button-primary button-large" id="awp-evaluate" accesskey="p" value="Run Evaluator">
+        <img src="<?php echo PLUGINURL; ?>/images/preload.gif" class="preloader" align="preload" style="display:none;" />
+		<?php
 	}
 	
 	function add_filter_boxes(){
@@ -769,14 +898,26 @@ class Sites_CPT{
 		if(!$post)
 			return;
 		
+		$disabled = array();
 		?><div id="awp_tabs" class="awp_meta_box">
 			<ul class="awp-tabber"><?php
+				$i = 0;
 				foreach( $fields as $head ){
-					if( $head['type'] == 'heading' ){
-						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a></li><?php
+					if( ($head['type'] == 'heading') || ($head['type'] == 'separator') ){
+						if( $head['type'] == 'heading' ){
+							?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
+                            <div class="wp-menu-arrow"><div></div></div></li><?php
+						}
+						if( $head['type'] == 'separator' ){
+							if($i >= 1){
+								?><li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li><?php
+							}
+							?><li class="awp-tab not-tab"><a href="javascript:void(0);"><?php echo $head['name']; ?></a></li><?php
+							$disabled[] = $i;
+						}
+						$i++;
 					}
 				}
-				
 			?></ul>
             
             <div class="awp-panels"><?php
@@ -803,7 +944,8 @@ class Sites_CPT{
 		</div>
 		<script type="text/javascript">
 			jQuery(document).ready(function($){
-                $('#awp_tabs').tabs();
+				var index = $('.awp-tabber li:not(li.not-tab)').first().index();
+                $('#awp_tabs').tabs({ disabled: [<?php echo implode(',', $disabled); ?>], active: index });
             });
 		</script>
         
@@ -929,6 +1071,39 @@ class Sites_CPT{
 	function site_manager_scripts(){
 		wp_enqueue_script('jquery');
 		wp_enqueue_style( 'awpeditor', PLUGINURL . '/css/editor.css' );
+		wp_enqueue_script( 'awpeditor', PLUGINURL . '/js/editor.js', array('jquery') );
+		wp_localize_script( 'awpeditor', 'ajax_object', array( 'ajax_url' => admin_url( 'admin-ajax.php' ), 'post_url' => admin_url('post.php') ) );
+	}
+	
+	function site_manager_bulk_action_item(){
+		global $post;
+		
+		if($post->post_type == 'site') {
+			?><script type="text/javascript">
+				jQuery(document).ready(function() {
+					jQuery('<option>').val('evaluate').text('Evaluate').appendTo("select[name='action']");
+					jQuery('<option>').val('evaluate').text('Evaluate').appendTo("select[name='action2']");
+				});
+			</script><?
+		}
+	}
+	
+	function site_manager_bulk_action_handle(){
+		if ( (isset($_REQUEST['action']) && 'evaluate' == $_REQUEST['action']) || (isset($_REQUEST['action2']) && 'evaluate' == $_REQUEST['action2']) ) {
+			if( $_REQUEST['post'] ){
+				foreach($_REQUEST['post'] as $data){
+					$url = get_post_meta($data, 'awp-url', true);
+					if(!$url){
+						$url = 'http://' . get_the_title($data);
+					}
+					$return = evaluate_js_callback( array('url' => $url, 'id' => $data) );
+				}
+			}
+			
+			return;
+			
+			/*?><pre><?php print_r( $_REQUEST ); ?></pre><?php wp_die();*/
+		}
 	}
 }
 
@@ -950,6 +1125,10 @@ add_action( 'add_meta_boxes', 'site_manager_remove_meta_box', 40 );
 // Add filter Boxes
 add_action( 'restrict_manage_posts', array('Sites_CPT', 'add_filter_boxes') );
 add_filter( 'parse_query', array('Sites_CPT', 'convert_term_id_to_taxonomy_term_in_query') );
+
+// Add Bulk action item
+add_action( 'admin_footer-edit.php', array('Sites_CPT', 'site_manager_bulk_action_item') );
+add_action( 'load-edit.php', array('Sites_CPT', 'site_manager_bulk_action_handle') );
 
 // Custom Sortable Columns
 add_filter( 'manage_site_posts_columns', array('Sites_CPT', 'site_columns') );

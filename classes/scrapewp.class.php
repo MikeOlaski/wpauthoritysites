@@ -116,8 +116,9 @@ class scrapeWordpress {
 				if($post_id){
 					update_post_meta( $post_id, 'rating', $po['rating'] );
 					update_post_meta( $post_id, 'awp-alexa-rank', $po['rating'] );
-					update_post_meta( $post_id, 'awp-name', $slug );
-					update_post_meta( $post_id, 'awp-domain', $slugs[$slugCount - 1] );
+					update_post_meta( $post_id, 'awp-name', $po['name'] );
+					update_post_meta( $post_id, 'awp-domain', $slug );
+					update_post_meta( $post_id, 'awp-tld', '.' . $slugs[$slugCount - 1] );
 					update_post_meta( $post_id, 'awp-url', 'http://'.$po['name'] );
 				}
 			}

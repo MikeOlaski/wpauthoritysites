@@ -5,7 +5,6 @@
  */
 
 $fields = array();
-
 $shortname = 'awp';
 
 // General
@@ -71,6 +70,7 @@ $fields[] = array(
 	'group' => $shortname.'-general'
 );
 
+// Owners
 $fields[] = array(
 	'name' => 'Owners',
 	'id' => $shortname.'-owners',
@@ -105,6 +105,7 @@ $fields[] = array(
 	'group' => $shortname.'-owners'
 );
 
+// Links
 $fields[] = array(
 	'name' => 'Links',
 	'id' => $shortname.'-links',
@@ -114,6 +115,13 @@ $fields[] = array(
 $fields[] = array(
 	'name' => 'Google',
 	'id' => $shortname.'-google',
+	'type' => 'text',
+	'group' => $shortname.'-links'
+);
+
+$fields[] = array(
+	'name' => 'Alexa',
+	'id' => $shortname.'-alexa',
 	'type' => 'text',
 	'group' => $shortname.'-links'
 );
@@ -133,7 +141,56 @@ $fields[] = array(
 );
 
 $fields[] = array(
-	'name' => 'Social Network',
+	'name' => 'Shares and Likes',
+	'id' => $shortname.'-subscriber',
+	'type' => 'heading'
+);
+
+$fields[] = array(
+	'name' => 'Google Plus',
+	'id' => $shortname.'-shares-goolgeplus',
+	'type' => 'text',
+	'group' => $shortname.'-subscriber'
+);
+
+$fields[] = array(
+	'name' => 'Facebook Shares',
+	'id' => $shortname.'-shares-facebook',
+	'type' => 'text',
+	'group' => $shortname.'-subscriber'
+);
+
+$fields[] = array(
+	'name' => 'Facebook Likes',
+	'id' => $shortname.'-likes-facebook',
+	'type' => 'text',
+	'group' => $shortname.'-subscriber'
+);
+
+$fields[] = array(
+	'name' => 'Twitter',
+	'id' => $shortname.'-shares-twitter',
+	'type' => 'text',
+	'group' => $shortname.'-subscriber'
+);
+
+$fields[] = array(
+	'name' => 'Pinterest',
+	'id' => $shortname.'-shares-pinterest',
+	'type' => 'text',
+	'group' => $shortname.'-subscriber'
+);
+
+$fields[] = array(
+	'name' => 'LinkedIn',
+	'id' => $shortname.'-shares-linkedin',
+	'type' => 'text',
+	'group' => $shortname.'-subscriber'
+);
+
+// Network
+$fields[] = array(
+	'name' => 'Network',
 	'id' => $shortname.'-social',
 	'type' => 'heading'
 );
@@ -173,6 +230,28 @@ $fields[] = array(
 	'group' => $shortname.'-social'
 );
 
+// Management
+$fields[] = array(
+	'name' => 'Management',
+	'id' => $shortname.'-management',
+	'type' => 'heading'
+);
+
+$fields[] = array(
+	'name' => 'Staff',
+	'id' => $shortname.'-staff',
+	'type' => 'text',
+	'group' => $shortname.'-management'
+);
+
+$fields[] = array(
+	'name' => 'Automated Processes',
+	'id' => $shortname.'-automated-processes',
+	'type' => 'text',
+	'group' => $shortname.'-management'
+);
+
+// Ranks
 $fields[] = array(
 	'name' => 'Ranks',
 	'id' => $shortname.'-ranks',
@@ -182,6 +261,13 @@ $fields[] = array(
 $fields[] = array(
 	'name' => 'Alexa Rank',
 	'id' => $shortname.'-alexa-rank',
+	'type' => 'text',
+	'group' => $shortname.'-ranks'
+);
+
+$fields[] = array(
+	'name' => 'Google Rank',
+	'id' => $shortname.'-google-rank',
 	'type' => 'text',
 	'group' => $shortname.'-ranks'
 );
@@ -207,6 +293,7 @@ $fields[] = array(
 	'group' => $shortname.'-ranks'
 );
 
+// Traffic
 $fields[] = array(
 	'name' => 'Traffic',
 	'id' => $shortname.'-traffic',
@@ -227,6 +314,7 @@ $fields[] = array(
 	'group' => $shortname.'-traffic'
 );
 
+// Engagement
 $fields[] = array(
 	'name' => 'Engagement',
 	'id' => $shortname.'-engagement',
@@ -282,6 +370,7 @@ $fields[] = array(
 	'group' => $shortname.'-engagement'
 );
 
+// Financials
 $fields[] = array(
 	'name' => 'Financials',
 	'id' => $shortname.'-financials',
@@ -309,6 +398,7 @@ $fields[] = array(
 	'group' => $shortname.'-financials'
 );
 
+// valuation
 $fields[] = array(
 	'name' => 'Valuation',
 	'id' => $shortname.'-valuation',
@@ -371,6 +461,7 @@ $fields[] = array(
 	'group' => $shortname.'-valuation'
 );
 
+// Content
 $fields[] = array(
 	'name' => 'Content',
 	'id' => $shortname.'-content',
@@ -405,6 +496,7 @@ $fields[] = array(
 	'group' => $shortname.'-content'
 );
 
+// Developments
 $fields[] = array(
 	'name' => 'Development',
 	'id' => $shortname.'-development',
@@ -432,6 +524,7 @@ $fields[] = array(
 	'group' => $shortname.'-development'
 );
 
+// Authors
 $fields[] = array(
 	'name' => 'Authors',
 	'id' => $shortname.'-authors',
@@ -473,26 +566,7 @@ $fields[] = array(
 	'group' => $shortname.'-authors'
 );
 
-$fields[] = array(
-	'name' => 'Management',
-	'id' => $shortname.'-management',
-	'type' => 'heading'
-);
-
-$fields[] = array(
-	'name' => 'Staff',
-	'id' => $shortname.'-staff',
-	'type' => 'text',
-	'group' => $shortname.'-management'
-);
-
-$fields[] = array(
-	'name' => 'Automated Processes',
-	'id' => $shortname.'-automated-processes',
-	'type' => 'text',
-	'group' => $shortname.'-management'
-);
-
+// Brand
 $fields[] = array(
 	'name' => 'Brand',
 	'id' => $shortname.'-brand',
