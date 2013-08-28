@@ -439,7 +439,7 @@ function parse_social_links($url, $type = 'facebook'){
 		case 'pinterest':
 			$find = 'pinterest.com'; break;
 		case 'plus.google':
-			$find = 'pinterest.com'; break;
+			$find = 'plus.google.com'; break;
 	}
 	
 	foreach($page->find('a[href*='.$find.']') as $element) {
