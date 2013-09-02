@@ -3,6 +3,7 @@ add_action( 'wp_ajax_evaluate_js', 'evaluate_js_callback');
 define('GOOGLE_MAGIC', 0xE6359A60);
 
 function evaluate_js_callback( $args = null ){
+	$settings = get_option('awp_settings');
 	
 	set_time_limit(500); //  Increased the timeout
 	
@@ -39,7 +40,10 @@ function evaluate_js_callback( $args = null ){
 		'google-rank' => 'awp-google-rank',
 		'compete-rank' => 'awp-compete-rank',
 		'semrush-rank' => 'awp-semrush-rank',
-		'one-rank' => 'awp-one-rank'
+		'one-rank' => 'awp-one-rank',
+		
+		// Traffic
+		'speed' => 'awp-page-speed'
 	);
 	
 	if( isset($_POST) && '' != $_POST['url'] ){
@@ -78,6 +82,39 @@ function evaluate_js_callback( $args = null ){
 			$i++;
 		}
 		
+		// Create thumbnail
+		$grabApiKey = ($settings['grabzit_api_key']) ? $settings['grabzit_api_key'] : 'MTFjOWYzYmQ3MGMxNDQ5OTgyNTc3MWY5ODU3YWRmMGE=';
+		$grabApiSecret = ($settings['grabzit_api_secret']) ? $settings['grabzit_api_secret'] : 'bT8/IGFXP1w/Pz8/PwM/PwBHHz8LPz8uPzoXRz8/HD8=';
+		$grabzIt = new GrabzItClient($grabApiKey, $grabApiSecret);
+		
+		// Take a screenshot
+		$grabzIt->SetImageOptions( $url );
+		$file = $name;
+		$filepath = PLUGINPATH . "uploads/$file.jpg";
+		$grabzIt->SaveTo($filepath);
+		
+		// Move upload file into WP Upload DIR
+		$upload_dir = wp_upload_dir();
+		$filename = $upload_dir['basedir'] . "/$file.jpg";
+		rename($filepath, $upload_dir['basedir'] . "/$file.jpg");
+		
+		// Create attachment post
+		$wp_filetype = wp_check_filetype(basename($filename), null );
+		$attachment = array(
+			'guid' => "$file.jpg",
+			'post_mime_type' => $wp_filetype['type'],
+			'post_title' => preg_replace('/\.[^.]+$/', '', basename($filename)),
+			'post_content' => '',
+			'post_status' => 'inherit'
+		);
+		
+		$attach_id = wp_insert_attachment( $attachment, "$file.jpg", $id );
+		$attach_data = wp_generate_attachment_metadata( $attach_id, "$file.jpg" );
+		wp_update_attachment_metadata( $attach_id, $attach_data );
+		
+		set_post_thumbnail( $id, $attach_id );
+		
+		// Update additional Custom Fields
 		update_post_meta($id, 'awp-name', $name);
 		update_post_meta($id, 'awp-domain', $domain);
 		update_post_meta($id, 'awp-tld', '.' . $domains[$slugCount - 1]);
@@ -174,6 +211,10 @@ function awp_evaluate($url, $for){
 		
 		case 'awp-compete-rank':
 			return awp_sharecounts($url, 'competeRank');
+		
+		// Traffic
+		case 'awp-page-speed':
+			return awp_sharecounts($url, 'pageSpeed');
 	}
 }
 
@@ -383,8 +424,11 @@ function awp_sharecounts($url, $type){
 			return isset( $xml->SD[1]->POPULARITY ) ? (string)$xml->SD[1]->POPULARITY->attributes()->TEXT : 0;
 		
 		} else if($type == 'googleRank'){
-			$pr = getPageRank( $url );
-			return $pr;
+			// $pr = getPageRank( $url );
+			// return $pr;
+			
+			$pr = new PR();
+			return $pr->get_google_pagerank($url);
 		
 		} else if($type == 'competeRank'){
 			$capi = ($settings['compete_api_key']) ? $settings['compete_api_key'] : 'ce9406ca48b0089750b76ded1ececaea';
@@ -394,6 +438,10 @@ function awp_sharecounts($url, $type){
 			$content = parse_curl('http://apps.compete.com/sites/' . $name . '/trended/Rank/?apikey=' . $capi);
 			$content = json_decode($content);
 			return (string)$content->data->trends->rank[12]->value;
+		} else if($type == 'pageSpeed'){
+			$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
+			$xml = simplexml_load_string($content);
+			return isset( $xml->SD[0]->SPEED ) ? (string)$xml->SD[0]->SPEED->attributes()->TEXT : 0;
 		}
 	}
 	return null;
@@ -498,92 +546,75 @@ function parse_curl($url){
 	return $curl_data;
 }
 
-function _zeroFill($a, $b){
-   	$z = hexdec(80000000);
-   	if ($z & $a){
-     	$a = ($a>>1);
-     	$a &= (~$z);
-     	$a |= 0x40000000;
-     	$a = ($a>>($b-1));
-   	} else {
-     	$a = ($a>>$b);
+class PR {
+	public function get_google_pagerank($url){
+		$query="http://toolbarqueries.google.com/tbr?client=navclient-auto&ch=".$this->CheckHash($this->HashURL($url)). "&features=Rank&q=info:".$url."&num=100&filter=0";
+		$data=file_get_contents($query);
+		$pos = strpos($data, "Rank_");
+		if($pos === false){} else{
+			$pagerank = substr($data, $pos + 9);
+			return $pagerank;
+		}
 	}
-	return $a;
-}
-
-function _mix($a,$b,$c){
-   	$a -= $b; $a -= $c; $a ^= (_zeroFill($c,13));
-   	$b -= $c; $b -= $a; $b ^= ($a<<8);
-   	$c -= $a; $c -= $b; $c ^= (_zeroFill($b,13));
-   	$a -= $b; $a -= $c; $a ^= (_zeroFill($c,12));
-   	$b -= $c; $b -= $a; $b ^= ($a<<16);
-   	$c -= $a; $c -= $b; $c ^= (_zeroFill($b,5));
-   	$a -= $b; $a -= $c; $a ^= (_zeroFill($c,3));
-   	$b -= $c; $b -= $a; $b ^= ($a<<10);
-   	$c -= $a; $c -= $b; $c ^= (_zeroFill($b,15));
 	
-   	return array($a,$b,$c);
-}
-
-function _GoogleCH($url, $length=null, $init=GOOGLE_MAGIC){
-   	if(is_null($length))
-     	$length = sizeof($url); 
+	public function StrToNum($Str, $Check, $Magic){
+		$Int32Unit = 4294967296; // 2^32
+		$length = strlen($Str);
+		for ($i = 0; $i < $length; $i++){
+			$Check *= $Magic;
+			if ($Check >= $Int32Unit){
+				$Check = ($Check - $Int32Unit * (int) ($Check / $Int32Unit));
+				$Check = ($Check < -2147483648) ? ($Check + $Int32Unit) : $Check;
+			}
+			$Check += ord($Str{$i});
+		}
+		return $Check;
+	}
 	
-   	$a = $b = 0x9E3779B9;
-   	$c = $init;
-   	$k = 0;
-   	$len = $length;
-   	while($len >= 12){
-     	$a += ($url[$k + 0] + ($url[$k + 1] << 8) + ($url[$k + 2] << 16) + ($url[$k + 3] << 24));
-     	$b += ($url[$k + 4] + ($url[$k + 5] << 8) + ($url[$k + 6] << 16) + ($url[$k + 7] << 24));
-     	$c += ($url[$k + 8] + ($url[$k + 9] << 8) + ($url[$k + 10] << 16) + ($url[$k + 11] << 24));
-     	$_mix = _mix($a,$b,$c);
-     	$a = $_mix[0]; $b = $_mix[1]; $c = $_mix[2];
-     	$k += 12;
-     	$len -= 12;
-   	}
-   	$c += $length;
-   	switch($len){
-     	case 11: $c += ($url[$k + 10] << 24);
-     	case 10: $c += ($url[$k + 9] << 16);
-     	case 9 : $c += ($url[$k + 8] << 8);
-     	case 8 : $b += ($url[$k + 7] << 24);
-     	case 7 : $b += ($url[$k + 6] << 16);
-     	case 6 : $b += ($url[$k + 5] << 8);
-     	case 5 : $b += ($url[$k + 4]);
-     	case 4 : $a += ($url[$k + 3] << 24);
-     	case 3 : $a += ($url[$k + 2] << 16);
-     	case 2 : $a += ($url[$k + 1] << 8);
-     	case 1 : $a += ($url[$k + 0]);
-   	}
-   	$_mix = _mix($a,$b,$c);
-   	return $_mix[2];
-}
-
-function _strord($string){
-   	for($i = 0;$i < strlen($string);$i++)
-     	$result[$i] = ord($string{$i});
-   	return $result;
-}
-
-function getPageRank($url){
-   	$pagerank = -1;
-   	$ch = "6"._GoogleCH(_strord("info:" . $url));
-   	$fp = fsockopen("www.google.com", 80, $errno, $errstr, 30);
-   	if($fp){
-     	$out = "GET /search?client=navclient-auto&ch=" . $ch . "&features=Rank&q=info:" . $url . " HTTP/1.1\r\n";
-     	$out .= "Host: www.google.com\r\n";
-     	$out .= "Connection: Close\r\n\r\n";
-     	fwrite($fp, $out);
-     	while (!feof($fp)){
-       	$data = fgets($fp, 128);
-       	$pos = strpos($data, "Rank_");
-       	if($pos === false){
-       	}else
-         	$pagerank = substr($data, $pos + 9);
-     	}
-     	fclose($fp);
-   	}
-   	return $pagerank;
+	public function HashURL($String){
+		$Check1 = $this->StrToNum($String, 0x1505, 0x21);
+		$Check2 = $this->StrToNum($String, 0, 0x1003F);
+		$Check1 >>= 2;
+		
+		$Check1 = (($Check1 >> 4) & 0x3FFFFC0 ) | ($Check1 & 0x3F);
+		$Check1 = (($Check1 >> 4) & 0x3FFC00 ) | ($Check1 & 0x3FF);
+		$Check1 = (($Check1 >> 4) & 0x3C000 ) | ($Check1 & 0x3FFF);
+		
+		$T1 = (((($Check1 & 0x3C0) << 4) | ($Check1 & 0x3C)) <<2 ) | ($Check2 & 0xF0F );
+		$T2 = (((($Check1 & 0xFFFFC000) << 4) | ($Check1 & 0x3C00)) << 0xA) | ($Check2 & 0xF0F0000 );
+		
+		return ($T1 | $T2);
+	}
+	
+	public function CheckHash($Hashnum){
+		$CheckByte = 0;
+		$Flag = 0;
+		
+		$HashStr = sprintf('%u', $Hashnum);
+		$length = strlen($HashStr);
+		
+		for ($i = $length - 1; $i >= 0; $i --){
+			$Re = $HashStr{$i};
+			if (1 === ($Flag % 2)){
+				$Re += $Re;
+				$Re = (int)($Re / 10) + ($Re % 10);
+			}
+			$CheckByte += $Re;
+			$Flag ++;
+		}
+		
+		$CheckByte %= 10;
+		if (0 !== $CheckByte){
+			$CheckByte = 10 - $CheckByte;
+			if (1 === ($Flag % 2) ){
+				if (1 === ($CheckByte % 2)){
+					$CheckByte += 9;
+				}
+				$CheckByte >>= 1;
+			}
+		}
+		
+		return '7'.$CheckByte.$HashStr;
+	}
 }
 ?>

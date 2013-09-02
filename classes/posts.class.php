@@ -78,7 +78,7 @@ $fields[] = array(
 	
 	// Owners
 	$fields[] = array(
-		'name' => 'Owners',
+		'name' => 'Project',
 		'id' => $shortname.'-owners',
 		'type' => 'heading'
 	);
@@ -107,6 +107,27 @@ $fields[] = array(
 	$fields[] = array(
 		'name' => 'Producer',
 		'id' => $shortname.'-producer',
+		'type' => 'text',
+		'group' => $shortname.'-owners'
+	);
+	
+	$fields[] = array(
+		'name' => 'Manager',
+		'id' => $shortname.'-manager',
+		'type' => 'text',
+		'group' => $shortname.'-owners'
+	);
+	
+	$fields[] = array(
+		'name' => 'Developer',
+		'id' => $shortname.'-developer',
+		'type' => 'text',
+		'group' => $shortname.'-owners'
+	);
+	
+	$fields[] = array(
+		'name' => 'Network Member',
+		'id' => $shortname.'-member',
 		'type' => 'text',
 		'group' => $shortname.'-owners'
 	);
@@ -245,7 +266,7 @@ $fields[] = array(
 	
 	// Management
 	$fields[] = array(
-		'name' => 'Management',
+		'name' => 'Systems',
 		'id' => $shortname.'-management',
 		'type' => 'heading'
 	);
@@ -330,6 +351,13 @@ $fields[] = array(
 	$fields[] = array(
 		'name' => 'Monthly Page Views',
 		'id' => $shortname.'-page-views',
+		'type' => 'text',
+		'group' => $shortname.'-traffic'
+	);
+	
+	$fields[] = array(
+		'name' => 'Page Speed',
+		'id' => $shortname.'-page-speed',
 		'type' => 'text',
 		'group' => $shortname.'-traffic'
 	);
@@ -626,7 +654,7 @@ class Sites_CPT{
 			'show_ui' => true, 
 			'show_in_menu' => false, 
 			'query_var' => true,
-			'rewrite' => array( 'slug' => 'site' ),
+			'rewrite' => array( 'slug' => 'sites' ),
 			'taxonomies' => array('site-category', 'site-tags'),
 			'capability_type' => 'post',
 			'has_archive' => true,
@@ -745,13 +773,14 @@ class Sites_CPT{
 	
 	function site_columns( $defaults ){
 		unset($defaults['date']);
-		$defaults['action'] = __('Action');
-		$defaults['status'] = __('Status');
-		$defaults['include'] = __('Include');
-		$defaults['topic'] = __('Topic');
-		$defaults['type'] = __('Type');
-		$defaults['location'] = __('Location');
-		$defaults['assignment'] = __('Assignment');
+		unset($defaults['status']);
+		$defaults['site-action'] = __('Action');
+		$defaults['site-status'] = __('Status');
+		$defaults['site-include'] = __('Include');
+		$defaults['site-topic'] = __('Topic');
+		$defaults['site-type'] = __('Type');
+		$defaults['site-location'] = __('Location');
+		$defaults['site-assignment'] = __('Assignment');
 		$defaults['rank'] = __('Rank');
 		$defaults['date'] = __('Date');
 		return $defaults;
@@ -766,14 +795,14 @@ class Sites_CPT{
 				echo ($rank) ? __( $rank ) : __(0);
 				break;
 			
-			case 'action':
-			case 'status':
-			case 'include':
-			case 'topic':
-			case 'type':
-			case 'location':
-			case 'assignment':
-				$terms = wp_get_post_terms( $post_ID, 'site-'.$column_name );
+			case 'site-action':
+			case 'site-status':
+			case 'site-include':
+			case 'site-topic':
+			case 'site-type':
+			case 'site-location':
+			case 'site-assignment':
+				$terms = wp_get_post_terms( $post_ID, $column_name );
 				
 				if( $terms ){
 					$max = count($terms);

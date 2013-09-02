@@ -15,6 +15,7 @@ define( 'PLUGINPATH', plugin_dir_path( __FILE__ ) );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/TwitterAPIExchange.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/whois.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/majestic/APIService.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/grabzit/GrabzItClient.class.php' );
 
 load_template( trailingslashit( PLUGINPATH ) . 'classes/simple_html_dom.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/admin-ajax.php' );
@@ -224,22 +225,22 @@ function awp_options_handle(){
 		if(isset($_POST['awp_submit']) && '' != $_POST['awp_submit']){
 			
 			// Evaluation Settings
-			$settings['evaluation'] = $awp_settings['evaluation'];
+			// $settings['evaluation'] = $awp_settings['evaluation'];
 			
-			// twitter API Settings
+			/*twitter API Settings
 			$settings['twitter_access_token'] = $awp_settings['twitter_access_token'];
 			$settings['twitter_access_secret'] = $awp_settings['twitter_access_secret'];
 			$settings['twitter_cons_key'] = $awp_settings['twitter_cons_key'];
-			$settings['twitter_cons_secret'] = $awp_settings['twitter_cons_secret'];
+			$settings['twitter_cons_secret'] = $awp_settings['twitter_cons_secret'];*/
 			
 			// Compete API Settings
 			$settings['compete_api_key'] = $awp_settings['compete_api_key'];
 			
-			// Google API Settings
-			$settings['goolge_api_key'] = $awp_settings['goolge_api_key'];
+			/*Google API Settings
+			$settings['goolge_api_key'] = $awp_settings['goolge_api_key']; */
 			
-			// Yahoo API Settings
-			$settings['yahoo_api_key'] = $awp_settings['yahoo_api_key'];
+			/*Yahoo API Settings
+			$settings['yahoo_api_key'] = $awp_settings['yahoo_api_key'];*/
 			
 			// Majestic API Settings
 			$settings['majestic_api_key'] = $awp_settings['majestic_api_key'];
@@ -249,6 +250,10 @@ function awp_options_handle(){
 			$settings['access_secret'] = $awp_settings['access_secret'];
 			$settings['StartNum'] = $awp_settings['StartNum'];
 			$settings['cronLimit'] = $awp_settings['cronLimit'];
+			
+			// GrabzIT API Settings
+			$settings['grabzit_api_key'] = $awp_settings['grabzit_api_key'];
+			$settings['grabzit_api_secret'] = $awp_settings['grabzit_api_secret'];
 			
 			// Cron Settings
 			$settings['cronjob'] = $awp_settings['cronjob'];
@@ -660,8 +665,9 @@ function awp_admin_pages(){
 					}
 				}
 				
-				?><form name="awp_settings" method="post" action="<?php admin_url('options-general.php?page=wpauthority'); ?>">
-                	<h3>Evaluation Settings</h3>
+				?><form name="awp_settings" method="post" action="<?php admin_url('options-general.php?page=wpauthority'); ?>"><?php
+                	
+                    /*<h3>Evaluation Settings</h3>
                     
                     <table class="form-table">
                     	<tr>
@@ -674,7 +680,7 @@ function awp_admin_pages(){
                         </tr>
                     </table>
                     
-                    <h3>Twitter API Settings</h3>
+                    ?><h3>Twitter API Settings</h3>
                     
                     <table class="form-table">
                     	<tr>
@@ -693,9 +699,9 @@ function awp_admin_pages(){
                             <th scope="row"><label for="twitter_cons_secret">Consumer Secret:</label></th>
                             <td><input type="text" name="awp_settings[twitter_cons_secret]" id="twitter_cons_secret" value="<?php echo $settings['twitter_cons_secret']; ?>" class="regular-text" /></td>
                         </tr>
-                    </table>
-                    
-                    <h3>Compete API Settings</h3>
+                    </table>*/
+					
+					?><h3>Compete API Settings</h3>
                     
                     <table class="form-table">
                     	<tr>
@@ -703,9 +709,9 @@ function awp_admin_pages(){
                             <td><input type="text" name="awp_settings[compete_api_key]" id="compete_api_key" value="<?php echo $settings['compete_api_key']; ?>" class="regular-text" /><br />
                             <span class="description">You can get your api service <a href="https://developer.compete.com/" target="_blank">here.</a></td>
                         </tr>
-                    </table>
+                    </table><?php
                     
-                    <h3>Google API Settings</h3>
+                    /* <h3>Google API Settings</h3>
                     
                     <table class="form-table">
                     	<tr>
@@ -713,9 +719,9 @@ function awp_admin_pages(){
                             <td><input type="text" name="awp_settings[goolge_api_key]" id="goolge_api_key" value="<?php echo $settings['goolge_api_key']; ?>" class="regular-text" /><br />
                             <span class="description">You can get your api service <a href="http://api.exslim.net/signup" target="_blank">here</a></td>
                         </tr>
-                    </table>
+                    </table> 
                     
-                    <h3>Yahoo API Settings</h3>
+                    ?><h3>Yahoo API Settings</h3>
                     
                     <table class="form-table">
                     	<tr>
@@ -723,9 +729,9 @@ function awp_admin_pages(){
                             <td><input type="text" name="awp_settings[yahoo_api_key]" id="yahoo_api_key" value="<?php echo $settings['yahoo_api_key']; ?>" class="regular-text" /><br />
                             <span class="description">You can get your api service <a href="https://developer.apps.yahoo.com/wsregapp/" target="_blank">here</a></td>
                         </tr>
-                    </table>
+                    </table>*/
                     
-                    <h3>Majestic API Settings</h3>
+                    ?><h3>Majestic API Settings</h3>
                     
                     <table class="form-table">
                     	<tr>
@@ -761,6 +767,19 @@ function awp_admin_pages(){
                             <td>
                             	<input type="text" name="awp_settins[cronLimit]" id="cronLimit" value="<?php echo $settings['cronLimit'] ?>" class="regular-text" />
                             </td>
+                        </tr>
+                    </table>
+                    
+                    <h3>GrabzIT API</h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="grabzit_api_key">API Key</label></th>
+                            <td><input class="regular-text" type="text" name="awp_settings[grabzit_api_key]" id="grabzit_api_key" value="<?php echo $settings['grabzit_api_key'] ?>" /></td>
+                        </tr>
+                        <tr>
+                        	<th scope="row"><label for="grabzit_api_secret">API Secret</label></th>
+                            <td><input class="regular-text" type="text" name="awp_settings[grabzit_api_secret]" id="grabzit_api_secret" value="<?php echo $settings['grabzit_api_secret'] ?>" /></td>
                         </tr>
                     </table>
                     

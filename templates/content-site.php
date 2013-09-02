@@ -72,7 +72,7 @@ $fields[] = array(
 
 // Owners
 $fields[] = array(
-	'name' => 'Owners',
+	'name' => 'Project',
 	'id' => $shortname.'-owners',
 	'type' => 'heading'
 );
@@ -101,6 +101,27 @@ $fields[] = array(
 $fields[] = array(
 	'name' => 'Producer',
 	'id' => $shortname.'-producer',
+	'type' => 'text',
+	'group' => $shortname.'-owners'
+);
+
+$fields[] = array(
+	'name' => 'Manager',
+	'id' => $shortname.'-manager',
+	'type' => 'text',
+	'group' => $shortname.'-owners'
+);
+
+$fields[] = array(
+	'name' => 'Developer',
+	'id' => $shortname.'-developer',
+	'type' => 'text',
+	'group' => $shortname.'-owners'
+);
+
+$fields[] = array(
+	'name' => 'Network Member',
+	'id' => $shortname.'-member',
 	'type' => 'text',
 	'group' => $shortname.'-owners'
 );
@@ -232,7 +253,7 @@ $fields[] = array(
 
 // Management
 $fields[] = array(
-	'name' => 'Management',
+	'name' => 'Systems',
 	'id' => $shortname.'-management',
 	'type' => 'heading'
 );
@@ -303,6 +324,13 @@ $fields[] = array(
 $fields[] = array(
 	'name' => 'Monthly Unique Visitors',
 	'id' => $shortname.'-unique-visitors',
+	'type' => 'text',
+	'group' => $shortname.'-traffic'
+);
+
+$fields[] = array(
+	'name' => 'Monthly Page Views',
+	'id' => $shortname.'-page-views',
 	'type' => 'text',
 	'group' => $shortname.'-traffic'
 );

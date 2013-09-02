@@ -47,7 +47,8 @@ class SiteTemplate
         if( $this->pt != get_post_type( $post->ID ) )
             return;
 		
-		wp_enqueue_style( 'awpmain', PLUGINURL . '/css/main.css' );      
+		wp_enqueue_script( 'awpmain', PLUGINURL . '/js/main.js', array('jquery') );
+		wp_enqueue_style( 'awpmain', PLUGINURL . '/css/main.css' );
     }
 
     /**
@@ -62,7 +63,11 @@ class SiteTemplate
         global $post;
         if( $this->pt != get_post_type( $post->ID ) )
             return $classes;
-
+		
+		if( is_archive() ){
+			$classes[] = 'wpa-archive-' . $this->pt;
+		}
+		
         $classes[] = $this->pt . '-body-class';
         return $classes;
     }

@@ -22,7 +22,7 @@ get_header(); ?>
         </div><!-- #content -->
     </div><!-- #primary --><?php
     
-    load_template( trailingslashit( PLUGINPATH ) . '/templates/sidebar-site.php' );
+    get_sidebar();
 	
 	?><div class="clear"></div><?php
 		
