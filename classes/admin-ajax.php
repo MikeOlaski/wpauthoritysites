@@ -1,6 +1,23 @@
 <?php
 add_action( 'wp_ajax_evaluate_js', 'evaluate_js_callback');
+add_action( 'wp_ajax_search_term', 'search_term_callback');
+
 define('GOOGLE_MAGIC', 0xE6359A60);
+
+function search_term_callback(){
+	if( isset($_POST) && '' != $_POST['taxonomy'] ){
+		$tax = get_taxonomy( $_POST['taxonomy'] );
+		$terms = get_terms( $_POST['taxonomy'], array('hide_empty' => 0));
+		if( $terms ){
+			?><option value="0">Select <?php echo $tax->label; ?></option><?php
+			foreach($terms as $tm){
+				?><option value="<?php echo $tm->slug; ?>"><?php echo $tm->name; ?></option><?php
+			}
+		}
+	}
+	
+	return;
+}
 
 function evaluate_js_callback( $args = null ){
 	$settings = get_option('awp_settings');
@@ -21,6 +38,15 @@ function evaluate_js_callback( $args = null ){
 		'twitter' => 'awp-shares-twitter',
 		'pinterest' => 'awp-shares-pinterest',
 		'linkedin' => 'awp-shares-linkedin',
+		'klout' => 'awp-score-klout',
+		
+		// Community
+		'google-followers' => 'awp-googleplus-followers',
+		'facebook-followers' => 'awp-facebook-followers',
+		'twitter-followers' => 'awp-twitter-followers',
+		'pinterest-followers' => 'awp-pinterest-followers',
+		'linkedin-followers' => 'awp-linkedin-followers',
+		'klout-followers' => 'awp-klout-followers',
 		
 		// Network
 		'facebook-page' => 'awp-facebook',
@@ -28,6 +54,8 @@ function evaluate_js_callback( $args = null ){
 		'twitter-page' => 'awp-twitter',
 		'pinterest-page' => 'awp-pinterest', // No page
 		'linkedin-page' => 'awp-linkedin', // No page
+		'klout-profile' => 'awp-klout',
+		'klout-profile' => 'awp-rss',
 		
 		// Links
 		'google-links' => 'awp-google',
@@ -58,7 +86,7 @@ function evaluate_js_callback( $args = null ){
 	// Get values of each fields
 	$return = array();
 	foreach( $fors as $label=>$for ){
-		$return[$for] = awp_evaluate($url, $for);
+		$return[$for] = awp_evaluate($url, $for, $id);
 	}
 	
 	if( !empty($return) ){
@@ -123,6 +151,10 @@ function evaluate_js_callback( $args = null ){
 		foreach( $return as $meta_key=>$meta_value ){
 			update_post_meta($id, $meta_key, $meta_value);
 		}
+		
+		// Update score counts
+		wpa_update_scores($id);
+		
 		if($die){
 			echo 'true';
 		} else {
@@ -142,7 +174,7 @@ function evaluate_js_callback( $args = null ){
 	}
 }
 
-function awp_evaluate($url, $for){
+function awp_evaluate($url, $for, $pID = ''){
 	switch( $for ){
 		// General
 		case 'awp-language':
@@ -173,6 +205,27 @@ function awp_evaluate($url, $for){
 		case 'awp-shares-linkedin':
 			return awp_sharecounts($url, 'linkedin');
 		
+		case 'awp-score-klout':
+			return awp_sharecounts($url, 'klout');
+		
+		case 'awp-googleplus-followers':
+			return awp_sharecounts($url, 'ggfollowers');
+		
+		case 'awp-facebook-followers':
+			return awp_sharecounts($url, 'fbfollowers');
+		
+		case 'awp-twitter-followers':
+			return awp_sharecounts($url, 'ttfollowers');
+		
+		case 'awp-pinterest-followers':
+			return awp_sharecounts($url, 'pifollowers');
+		
+		case 'awp-linkedin-followers':
+			return awp_sharecounts($url, 'lifollowers');
+		
+		case 'awp-klout-followers':
+			return awp_sharecounts($url, 'klfollowers');
+		
 		// Network
 		case 'awp-facebook':
 			return awp_sharecounts($url, 'facebookPage');
@@ -188,6 +241,12 @@ function awp_evaluate($url, $for){
 		
 		case 'awp-linkedin':
 			return awp_sharecounts($url, 'linkedinPage');
+		
+		case 'awp-klout':
+			return awp_sharecounts($url, 'kloutPage');
+		
+		case 'awp-rss':
+			return awp_sharecounts($url, 'rssPage');
 		
 		// Links
 		case 'awp-google':
@@ -212,13 +271,16 @@ function awp_evaluate($url, $for){
 		case 'awp-compete-rank':
 			return awp_sharecounts($url, 'competeRank');
 		
+		case 'awp-one-rank':
+			return awp_sharecounts($url, 'oneRank', $pID);
+		
 		// Traffic
 		case 'awp-page-speed':
 			return awp_sharecounts($url, 'pageSpeed');
 	}
 }
 
-function awp_sharecounts($url, $type){
+function awp_sharecounts($url, $type, $pID = ''){
 	$settings = get_option('awp_settings');
 	
 	if(filter_var($url, FILTER_VALIDATE_URL)){
@@ -292,6 +354,9 @@ function awp_sharecounts($url, $type){
 			$content = json_decode( $content );
 			return $content->count;
 		
+		} else if($type == 'klout'){
+			return '';
+		
 		} else if($type == 'stumbleupon'){
 			$content = parse("http://www.stumbleupon.com/services/1.01/badge.getinfo?url=$url");
 			
@@ -349,6 +414,36 @@ function awp_sharecounts($url, $type){
 		
 		} else if($type == 'linkedinPage'){
 			return parse_social_links($url, 'linkedin');
+		
+		} else if($type == 'kloutPage'){
+			return parse_social_links($url, 'klout');
+		
+		} else if($type == 'ggfollowers'){
+			$GGurl = parse_social_links($url, 'plus.google');
+			return awp_sharecounts($GGurl, 'googlePlus');
+		
+		} else if($type == 'fbfollowers'){
+			$FBurl = parse_social_links($url, 'facebook');
+			return awp_sharecounts($FBurl, 'facebookLikes');
+		
+		} else if($type == 'ttfollowers'){
+			$TTurl = parse_social_links($url, 'twitter');
+			return awp_sharecounts($TTurl, 'twitterShares');
+		
+		} else if($type == 'pifollowers'){
+			$PIurl = parse_social_links($url, 'pinterest');
+			return awp_sharecounts($PIurl, 'pinterest');
+		
+		} else if($type == 'lifollowers'){
+			$LIurl = parse_social_links($url, 'linkedin');
+			return awp_sharecounts($LIurl, 'linkedin');
+		
+		} else if($type == 'klfollowers'){
+			$KLurl = parse_social_links($url, 'klout');
+			return awp_sharecounts($KLurl, 'klout');
+		
+		} else if($type == 'rssPage'){
+			return parse_social_links($url, 'rss');
 		
 		// Links
 		} else if($type == 'googleBackLinks'){
@@ -438,6 +533,14 @@ function awp_sharecounts($url, $type){
 			$content = parse_curl('http://apps.compete.com/sites/' . $name . '/trended/Rank/?apikey=' . $capi);
 			$content = json_decode($content);
 			return (string)$content->data->trends->rank[12]->value;
+		
+		} else if($type == 'oneRank'){
+			$ar = get_post_meta($pID, 'awp-alexa-rank', true);
+			$gr = get_post_meta($pID, 'awp-google-rank', true);
+			$cr = get_post_meta($pID, 'awp-compete-rank', true);
+			$sr = get_post_meta($pID, 'awp-semrush-rank', true);
+			return (int) ($ar + $gr + $cr + $sr) / 4;
+			
 		} else if($type == 'pageSpeed'){
 			$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
 			$xml = simplexml_load_string($content);
@@ -445,6 +548,82 @@ function awp_sharecounts($url, $type){
 		}
 	}
 	return null;
+}
+
+function wpa_update_scores($pID){
+	$gLink = get_post_meta($pID, 'awp-google', true);
+	$aLink = get_post_meta($pID, 'awp-alexa', true);
+	$ylink = get_post_meta($pID, 'awp-yahoo', true);
+	$mLink = get_post_meta($pID, 'awp-majestic', true);
+	
+	$linkScore = ( $gLink + $aLink + $ylink + $mLink);
+	update_post_meta($pID, 'awp-links-scores', $linkScore);
+	
+	$ggFol = get_post_meta($pID, 'awp-googleplus-followers', true);
+	$fbFol = get_post_meta($pID, 'awp-facebook-followers', true);
+	$ttFol = get_post_meta($pID, 'awp-twitter-followers', true);
+	$piFol = get_post_meta($pID, 'awp-pinterest-followers', true);
+	$liFol = get_post_meta($pID, 'awp-linkedin-followers', true);
+	$klFol = get_post_meta($pID, 'awp-klout-followers', true);
+	
+	$commScore = (int)( str_replace('K+', '000', $ggFol) + $fbFol + $ttFol + $piFol + $liFol + $klFol);
+	update_post_meta($pID, 'awp-community-scores', $commScore);
+	
+	$ggSocial = get_post_meta($pID, 'awp-shares-goolgeplus', true);
+	$fbsSocial = get_post_meta($pID, 'awp-shares-facebook', true);
+	$fblSocial = get_post_meta($pID, 'awp-likes-facebook', true);
+	$ttSocial = get_post_meta($pID, 'awp-shares-twitter', true);
+	$piSocial = get_post_meta($pID, 'awp-shares-pinterest', true);
+	$liSocial = get_post_meta($pID, 'awp-shares-linkedin', true);
+	$klSocial = get_post_meta($pID, 'awp-score-klout', true);
+	
+	$socialScore = ($ggSocial + $fbsSocial + $fblSocial + $ttSocial + $piSocial + $liSocial + $klFol);
+	update_post_meta($pID, 'awp-social-scores', $socialScore);
+	
+	$aRank = get_post_meta($pID, 'awp-alexa-rank', true);
+	$mozRank = get_post_meta($pID, 'awp-moz-rank', true);
+	$comRank = get_post_meta($pID, 'awp-compete-rank', true);
+	$semRank = get_post_meta($pID, 'awp-semrush-rank', true);
+	$oneRank = get_post_meta($pID, 'awp-one-rank', true);
+	$oneScore = get_post_meta($pID, 'awp-one-score', true);
+	
+	$rankScore = ( $aRank + $mozRank + $comRank + $semRank + $oneRank + $oneScore );
+	update_post_meta($pID, 'awp-ranks-scores', $rankScore);
+	
+	$visitors = get_post_meta($pID, 'awp-unique-visitors', true);
+	$pageviews = get_post_meta($pID, 'awp-page-views', true);
+	$pagespeed = get_post_meta($pID, 'awp-page-speed', true);
+	
+	$trafficScore = ($visitors + $pageviews + $pagespeed);
+	update_post_meta($pID, 'awp-traffic-scores', $trafficScore);
+	
+	$pagevisit = get_post_meta($pID, 'awp-pages-per-visit', true);
+	$timevisit = get_post_meta($pID, 'awp-time-per-visit', true);
+	$activecom = get_post_meta($pID, 'awp-comments-active', true);
+	$comsystem = get_post_meta($pID, 'awp-comment-system', true);
+	$comperpos = get_post_meta($pID, 'awp-comments-per-post', true);
+	$percelong = get_post_meta($pID, 'awp-percent-longer-15', true);
+	$secsunder = get_post_meta($pID, 'awp-10-seconds-under-55', true);
+	
+	$engScore = ($pagevisit + $timevisit + $activecom + $comsystem + $comperpos + $percelong + $secsunder);
+	update_post_meta($pID, 'awp-engagement-scores', $engScore);
+	
+	$silos = get_post_meta($pID, 'awp-silos-number', true);
+	$stags = get_post_meta($pID, 'awp-silos-tag', true);
+	$rityp = get_post_meta($pID, 'awp-rich-snippet-types', true);
+	$richs = get_post_meta($pID, 'awp-rich-snippets', true);
+	
+	$contentScore = ($silos + $stags + $rityp + $richs);
+	update_post_meta($pID, 'awp-content-scores', $contentScore);
+	
+	$authors = get_post_meta($pID, 'awp-authors-number', true);
+	$biotype = get_post_meta($pID, 'awp-bio-type', true);
+	$bylines = get_post_meta($pID, 'awp-byline-type', true);
+	$pagetyp = get_post_meta($pID, 'awp-author-page-type', true);
+	$profile = get_post_meta($pID, 'awp-profiles-number', true);
+	
+	$authorsScore = ($authors + $biotype + $bylines + $pagetyp + $profile);
+	update_post_meta($pID, 'awp-authors-scores', $authorsScore);
 }
 
 function url_exists($url) {
@@ -479,18 +658,22 @@ function parse_social_links($url, $type = 'facebook'){
 	
 	switch($type){
 		case 'facebook':
-			$find = 'facebook.com'; break;
+			$find = 'a[href*=facebook.com]'; break;
 		case 'twitter':
-			$find = 'twitter.com'; break;
+			$find = 'a[href*=twitter.com]'; break;
 		case 'linkedin':
-			$find = 'linkedin.com'; break;
+			$find = 'a[href*=linkedin.com]'; break;
 		case 'pinterest':
-			$find = 'pinterest.com'; break;
+			$find = 'a[href*=pinterest.com]'; break;
 		case 'plus.google':
-			$find = 'plus.google.com'; break;
+			$find = 'a[href*=plus.google.com]'; break;
+		case 'klout':
+			$find = 'a[href*=klout.com]'; break;
+		case 'rss':
+			$find = 'link[type*=rss]'; break;
 	}
 	
-	foreach($page->find('a[href*='.$find.']') as $element) {
+	foreach($page->find($find) as $element) {
 		// from the page find DOM elements that have attributes of "href" with values starting with "$find"
 		$links = $element->href; // get the value of the attribute
 		/*$string = str_replace("'", "|", $value); // for easier formatting of the value I substitute single quote for pipe

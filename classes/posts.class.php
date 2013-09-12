@@ -1,638 +1,17 @@
 <?php
 !defined( 'ABSPATH' ) ? exit : '';
 
-global $fields;
-$fields = array();
-
-$shortname = 'awp';
-
-// Departments
-$fields[] = array(
-	'name' => 'Departments',
-	'id' => $shortname.'-departments',
-	'type' => 'separator'
-);
-
-	// General
-	$fields[] = array(
-		'name' => 'Site',
-		'id' => $shortname.'-general',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Name',
-		'id' => $shortname.'-name',
-		'type' => 'text',
-		'group' => $shortname.'-general'
-	);
-	
-	$fields[] = array(
-		'name' => 'Domain',
-		'id' => $shortname.'-domain',
-		'type' => 'text',
-		'group' => $shortname.'-general'
-	);
-	
-	$fields[] = array(
-		'name' => 'TLD',
-		'id' => $shortname.'-tld',
-		'type' => 'text',
-		'group' => $shortname.'-general'
-	);
-	
-	$fields[] = array(
-		'name' => 'URL – Link',
-		'id' => $shortname.'-url',
-		'type' => 'text',
-		'group' => $shortname.'-general'
-	);
-	
-	$fields[] = array(
-		'name' => 'Date Founded',
-		'id' => $shortname.'-date',
-		'type' => 'text',
-		'group' => $shortname.'-general'
-	);
-	
-	$fields[] = array(
-		'name' => 'Network IN?',
-		'id' => $shortname.'-networked',
-		'type' => 'text',
-		'group' => $shortname.'-general'
-	);
-	
-	$fields[] = array(
-		'name' => 'Location',
-		'id' => $shortname.'-location',
-		'type' => 'text',
-		'group' => $shortname.'-general'
-	);
-	
-	$fields[] = array(
-		'name' => 'Language',
-		'id' => $shortname.'-language',
-		'type' => 'text',
-		'group' => $shortname.'-general'
-	);
-	
-	// Owners
-	$fields[] = array(
-		'name' => 'Project',
-		'id' => $shortname.'-owners',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Founder',
-		'id' => $shortname.'-founder',
-		'type' => 'text',
-		'group' => $shortname.'-owners'
-	);
-	
-	$fields[] = array(
-		'name' => 'Owner',
-		'id' => $shortname.'-owner',
-		'type' => 'text',
-		'group' => $shortname.'-owners'
-	);
-	
-	$fields[] = array(
-		'name' => 'Publisher',
-		'id' => $shortname.'-publisher',
-		'type' => 'text',
-		'group' => $shortname.'-owners'
-	);
-	
-	$fields[] = array(
-		'name' => 'Producer',
-		'id' => $shortname.'-producer',
-		'type' => 'text',
-		'group' => $shortname.'-owners'
-	);
-	
-	$fields[] = array(
-		'name' => 'Manager',
-		'id' => $shortname.'-manager',
-		'type' => 'text',
-		'group' => $shortname.'-owners'
-	);
-	
-	$fields[] = array(
-		'name' => 'Developer',
-		'id' => $shortname.'-developer',
-		'type' => 'text',
-		'group' => $shortname.'-owners'
-	);
-	
-	$fields[] = array(
-		'name' => 'Network Member',
-		'id' => $shortname.'-member',
-		'type' => 'text',
-		'group' => $shortname.'-owners'
-	);
-
-// Signals
-$fields[] = array(
-	'name' => 'Signals',
-	'id' => $shortname.'-signals',
-	'type' => 'separator'
-);
-
-	// Links
-	$fields[] = array(
-		'name' => 'Links',
-		'id' => $shortname.'-links',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Google',
-		'id' => $shortname.'-google',
-		'type' => 'text',
-		'group' => $shortname.'-links'
-	);
-	
-	$fields[] = array(
-		'name' => 'Alexa',
-		'id' => $shortname.'-alexa',
-		'type' => 'text',
-		'group' => $shortname.'-links'
-	);
-	
-	$fields[] = array(
-		'name' => 'Yahoo',
-		'id' => $shortname.'-yahoo',
-		'type' => 'text',
-		'group' => $shortname.'-links'
-	);
-	
-	$fields[] = array(
-		'name' => 'Majestic',
-		'id' => $shortname.'-majestic',
-		'type' => 'text',
-		'group' => $shortname.'-links'
-	);
-	
-	$fields[] = array(
-		'name' => 'Shares and Likes',
-		'id' => $shortname.'-subscriber',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Google Plus',
-		'id' => $shortname.'-shares-goolgeplus',
-		'type' => 'text',
-		'group' => $shortname.'-subscriber'
-	);
-	
-	$fields[] = array(
-		'name' => 'Facebook Shares',
-		'id' => $shortname.'-shares-facebook',
-		'type' => 'text',
-		'group' => $shortname.'-subscriber'
-	);
-	
-	$fields[] = array(
-		'name' => 'Facebook Likes',
-		'id' => $shortname.'-likes-facebook',
-		'type' => 'text',
-		'group' => $shortname.'-subscriber'
-	);
-	
-	$fields[] = array(
-		'name' => 'Twitter',
-		'id' => $shortname.'-shares-twitter',
-		'type' => 'text',
-		'group' => $shortname.'-subscriber'
-	);
-	
-	$fields[] = array(
-		'name' => 'Pinterest',
-		'id' => $shortname.'-shares-pinterest',
-		'type' => 'text',
-		'group' => $shortname.'-subscriber'
-	);
-	
-	$fields[] = array(
-		'name' => 'LinkedIn',
-		'id' => $shortname.'-shares-linkedin',
-		'type' => 'text',
-		'group' => $shortname.'-subscriber'
-	);
-	
-	// Network
-	$fields[] = array(
-		'name' => 'Network',
-		'id' => $shortname.'-social',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Google Plus',
-		'id' => $shortname.'-googleplus',
-		'type' => 'text',
-		'group' => $shortname.'-social'
-	);
-	
-	$fields[] = array(
-		'name' => 'Facebook',
-		'id' => $shortname.'-facebook',
-		'type' => 'text',
-		'group' => $shortname.'-social'
-	);
-	
-	$fields[] = array(
-		'name' => 'Twitter',
-		'id' => $shortname.'-twitter',
-		'type' => 'text',
-		'group' => $shortname.'-social'
-	);
-	
-	$fields[] = array(
-		'name' => 'Pinterest',
-		'id' => $shortname.'-pinterest',
-		'type' => 'text',
-		'group' => $shortname.'-social'
-	);
-	
-	$fields[] = array(
-		'name' => 'LinkedIn',
-		'id' => $shortname.'-linkedin',
-		'type' => 'text',
-		'group' => $shortname.'-social'
-	);
-	
-	// Management
-	$fields[] = array(
-		'name' => 'Systems',
-		'id' => $shortname.'-management',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Staff',
-		'id' => $shortname.'-staff',
-		'type' => 'text',
-		'group' => $shortname.'-management'
-	);
-	
-	$fields[] = array(
-		'name' => 'Automated Processes',
-		'id' => $shortname.'-automated-processes',
-		'type' => 'text',
-		'group' => $shortname.'-management'
-	);
-
-// Valuation
-$fields[] = array(
-	'name' => 'Valuation',
-	'id' => $shortname.'-valuation',
-	'type' => 'separator'
-);
-
-	// Ranks
-	$fields[] = array(
-		'name' => 'Ranks',
-		'id' => $shortname.'-ranks',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Alexa Rank',
-		'id' => $shortname.'-alexa-rank',
-		'type' => 'text',
-		'group' => $shortname.'-ranks'
-	);
-	
-	$fields[] = array(
-		'name' => 'Google Rank',
-		'id' => $shortname.'-google-rank',
-		'type' => 'text',
-		'group' => $shortname.'-ranks'
-	);
-	
-	$fields[] = array(
-		'name' => 'Compete Rank',
-		'id' => $shortname.'-compete-rank',
-		'type' => 'text',
-		'group' => $shortname.'-ranks'
-	);
-	
-	$fields[] = array(
-		'name' => 'SEM Rush Rank',
-		'id' => $shortname.'-semrush-rank',
-		'type' => 'text',
-		'group' => $shortname.'-ranks'
-	);
-	
-	$fields[] = array(
-		'name' => 'One Rank',
-		'id' => $shortname.'-one-rank',
-		'type' => 'text',
-		'group' => $shortname.'-ranks'
-	);
-
-	// Traffic
-	$fields[] = array(
-		'name' => 'Traffic',
-		'id' => $shortname.'-traffic',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Monthly Unique Visitors',
-		'id' => $shortname.'-unique-visitors',
-		'type' => 'text',
-		'group' => $shortname.'-traffic'
-	);
-	
-	$fields[] = array(
-		'name' => 'Monthly Page Views',
-		'id' => $shortname.'-page-views',
-		'type' => 'text',
-		'group' => $shortname.'-traffic'
-	);
-	
-	$fields[] = array(
-		'name' => 'Page Speed',
-		'id' => $shortname.'-page-speed',
-		'type' => 'text',
-		'group' => $shortname.'-traffic'
-	);
-
-	// Engagement
-	$fields[] = array(
-		'name' => 'Engagement',
-		'id' => $shortname.'-engagement',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Pages Per Visit',
-		'id' => $shortname.'-pages-per-visit',
-		'type' => 'text',
-		'group' => $shortname.'-engagement'
-	);
-	
-	$fields[] = array(
-		'name' => 'Time Per Visit',
-		'id' => $shortname.'-time-per-visit',
-		'type' => 'text',
-		'group' => $shortname.'-engagement'
-	);
-	
-	$fields[] = array(
-		'name' => 'Comments Active',
-		'id' => $shortname.'-comments-active',
-		'type' => 'text',
-		'group' => $shortname.'-engagement'
-	);
-	
-	$fields[] = array(
-		'name' => 'Comment System',
-		'id' => $shortname.'-comment-system',
-		'type' => 'text',
-		'group' => $shortname.'-engagement'
-	);
-	
-	$fields[] = array(
-		'name' => 'Comments Per Post',
-		'id' => $shortname.'-comments-per-post',
-		'type' => 'text',
-		'group' => $shortname.'-engagement'
-	);
-	
-	$fields[] = array(
-		'name' => 'Percent Longer than 15 Seconds',
-		'id' => $shortname.'-percent-longer-15',
-		'type' => 'text',
-		'group' => $shortname.'-engagement'
-	);
-	
-	$fields[] = array(
-		'name' => '0-10 Seconds under 55%',
-		'id' => $shortname.'-10-seconds-under-55',
-		'type' => 'text',
-		'group' => $shortname.'-engagement'
-	);
-
-	// Financials
-	$fields[] = array(
-		'name' => 'Financials',
-		'id' => $shortname.'-financials',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Net Income',
-		'id' => $shortname.'-net-income',
-		'type' => 'text',
-		'group' => $shortname.'-financials'
-	);
-	
-	$fields[] = array(
-		'name' => 'Gross Revenue',
-		'id' => $shortname.'-gross-revenue',
-		'type' => 'text',
-		'group' => $shortname.'-financials'
-	);
-	
-	$fields[] = array(
-		'name' => 'Trailing 12 Months',
-		'id' => $shortname.'-trailing-12-months',
-		'type' => 'text',
-		'group' => $shortname.'-financials'
-	);
-
-	// valuation
-	$fields[] = array(
-		'name' => 'Valuation',
-		'id' => $shortname.'-valuation',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Last Sale Value',
-		'id' => $shortname.'-sale-value',
-		'type' => 'text',
-		'group' => $shortname.'-valuation'
-	);
-	
-	$fields[] = array(
-		'name' => 'Last Sale Price',
-		'id' => $shortname.'-sale-price',
-		'type' => 'text',
-		'group' => $shortname.'-valuation'
-	);
-	
-	$fields[] = array(
-		'name' => 'Revenue Value Multiplier',
-		'id' => $shortname.'-revenue-multiplier',
-		'type' => 'text',
-		'group' => $shortname.'-valuation'
-	);
-	
-	$fields[] = array(
-		'name' => 'Income value Multiplier',
-		'id' => $shortname.'-income-multiplier',
-		'type' => 'text',
-		'group' => $shortname.'-valuation'
-	);
-	
-	$fields[] = array(
-		'name' => 'Daily Worth (From Income Diary)',
-		'id' => $shortname.'-daily-worth',
-		'type' => 'text',
-		'group' => $shortname.'-valuation'
-	);
-	
-	$fields[] = array(
-		'name' => 'Sale URL',
-		'id' => $shortname.'-sale-url',
-		'type' => 'text',
-		'group' => $shortname.'-valuation'
-	);
-	
-	$fields[] = array(
-		'name' => 'Sale Date',
-		'id' => $shortname.'-sale-date',
-		'type' => 'text',
-		'group' => $shortname.'-valuation'
-	);
-	
-	$fields[] = array(
-		'name' => 'Sale Type',
-		'id' => $shortname.'-sale-type',
-		'type' => 'text',
-		'group' => $shortname.'-valuation'
-	);
-
-	// Content
-	$fields[] = array(
-		'name' => 'Content',
-		'id' => $shortname.'-content',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Number of Defined Silos',
-		'id' => $shortname.'-silos-number',
-		'type' => 'text',
-		'group' => $shortname.'-content'
-	);
-	
-	$fields[] = array(
-		'name' => 'Silos',
-		'id' => $shortname.'-silos-tag',
-		'type' => 'text',
-		'group' => $shortname.'-content'
-	);
-	
-	$fields[] = array(
-		'name' => 'Number of Rich Snippet Types',
-		'id' => $shortname.'-rich-snippet-types',
-		'type' => 'text',
-		'group' => $shortname.'-content'
-	);
-	
-	$fields[] = array(
-		'name' => 'Number of Rich Snippets',
-		'id' => $shortname.'-rich-snippets',
-		'type' => 'text',
-		'group' => $shortname.'-content'
-	);
-
-	// Developments
-	$fields[] = array(
-		'name' => 'Development',
-		'id' => $shortname.'-development',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Percent Customized',
-		'id' => $shortname.'-percent-customized',
-		'type' => 'text',
-		'group' => $shortname.'-development'
-	);
-	
-	$fields[] = array(
-		'name' => 'Cost to Build',
-		'id' => $shortname.'-cost-to-build',
-		'type' => 'text',
-		'group' => $shortname.'-development'
-	);
-	
-	$fields[] = array(
-		'name' => 'Cost to Maintain',
-		'id' => $shortname.'-cost-to-maintain',
-		'type' => 'text',
-		'group' => $shortname.'-development'
-	);
-
-	// Authors
-	$fields[] = array(
-		'name' => 'Authors',
-		'id' => $shortname.'-authors',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Number of Authors',
-		'id' => $shortname.'-authors-number',
-		'type' => 'text',
-		'group' => $shortname.'-authors'
-	);
-	
-	$fields[] = array(
-		'name' => 'Bio Type',
-		'id' => $shortname.'-bio-type',
-		'type' => 'text',
-		'group' => $shortname.'-authors'
-	);
-	
-	$fields[] = array(
-		'name' => 'Byline Type',
-		'id' => $shortname.'-byline-type',
-		'type' => 'text',
-		'group' => $shortname.'-authors'
-	);
-	
-	$fields[] = array(
-		'name' => 'Author Page Type',
-		'id' => $shortname.'-author-page-type',
-		'type' => 'text',
-		'group' => $shortname.'-authors'
-	);
-	
-	$fields[] = array(
-		'name' => 'Number of Connected Profiles',
-		'id' => $shortname.'-profiles-number',
-		'type' => 'text',
-		'group' => $shortname.'-authors'
-	);
-
-	// Brand
-	$fields[] = array(
-		'name' => 'Brand',
-		'id' => $shortname.'-brand',
-		'type' => 'heading'
-	);
-	
-	$fields[] = array(
-		'name' => 'Brand Keywords',
-		'id' => $shortname.'-brand-keywords',
-		'type' => 'text',
-		'group' => $shortname.'-brand'
-	);
-
 class Sites_CPT{
+	
+	var $fields;
+	
+	function set_fields($fields){
+		$this->fields = $fields;
+	}
 	
 	function register_post_type(){
 		$labels = array(
-			'name' => 'WP Authorities',
+			'name' => 'WP Sites',
 			'singular_name' => 'Site',
 			'add_new' => 'Add New',
 			'add_new_item' => 'Add New Site',
@@ -644,7 +23,7 @@ class Sites_CPT{
 			'not_found' =>  'No sites found',
 			'not_found_in_trash' => 'No sites found in Trash', 
 			'parent_item_colon' => '',
-			'menu_name' => 'WP Authorities'
+			'menu_name' => 'WP Sites'
 		);
 		
 		$args = array(
@@ -768,12 +147,24 @@ class Sites_CPT{
 	function site_columns_head($defaults){
 		$defaults['rank'] = __('Rank');
 		$defaults['date'] = __('Date');
+		
 		return $defaults;
 	}
 	
 	function site_columns( $defaults ){
+		global $fields;
+		$fields = $this->fields;
+		
+		// Remove Default Columns
 		unset($defaults['date']);
 		unset($defaults['status']);
+		
+		// Remove WP SEO Columns
+		unset($defaults['wpseo-score']);
+		unset($defaults['wpseo-title']);
+		unset($defaults['wpseo-metadesc']);
+		unset($defaults['wpseo-focuskw']);
+		
 		$defaults['site-action'] = __('Action');
 		$defaults['site-status'] = __('Status');
 		$defaults['site-include'] = __('Include');
@@ -783,6 +174,15 @@ class Sites_CPT{
 		$defaults['site-assignment'] = __('Assignment');
 		$defaults['rank'] = __('Rank');
 		$defaults['date'] = __('Date');
+		
+		foreach($fields as $fl){
+			if(('heading' == $fl['type']) || ('separator' == $fl['type'])){
+				continue;
+			} else {
+				$defaults[$fl['id']] = __($fl['name']);
+			}
+		}
+		
 		return $defaults;
 	}
 	
@@ -795,6 +195,7 @@ class Sites_CPT{
 				echo ($rank) ? __( $rank ) : __(0);
 				break;
 			
+			case 'taxonomy-site-category':
 			case 'site-action':
 			case 'site-status':
 			case 'site-include':
@@ -808,7 +209,7 @@ class Sites_CPT{
 					$max = count($terms);
 					$i = 1;
 					foreach( $terms as $tm ){
-						$tlink = sprintf( 'edit.php?post_type=site&site-%s=%s', $column_name, $tm->slug );
+						$tlink = sprintf( 'edit.php?post_type=site&%s=%s', $column_name, $tm->slug );
 						?><a href="<?php echo $tlink; ?>"><?php echo $tm->name; ?></a><?php
 						if($i < $max){ echo ', '; }
 						$i++;
@@ -816,6 +217,11 @@ class Sites_CPT{
 				} else {
 					echo '—';
 				}
+				break;
+			
+			default:
+				$meta = get_post_meta($post_ID, $column_name, true);
+				echo $meta;
 				break;
 		}
 	}
@@ -863,6 +269,11 @@ class Sites_CPT{
 	function add_filter_boxes(){
 		global $typenow;
 		global $wp_query;
+		
+		$screen = get_current_screen();
+		
+		/*?><pre><?php print_r($screen); ?></pre><?php wp_die();*/
+		
 		if ($typenow == 'site') {
 			
 			$actiontaxes = array(
@@ -928,9 +339,31 @@ class Sites_CPT{
 			return;
 		
 		$disabled = array();
+		$headings = wpa_get_metrics_groups();
 		?><div id="awp_tabs" class="awp_meta_box">
-			<ul class="awp-tabber"><?php
-				$i = 0;
+			<ul class="awp-tabber">
+            	<li class="awp-tab not-tab ui-state-disabled"><a href="javascript:void(0);">Departments</a></li><?php
+                	$depts = wpa_get_metrics_group_by_category('departments');
+					foreach($depts as $head){
+						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
+                            <div class="wp-menu-arrow"><div></div></div></li><?php
+					}
+				?><li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li>
+                <li class="awp-tab not-tab ui-state-disabled"><a href="javascript:void(0);">Signals</a></li><?php
+                	$depts = wpa_get_metrics_group_by_category('signals');
+					foreach($depts as $head){
+						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
+                            <div class="wp-menu-arrow"><div></div></div></li><?php
+					}
+				?><li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li>
+				<li class="awp-tab not-tab ui-state-disabled"><a href="javascript:void(0);">Valuation</a></li><?php
+					$depts = wpa_get_metrics_group_by_category('valuation');
+					foreach($depts as $head){
+						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
+                            <div class="wp-menu-arrow"><div></div></div></li><?php
+					}
+				
+				/*$i = 0;
 				foreach( $fields as $head ){
 					if( ($head['type'] == 'heading') || ($head['type'] == 'separator') ){
 						if( $head['type'] == 'heading' ){
@@ -946,7 +379,7 @@ class Sites_CPT{
 						}
 						$i++;
 					}
-				}
+				}*/
 			?></ul>
             
             <div class="awp-panels"><?php
@@ -1098,10 +531,14 @@ class Sites_CPT{
 	}
 	
 	function site_manager_scripts(){
-		wp_enqueue_script('jquery');
-		wp_enqueue_style( 'awpeditor', PLUGINURL . '/css/editor.css' );
-		wp_enqueue_script( 'awpeditor', PLUGINURL . '/js/editor.js', array('jquery') );
-		wp_localize_script( 'awpeditor', 'ajax_object', array( 'ajax_url' => admin_url( 'admin-ajax.php' ), 'post_url' => admin_url('post.php') ) );
+		global $post;
+		
+		if('site' == $post->post_type){
+			wp_enqueue_script('jquery');
+			wp_enqueue_style( 'awpeditor', PLUGINURL . '/css/editor.css' );
+			wp_enqueue_script( 'awpeditor', PLUGINURL . '/js/editor.js', array('jquery') );
+			wp_localize_script( 'awpeditor', 'ajax_object', array( 'ajax_url' => admin_url( 'admin-ajax.php' ), 'post_url' => admin_url('post.php') ) );
+		}
 	}
 	
 	function site_manager_bulk_action_item(){
@@ -1109,9 +546,39 @@ class Sites_CPT{
 		
 		if($post->post_type == 'site') {
 			?><script type="text/javascript">
-				jQuery(document).ready(function() {
+				jQuery(document).ready(function($) {
 					jQuery('<option>').val('evaluate').text('Evaluate').appendTo("select[name='action']");
 					jQuery('<option>').val('evaluate').text('Evaluate').appendTo("select[name='action2']");
+					<?php /*var dropdowns = {
+						'taxonomy-site-category-hide' : 'site-category',
+						'taxonomy-site-tag-hide' : 'site-tag',
+						'site-action-hide' : 'site-action',
+						'site-status-hide' : 'site-status',
+						'site-include-hide' : 'site-include',
+						'site-topic-hide' : 'site-topic',
+						'site-type-hide' : 'site-type',
+						'site-location-hide' : 'site-location',
+						'site-assignment-hide' : 'site-assignment'
+					};
+					
+					jQuery.each(dropdowns, function(i,e){
+						selector = $('input[name=' + i + ']');
+						dropdown = $('select[name=' + e + ']');
+						
+						if( selector.is(':not(:checked)') ){
+							dropdown.hide();
+						}
+						
+						selector.change(function(e) {
+							console.log( dropdown );
+							
+                            if( !$(this).is(':checked') ){
+								$('select[name=' + dropdowns[i] + ']').hide();
+							} else {
+								$('select[name=' + dropdowns[i] + ']').show();
+							}
+                        });
+					});*/ ?>
 				});
 			</script><?
 		}
@@ -1134,7 +601,43 @@ class Sites_CPT{
 			/*?><pre><?php print_r( $_REQUEST ); ?></pre><?php wp_die();*/
 		}
 	}
+	
+	// Remove SEO Yoast and tumblog filter
+	function remove_alien_filters(){
+		global $woo_tumblog_post_format;
+		if( $woo_tumblog_post_format ){
+			remove_action('restrict_manage_posts', array($woo_tumblog_post_format, 'woo_tumblog_restrict_manage_posts') );
+		}
+	}
 }
+
+function awp_add_view_links($views){
+	
+	$views[] = '<a href="javascript:void(0)" data-column="action" class="wpa-views">Action</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="site" class="wpa-views">Site</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="project" class="wpa-views">Project</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="links" class="wpa-views">Links</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="buzz" class="wpa-views">Social</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="network" class="wpa-views">Network</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="systems" class="wpa-views">Systems</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="ranks" class="wpa-views">Ranks</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="traffic" class="wpa-views">Traffic</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="engagement" class="wpa-views">Engagement</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="financials" class="wpa-views">Financials</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="valuation" class="wpa-views">Valuation</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="content" class="wpa-views">Content</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="development" class="wpa-views">development</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="authors" class="wpa-views">Authors</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="brand" class="wpa-views">Brand</a>';
+	
+	return $views;
+}
+
+global $fields;
+$fields = wpa_default_metrics();
+
+$custom_post_site = new Sites_CPT();
+$custom_post_site->set_fields($fields);
 
 // Remove unnescessary metaboxes that we know
 function site_manager_remove_meta_box(){
@@ -1144,28 +647,31 @@ function site_manager_remove_meta_box(){
 }
 
 // Enqueue Scripts
-add_action( 'admin_head-post.php', array('Sites_CPT', 'site_manager_scripts') );
+add_action( 'admin_head-post.php', array($custom_post_site, 'site_manager_scripts') );
+add_action( 'admin_head-edit.php', array($custom_post_site, 'site_manager_scripts') );
 
 // Register Post Type
-add_action( 'init', array('Sites_CPT', 'register_post_type') );
-add_action( 'init', array('Sites_CPT', 'register_taxonomies') );
+add_action( 'init', array($custom_post_site, 'register_post_type') );
+add_action( 'init', array($custom_post_site, 'register_taxonomies') );
 add_action( 'add_meta_boxes', 'site_manager_remove_meta_box', 40 );
 
 // Add filter Boxes
-add_action( 'restrict_manage_posts', array('Sites_CPT', 'add_filter_boxes') );
-add_filter( 'parse_query', array('Sites_CPT', 'convert_term_id_to_taxonomy_term_in_query') );
+// add_action( 'restrict_manage_posts', array('Sites_CPT', 'add_filter_boxes') );
+add_action( 'wp', array($custom_post_site, 'remove_alien_filters') );
+add_filter( 'parse_query', array($custom_post_site, 'convert_term_id_to_taxonomy_term_in_query') );
+add_filter( 'views_edit-site', 'awp_add_view_links' );
 
 // Add Bulk action item
-add_action( 'admin_footer-edit.php', array('Sites_CPT', 'site_manager_bulk_action_item') );
-add_action( 'load-edit.php', array('Sites_CPT', 'site_manager_bulk_action_handle') );
+add_action( 'admin_footer-edit.php', array($custom_post_site, 'site_manager_bulk_action_item') );
+add_action( 'load-edit.php', array($custom_post_site, 'site_manager_bulk_action_handle') );
 
 // Custom Sortable Columns
-add_filter( 'manage_site_posts_columns', array('Sites_CPT', 'site_columns') );
-add_filter( 'manage_edit-site_sortable_columns', array('Sites_CPT', 'site_columns_head') );
-add_action( 'manage_site_posts_custom_column', array('Sites_CPT', 'site_columns_content'), 10, 2);
+add_filter( 'manage_site_posts_columns', array($custom_post_site, 'site_columns') );
+add_filter( 'manage_edit-site_sortable_columns', array($custom_post_site, 'site_columns_head') );
+add_action( 'manage_site_posts_custom_column', array($custom_post_site, 'site_columns_content'), 10, 2);
 
-add_action( 'pre_get_posts', array('Sites_CPT', 'site_orderby_rank') );
+add_action( 'pre_get_posts', array($custom_post_site, 'site_orderby_rank') );
 
 // Add meta boxes
-add_action( 'add_meta_boxes', array('Sites_CPT', 'add_meta_boxes') );
-add_action( 'save_post', array('Sites_CPT', 'save_post') );
+add_action( 'add_meta_boxes', array($custom_post_site, 'add_meta_boxes') );
+add_action( 'save_post', array($custom_post_site, 'save_post') );

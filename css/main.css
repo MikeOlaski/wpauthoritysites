@@ -1,3 +1,7 @@
+.hide{
+	display: none;
+}
+
 #primary #content{
 	float: left;
 	width: 64.89%;
@@ -65,10 +69,14 @@
 }
 
 .wpa-display-controls li a.detail{
-	background-position: top center;
+	background-position: -25px 0px;
 }
 
 .wpa-display-controls li a.list{
+	background-position: -50px 0px;
+}
+
+.wpa-display-controls li a.line{
 	background-position: top right;
 }
 
@@ -78,6 +86,7 @@
 }
 
 .wpa-display-archives{
+	margin-bottom: 10px;
 }
 
 .wpa-display-archives .post{
@@ -126,7 +135,7 @@
 .wpa-icons{
 	background: url(../images/wpa-icons.png) no-repeat;
 	height: 20px; width: 20px;
-	display: inline-block;
+	display: inline-block !important;
 	
 	opacity: 0.6;
 	filter: alpha(opacity=60);
@@ -141,11 +150,24 @@
 	filter: alpha(opacity=100);
 }
 
-.wpa-icons.google{ background-position: 0 0; }
-.wpa-icons.facebook{ background-position: -20px 0; }
-.wpa-icons.twitter{ background-position: -42px 0; }
-.wpa-icons.pinterest{ background-position: -63px 0; }
-.wpa-icons.linkedin{ background-position: -84px 0; }
+.wpa-icons.wpa-icon-google{ background-position: 0 0; }
+.wpa-icons.wpa-icon-facebook{ background-position: -20px 0; }
+.wpa-icons.wpa-icon-twitter{ background-position: -42px 0; }
+.wpa-icons.wpa-icon-pinterest{ background-position: -63px 0; }
+.wpa-icons.wpa-icon-linkedin{ background-position: -84px 0; }
+.wpa-icons.wpa-icon-alexa{ background-position: -104px 0; }
+.wpa-icons.wpa-icon-moz{ background-position: -125px 0; }
+.wpa-icons.wpa-icon-fblikes{ background-position: -148px 0; }
+.wpa-icons.wpa-icon-klout{ background-position: -170px 0; }
+.wpa-icons.wpa-icon-one-rank{ background-position: -84px 0; }
+.wpa-icons.wpa-icon-one-score{ background-position: -84px 0; }
+
+/*	 Wrapper	*/
+.wpa-display-archives.list .wpa-site-wrapper{
+	float: left;
+	width: 100%;
+	overflow-x: scroll !important;
+}
 
 /*	 Grid View	 */
 .wpa-display-archives .wpa-grid-item{
@@ -165,7 +187,7 @@
 	padding: 5px;
 	float: left;
 	width: 190px;
-	height: 197px;
+	height: 380px;
 	
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
@@ -173,7 +195,7 @@
 }
 
 .wpa-display-archives .wpa-grid-item{
-	text-transform: uppercase;
+	/* text-transform: uppercase; */
 	word-break: break-all;
 }
 
@@ -207,26 +229,72 @@
 	color: #000;
 }
 
+.wpa-display-archives .wpa-grid-item .entry-summary,
+.wpa-display-archives .wpa-grid-item .entry-summary p{
+	font-size: 12px;
+}
+
 .wpa-display-archives .wpa-grid-item .meta{
+	float: left;
+	display: block;
 	font-size: 11px;
 	color: #666;
+	width: 90px;
+	
+	line-height: 25px;
+	vertical-align: middle;
+}
+
+.wpa-display-archives .wpa-grid-item .meta .wpa-icons{
+	margin-right: 3px;
 }
 
 /*	 Detail View	*/
-.wpa-display-archives .wpa-screen-options,
+.wpa-screen-options.hide,
 .wpa-display-archives .wpa-detail-item{
 	display: none;
 }
 
 .wpa-display-archives.detail .wpa-detail-item,
-.wpa-display-archives.detail .wpa-screen-options,
+.wpa-screen-options,
 .wpa-display-archives.detail .wpa-sort-wrapper{
 	display: block;
 	-webkit-animation: fadeIn 1s;
     animation: fadeIn 1s;
 }
 
-.wpa-display-archives .wpa-screen-options{
+.wpa-collapse-wrapper{
+	background: #f8f8f8;
+	margin-bottom: 5px;
+	position: relative;
+}
+
+.wpa-collapse-wrapper .wpa-collapse-btn{
+	background: #f8f8f8;
+	position: absolute;
+	bottom: -26px;
+	right: 255px;
+	display: block;
+	padding: 3px 10px;
+	
+	-webkit-border-bottom-right-radius: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+	-moz-border-radius-bottomright: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 5px;
+	text-decoration: none;
+	font-size: 12px;
+	color: #000;
+}
+
+.wpa-collapse-wrapper .wpa-collapse{
+	border: solid 1px #CC9;
+	padding: 10px 5px 5px;
+	display: none;
+}
+
+.wpa-screen-options{
 	border: solid 1px #CC9;
 	background: #f8f8f8;
 	margin-bottom: 10px;
@@ -237,27 +305,29 @@
 	-webkit-border-radius: 5px;
 }
 
-.wpa-display-archives .wpa-screen-options h4{
+.wpa-screen-options h4{
 	float: left;
 	margin: 0;
 	width: 130px;
 	font-size: 14px;
 }
 
-.wpa-display-archives .wpa-screen-options p{
+.wpa-screen-options p{
+	float: left;
+	max-width: 865px;
+	width: 100%;
 }
 
-.wpa-display-archives .wpa-screen-options input[type=checkbox]{
+.wpa-screen-options input[type=checkbox]{
 	
 }
 
-.wpa-display-archives .wpa-screen-options label{
-	display: inline-block;
-	margin-right: 10px;
+.wpa-screen-options label{
+	margin-right: 22px;
 	font-size: 12px;
 	vertical-align: middle;
 	line-height: 12px;
-	width: 95px;
+	cursor: pointer;
 }
 
 .wpa-display-archives.detail .post{
@@ -294,7 +364,7 @@
 }
 
 .wpa-display-archives .wpa-detail-item .entry-title{
-	text-transform: uppercase;
+	/* text-transform: uppercase; */
 	margin: 0 0 5px;
 	
 	font-size: 16px;
@@ -316,12 +386,14 @@
 }
 
 /*	 List view	 */
+.wpa-group-column.hide,
 .wpa-display-archives .wpa-list-header,
 .wpa-display-archives .wp-list-item{
 	border-bottom: 1px solid #e8e8e8;
 	display: none;
 }
 
+.wpa-group-column,
 .wpa-display-archives.list .wpa-list-header,
 .wpa-display-archives.list .wp-list-item{
 	display: block;
@@ -329,10 +401,56 @@
     animation: fadeIn 1s;
 }
 
+.wpa-display-archives.list .wpa-list-header,
+.wpa-display-archives.list .wp-list-item{
+	display: table;
+	height: 100%;
+	width: 100%;
+}
+
+.wpa-display-archives.list .post{
+	width: 100%;
+}
+
 .wpa-display-archives.list .wpa-sort-wrapper{
 	display: none;
 	-webkit-animation: fadeIn 1s;
     animation: fadeIn 1s;
+}
+
+.wpa-group-column{
+	margin: 0 auto 10px;
+	border: 0;
+}
+
+.wpa-group-column ul{
+}
+
+.wpa-group-column ul li{
+	display: inline-block;
+}
+
+.wpa-group-column ul li a{
+	border-right: solid 1px #000;
+	display: inline-block;
+	padding: 0px 5px;
+	
+	line-height: 12px;
+	font-size: 12px;
+	color: #000;
+}
+
+.wpa-group-column ul li.current a{
+	text-decoration: underline;
+	color: #009;
+}
+
+.wpa-group-column ul li.first a{
+	padding-left: 0;
+}
+
+.wpa-group-column ul li.last a{
+	border-right: 0;
 }
 
 .wpa-display-archives .wpa-list-header{
@@ -348,16 +466,16 @@
 	background: #fff;
 }
 
-.wpa-display-archives .wpa-list-header div.wpa-th-count,
-.wpa-display-archives .wpa-list-header div.wpa-th-title,
-.wpa-display-archives .wpa-list-header div.wpa-th-spacer,
-.wpa-display-archives .wpa-list-header div.wpa-th-traffic,
-.wpa-display-archives .wpa-list-header div.wpa-th-authority,
-.wpa-display-archives .wpa-list-header div.wpa-th-buzz{
+.wpa-display-archives .wpa-list-header div.wpa-th{
 	border-right: solid 1px #5c6a79;
 	padding: 5px 15px;
+	min-height: 52px;
+	max-width: 140px;
+	height: 100%;
 	float: left;
+	width: 12%;
 	
+	line-height: normal;
 	text-align: center;
 	font-weight: bold;
 	color: #fff;
@@ -367,43 +485,147 @@
 	-webkit-box-sizing: border-box;
 }
 
-.wpa-display-archives .wpa-list-header div.wpa-th-count a,
-.wpa-display-archives .wpa-list-header div.wpa-th-title a,
-.wpa-display-archives .wpa-list-header div.wpa-th-spacer a,
-.wpa-display-archives .wpa-list-header div.wpa-th-traffic a,
-.wpa-display-archives .wpa-list-header div.wpa-th-authority a,
-.wpa-display-archives .wpa-list-header div.wpa-th-buzz a{
+.wpa-display-archives .wpa-list-header div.wpa-th a{
 	color: #fff;
 }
 
-.wpa-display-archives .wp-list-item div.wpa-td-count,
-.wpa-display-archives .wp-list-item div.wpa-td-title,
-.wpa-display-archives .wp-list-item div.wpa-td-spacer,
-.wpa-display-archives .wp-list-item div.wpa-td-traffic,
-.wpa-display-archives .wp-list-item div.wpa-td-authority,
-.wpa-display-archives .wp-list-item div.wpa-td-buzz{
+.wpa-display-archives .wpa-list-header div.wpa-th small{
+	font-weight: normal;
+	font-size: 10px;
+}
+
+.wpa-display-archives .wp-list-item div.wpa-td{
 	border-right: solid 1px #e8e8e8;
-	min-height: 110px;
+	display: table-cell;
 	padding: 5px 15px;
+	min-height: 52px;
+	max-width: 140px;
 	float: left;
+	width: 12%;
 	
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
 
+.wpa-display-archives .wpa-list-header div.wpa-th-title,
+.wpa-display-archives .wp-list-item div.wpa-td-title{
+	max-width: 300px;
+}
+
+.wpa-display-archives .wp-list-item div.wpa-td.hide{
+	display: none;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-col-project,
+.wpa-display-archives .wp-list-item div.wpa-col-project{
+	width: 11%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-col-network,
+.wpa-display-archives .wp-list-item div.wpa-col-network{
+	word-break: break-all;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-col-engagement,
+.wpa-display-archives .wp-list-item div.wpa-col-engagement{
+	width: 10%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-th-percent-longer,
+.wpa-display-archives .wp-list-item div.wpa-td-percent-longer,
+.wpa-display-archives .wpa-list-header div.wpa-th-seconds-under,
+.wpa-display-archives .wp-list-item div.wpa-td-seconds-under{
+	max-width: 129px;
+	font-size: 13px;
+	width: 14%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-col-valuation,
+.wpa-display-archives .wp-list-item div.wpa-col-valuation{
+	width: 10%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-th-daily-worth,
+.wpa-display-archives .wp-list-item div.wpa-td-daily-worth{
+	width: 12%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-th-revenue-multiplier,
+.wpa-display-archives .wp-list-item div.wpa-td-revenue-multiplier,
+.wpa-display-archives .wpa-list-header div.wpa-th-sale-value,
+.wpa-display-archives .wp-list-item div.wpa-td-sale-value,
+.wpa-display-archives .wpa-list-header div.wpa-th-sale-price,
+.wpa-display-archives .wp-list-item div.wpa-td-sale-price,
+.wpa-display-archives .wpa-list-header div.wpa-th-income-multiplier,
+.wpa-display-archives .wp-list-item div.wpa-td-income-multiplier,
+.wpa-display-archives .wpa-list-header div.wpa-th-sale-type,
+.wpa-display-archives .wp-list-item div.wpa-td-sale-type{
+	font-size: 12px;
+	width: 9%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-col-content,
+.wpa-display-archives .wp-list-item div.wpa-col-content{
+	width: 16%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-th-profiles-number,
+.wpa-display-archives .wp-list-item div.wpa-td-profiles-number{
+	width: 18%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-th-keywords,
+.wpa-display-archives .wp-list-item div.wpa-td-keywords{
+	width: 77%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-th-visitors,
+.wpa-display-archives .wp-list-item div.wpa-td-visitors{
+	width: 15%;
+}
+
 .wpa-display-archives .wpa-list-header div.wpa-th-spacer,
-.wpa-display-archives .wp-list-item div.wpa-td-spacer,
-.wpa-display-archives .wpa-list-header div.wpa-th-count,
-.wpa-display-archives .wp-list-item div.wpa-td-count{
+.wpa-display-archives .wp-list-item div.wpa-td-spacer{
 	text-align: center;
+	width: 5%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-th-count,
+.wpa-display-archives .wp-list-item div.wpa-td-count,
+.wpa-display-archives .wpa-list-header div.wpa-th-change,
+.wpa-display-archives .wp-list-item div.wpa-td-change{
+	text-align: center;
+	max-width: 70px;
 	width: 7%;
 }
 
+.wpa-display-archives .wpa-list-header div.wpa-th-location,
+.wpa-display-archives .wp-list-item div.wpa-td-location{
+	width: 10%;
+}
+
 .wpa-display-archives .wpa-list-header div.wpa-th-title,
-.wpa-display-archives .wp-list-item div.wpa-td-title{
-	
-	width: 50%;
+.wpa-display-archives .wp-list-item div.wpa-td-title{	
+	width: 18%;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-th-founded,
+.wpa-display-archives .wp-list-item div.wpa-td-founded,
+.wpa-display-archives .wpa-list-header div.wpa-th-networked,
+.wpa-display-archives .wp-list-item div.wpa-td-networked{
+	width: 11%;
+}
+
+.wpa-display-archives .wp-list-item div.wpa-td-domain,
+.wpa-display-archives .wpa-list-header div.wpa-th-link,
+.wpa-display-archives .wp-list-item div.wpa-td-link{
+	word-break: break-all;
+}
+
+.wpa-display-archives .wpa-list-header div.wpa-th-tld,
+.wpa-display-archives .wp-list-item div.wpa-td-tld{
+	width: 7%;
 }
 
 .wpa-display-archives .wpa-list-header div.wpa-th-traffic,
@@ -420,6 +642,10 @@
 .wpa-display-archives .wpa-list-header div.wpa-th-buzz,
 .wpa-display-archives .wp-list-item div.wpa-td-buzz{
 	width: 16%;
+}
+
+.wpa-display-archives .wpa-list-header div.last,
+.wpa-display-archives .wp-list-item div.last{
 	border: 0;
 }
 
@@ -435,4 +661,123 @@
 .wpa-display-archives .wp-list-item .metaval{
 	font-size: 11px;
 	color: #000;
+}
+
+/*	 Line View	 */
+.wpa-display-archives .wpa-line-header,
+.wpa-display-archives .wpa-line-item{
+	border-bottom: 1px solid #e8e8e8;
+	display: none;
+}
+
+.wpa-display-archives.line .wpa-line-header,
+.wpa-display-archives.line .wpa-line-item{
+	display: block;
+	-webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+
+.wpa-display-archives .wpa-line-header{
+	border-top: 1px solid #000;
+	background: #3a434d;
+}
+
+.wpa-display-archives .wpa-line-item{
+	background: #f8f8f8;
+}
+
+.wpa-display-archives .post:nth-child(2n+1) .wpa-line-item{
+	background: #fff;
+}
+
+.wpa-display-archives .wpa-line-header div.wpa-th{
+	border-right: solid 1px #5c6a79;
+	padding: 5px 15px;
+	min-height: 52px;
+	height: 100%;
+	float: left;
+	width: 12%;
+	
+	line-height: normal;
+	text-align: center;
+	font-weight: bold;
+	color: #fff;
+	
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.wpa-display-archives .wpa-line-header div.wpa-th a{
+	color: #fff;
+}
+
+.wpa-display-archives .wpa-line-header div.wpa-th small{
+	font-weight: normal;
+	font-size: 10px;
+}
+
+.wpa-display-archives .wpa-line-item div.wpa-td{
+	border-right: solid 1px #e8e8e8;
+	display: table-cell;
+	padding: 5px 15px;
+	min-height: 52px;
+	float: left;
+	width: 12%;
+	
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.wpa-display-archives .wpa-line-item div.wpa-td.hide{
+	display: none;
+}
+
+.wpa-display-archives .wpa-line-item div.wpa-td-thumbnail,
+.wpa-display-archives .wpa-line-header div.wpa-th-thumbnail{
+	max-width: 210px;
+	width: 30%;
+}
+
+.wpa-display-archives .wpa-line-item div.wpa-td-description,
+.wpa-display-archives .wpa-line-header div.wpa-th-description{
+	max-width: 700px;
+	width: 70%;
+}
+
+.wpa-paginate-posts{
+}
+
+.wpa-paginate-posts ul{
+}
+
+.wpa-paginate-posts ul li{
+	display: inline-block;
+}
+
+.wpa-paginate-posts ul li a{
+	border: solid 1px #FFC;
+	background: #f1f1f1;
+	
+	display: inline-block;
+	padding: 5px 10px;
+	margin: 0 5px;
+	
+	text-decoration: none;
+}
+
+.wpa-paginate-posts ul li:first-child a{
+	margin-left: 0;
+}
+
+/*	 Single Page	*/
+.single-site .custom-info{
+}
+
+.single-site .custom-info i.icon{
+	float: left;
+	margin: 0 5px 0 0;
+	line-height: 15px;
+	cursor: pointer;
 }

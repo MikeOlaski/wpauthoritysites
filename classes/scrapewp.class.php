@@ -93,7 +93,7 @@ class scrapeWordpress {
 				
 				$cpost = array(
 					'post_title' => $po['name'],
-					'post_name' => $slug,
+					'post_name' => $po['name'], // $slug, Return the slug to -com format
 					'post_type' => 'site',
 					'post_status' => 'publish'
 				);

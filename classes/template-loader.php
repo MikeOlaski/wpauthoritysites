@@ -8,6 +8,7 @@ class SiteTemplate
     private $pt;
     private $url;
     private $path;
+	private $settings;
 
     /**
      * Construct 
@@ -19,9 +20,9 @@ class SiteTemplate
         $this->pt = $pt;
         $this->url = PLUGINURL;
         $this->path = PLUGINPATH;
+		$this->settings = get_option('awp_settings');
         add_action( 'init', array( $this, 'init_all' ) );
     }
-
 
     /**
      * Dispatch general hooks
@@ -33,6 +34,14 @@ class SiteTemplate
         add_action( 'wp_enqueue_scripts',   array( $this, 'frontend_scripts' ) );
         add_filter( 'body_class',           array( $this, 'filter_body_class' ) );
         add_filter( 'template_include',     array( $this, 'site_template' ) );
+		
+		// Allow users to override the default archive template contents through Content and SEO settings.
+		add_filter( 'wpa_archive_page_title', array( $this, 'archive_page_title' ) );
+		add_filter( 'wpa_archive_content_before', array( $this, 'archive_content_before' ) );
+		add_filter( 'wpa_archive_content_after', array( $this, 'archive_content_after' ) );
+		
+		add_filter( 'wp_title', array( $this, 'filter_archive_title'), 10, 2 );
+		add_action( 'wp_head', array( $this, 'wpa_add_meta_tags' ) );
     }
 
     /**
@@ -48,6 +57,7 @@ class SiteTemplate
             return;
 		
 		wp_enqueue_script( 'awpmain', PLUGINURL . '/js/main.js', array('jquery') );
+		wp_localize_script( 'awpmain', 'wpaObj', array('ajaxurl' => admin_url( 'admin-ajax.php' )));
 		wp_enqueue_style( 'awpmain', PLUGINURL . '/css/main.css' );
     }
 
@@ -79,8 +89,7 @@ class SiteTemplate
      * @param string $template
      * @return string
      **/
-    public function site_template( $template ) 
-    {
+    public function site_template( $template ) {
         $post_types = array( $this->pt );
         $theme = wp_get_theme();
 
@@ -92,5 +101,48 @@ class SiteTemplate
 
         return $template;
     }
-
+	
+	/**
+	 * Allow users to override the default archive template contents
+	 * through Content and SEO settings.
+	 **/
+	public function archive_page_title() {
+		return $this->settings['archive_page_title'];
+	}
+	
+	public function archive_content_before(){
+		return apply_filters('the_content', $this->settings['archive_content_before']);
+	}
+	
+	public function archive_content_after(){
+		return apply_filters('the_content', $this->settings['archive_content_after']);
+	}
+	
+	public function filter_archive_title($title, $sep){
+		$post_types = array( $this->pt );
+		global $paged, $page;
+		
+		if ( is_post_type_archive( $post_types ) ){
+			
+			$title = $this->settings['archive_meta_title'];
+			
+			if ( $paged >= 2 || $page >= 2 ){
+				$title = "$title $sep " . sprintf( __( 'Page %s', 'wpa' ), max( $paged, $page ) );
+			}
+			
+			echo $title;
+		}
+		return;
+	}
+	
+	public function wpa_add_meta_tags(){
+		$post_types = array( $this->pt );
+		
+		if ( is_post_type_archive( $post_types ) ){
+			?>
+            <meta name="description" content="<?php echo $this->settings['archive_meta_desc']; ?>" />
+			<meta name="keywords" content="<?php echo $this->settings['archive_meta_keywords']; ?>" />
+			<?php
+		}
+	}
 }
