@@ -1,0 +1,98 @@
+.bb_builder{
+	position: relative;
+}
+
+#bb_sortable {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+}
+
+#bb_sortable li {
+	list-style: none;
+	margin: 0 5px 5px 5px;
+	padding: 5px;
+	font-size: 1.2em;
+	height: 1.5em;
+}
+
+#bb_sortable li .hand{
+	display: block;
+	width: 200px;
+	cursor: move;
+	float: left;
+}
+
+#bb_sortable li .ui-form-slider{
+	margin: 5px 0;
+	width: 250px;
+	float: left;
+}
+
+#bb_sortable li .ui-text-field{
+	margin: 0 20px;
+	width: 35px;
+	float: left;
+}
+
+#bb_sortable li .ui-remove-button{
+	background: url(../images/ui-remove-button.png) no-repeat top left;
+	display: block;
+	float: right;
+	height: 30px;
+	width: 30px;
+	
+	text-indent: -9999px;
+	color: transparent;
+	font-size: 0;
+}
+
+.bb_builder .ui-form-footer{
+	width: 210px;
+}
+
+.bb_builder .ui-add-button{
+	background: url(../images/ui-add-button.png) no-repeat top left;
+	display: inline-block;
+	margin: 0 10px 0 0;
+	/* float: right; */
+	height: 30px;
+	width: 30px;
+	
+	text-indent: -9999px;
+	color: transparent;
+	font-size: 0;
+}
+
+.bb_builder .ui-total-field{
+	margin: 0 5px;
+	max-width: 140px;
+}
+
+.ui-check-dept{
+	position: relative;
+	float: right;
+}
+
+#extra-depts{
+	position: absolute;
+	background: #ccc;
+	padding: 10px;
+	width: 200px;
+	z-index: 2;
+	right: 0;
+}
+
+#extra-depts label{
+	display: block;
+}
+
+.ui-linked-label{
+	cursor: pointer;
+}
+
+.ui-linked-label:hover,
+.ui-linked-label:active{
+	text-decoration: underline;
+}

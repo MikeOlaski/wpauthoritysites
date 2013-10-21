@@ -5,6 +5,55 @@ class Sites_CPT{
 	
 	var $fields;
 	
+	function __construct(){
+		// Enqueue Scripts
+		add_action( 'admin_head-post.php', array($this, 'site_manager_scripts') );
+		add_action( 'admin_head-edit.php', array($this, 'site_manager_scripts') );
+		
+		// Register Post Type
+		add_action( 'init', array($this, 'register_post_type') );
+		add_action( 'init', array($this, 'register_taxonomies') );
+		
+		// Remove Unnescessary filter objects
+		add_action( 'wp', array($this, 'remove_alien_filters') );
+		add_filter( 'parse_query', array($this, 'convert_term_id_to_taxonomy_term_in_query') );
+		
+		// Add Bulk action item
+		add_action( 'admin_footer-edit.php', array($this, 'site_manager_bulk_action_item') );
+		add_action( 'load-edit.php', array($this, 'site_manager_bulk_action_handle') );
+		
+		// Custom Sortable Columns
+		add_filter( 'manage_site_posts_columns', array($this, 'site_columns') );
+		add_filter( 'manage_edit-site_sortable_columns', array($this, 'site_columns_head') );
+		add_action( 'manage_site_posts_custom_column', array($this, 'site_columns_content'), 10, 2);
+		
+		add_action( 'pre_get_posts', array($this, 'site_orderby_rank') );
+		
+		// Add meta boxes
+		add_action( 'add_meta_boxes', array($this, 'add_meta_boxes') );
+		add_action( 'save_post', array($this, 'save_post') );
+		
+		// Add another row action
+		add_filter('post_row_actions', array($this, 'add_action_row'), 10, 2);
+	}
+	
+	function add_action_row($actions, $post){
+		$acts = array();
+		if ($post->post_type =="site"){
+			$link = add_query_arg(
+				array(
+					'post_type' => 'site',
+					'action' => 'evaluate',
+					'post' => array($post->ID)
+				),
+				'edit.php'
+			);
+			$acts['audit'] = sprintf('<a href="%s" title="Audit this item">Audit</a>', $link );
+		}
+		$actions = wp_parse_args($actions, $acts);
+		return $actions;
+	}
+	
 	function set_fields($fields){
 		$this->fields = $fields;
 	}
@@ -260,8 +309,8 @@ class Sites_CPT{
 	}
 	
 	function metabox_evaluate(){
-		?><p>Click "<tt>Run Evaluator</tt>" to evaluate this site</p>
-        <input name="awp-evaluate" type="button" class="button button-primary button-large" id="awp-evaluate" accesskey="p" value="Run Evaluator">
+		?><p>Click "<tt>Audit This Site</tt>" to get all the data of this site</p>
+        <input name="awp-evaluate" type="button" class="button button-primary button-large" id="awp-evaluate" accesskey="p" value="Audit this Site">
         <img src="<?php echo PLUGINURL; ?>/images/preload.gif" class="preloader" align="preload" style="display:none;" />
 		<?php
 	}
@@ -531,13 +580,23 @@ class Sites_CPT{
 	}
 	
 	function site_manager_scripts(){
-		global $post;
+		get_currentuserinfo();
+		global $post, $user_ID;
 		
 		if('site' == $post->post_type){
 			wp_enqueue_script('jquery');
 			wp_enqueue_style( 'awpeditor', PLUGINURL . '/css/editor.css' );
 			wp_enqueue_script( 'awpeditor', PLUGINURL . '/js/editor.js', array('jquery') );
-			wp_localize_script( 'awpeditor', 'ajax_object', array( 'ajax_url' => admin_url( 'admin-ajax.php' ), 'post_url' => admin_url('post.php') ) );
+			
+			$view = get_user_meta($user_ID, 'user_defined_view', true);
+			
+			wp_localize_script( 'awpeditor', 'WPAJAX_OBJ',
+				array(
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'post_url' => admin_url('post.php'),
+					'defined_view' => $view
+				)
+			);
 		}
 	}
 	
@@ -547,38 +606,14 @@ class Sites_CPT{
 		if($post->post_type == 'site') {
 			?><script type="text/javascript">
 				jQuery(document).ready(function($) {
-					jQuery('<option>').val('evaluate').text('Evaluate').appendTo("select[name='action']");
-					jQuery('<option>').val('evaluate').text('Evaluate').appendTo("select[name='action2']");
-					<?php /*var dropdowns = {
-						'taxonomy-site-category-hide' : 'site-category',
-						'taxonomy-site-tag-hide' : 'site-tag',
-						'site-action-hide' : 'site-action',
-						'site-status-hide' : 'site-status',
-						'site-include-hide' : 'site-include',
-						'site-topic-hide' : 'site-topic',
-						'site-type-hide' : 'site-type',
-						'site-location-hide' : 'site-location',
-						'site-assignment-hide' : 'site-assignment'
-					};
-					
-					jQuery.each(dropdowns, function(i,e){
-						selector = $('input[name=' + i + ']');
-						dropdown = $('select[name=' + e + ']');
-						
-						if( selector.is(':not(:checked)') ){
-							dropdown.hide();
-						}
-						
-						selector.change(function(e) {
-							console.log( dropdown );
-							
-                            if( !$(this).is(':checked') ){
-								$('select[name=' + dropdowns[i] + ']').hide();
-							} else {
-								$('select[name=' + dropdowns[i] + ']').show();
-							}
-                        });
-					});*/ ?>
+					jQuery('<option>').val('evaluate').text('Audit').prependTo("select[name='action']");
+					jQuery('<option>').val('evaluate').text('Audit').prependTo("select[name='action2']");
+					<?php if( isset($_REQUEST['audited']) ){ ?>
+						<?php if(!empty($_REQUEST['audited'])){ ?>
+							var message = '<div id="message" class="updated"><p><?php echo sprintf( _n( '%s post audited.', '%s posts audited.', $_REQUEST['audited'] ), number_format_i18n( $_REQUEST['audited'] ) ); ?></p></div>';
+						<?php } ?>
+						$('div.wrap h2').after( message );
+					<?php } ?>
 				});
 			</script><?
 		}
@@ -587,12 +622,19 @@ class Sites_CPT{
 	function site_manager_bulk_action_handle(){
 		if ( (isset($_REQUEST['action']) && 'evaluate' == $_REQUEST['action']) || (isset($_REQUEST['action2']) && 'evaluate' == $_REQUEST['action2']) ) {
 			if( $_REQUEST['post'] ){
+				$ids = array();
 				foreach($_REQUEST['post'] as $data){
 					$url = get_post_meta($data, 'awp-url', true);
 					if(!$url){
 						$url = 'http://' . get_the_title($data);
 					}
 					$return = evaluate_js_callback( array('url' => $url, 'id' => $data) );
+					$ids[] = $data;
+				}
+				
+				if($return){
+					$location = admin_url('edit.php?post_type=site&audited=' . count($ids) . '&ids=' . implode(',', $ids));
+					wp_redirect( $location ); exit;
 				}
 			}
 			
@@ -613,22 +655,20 @@ class Sites_CPT{
 
 function awp_add_view_links($views){
 	
-	$views[] = '<a href="javascript:void(0)" data-column="action" class="wpa-views">Action</a>';
 	$views[] = '<a href="javascript:void(0)" data-column="site" class="wpa-views">Site</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="project" class="wpa-views">Project</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="project" class="wpa-views">Team</a>';
 	$views[] = '<a href="javascript:void(0)" data-column="links" class="wpa-views">Links</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="buzz" class="wpa-views">Social</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="network" class="wpa-views">Network</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="systems" class="wpa-views">Systems</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="ranks" class="wpa-views">Ranks</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="traffic" class="wpa-views">Traffic</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="engagement" class="wpa-views">Engagement</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="financials" class="wpa-views">Financials</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="valuation" class="wpa-views">Valuation</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="content" class="wpa-views">Content</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="development" class="wpa-views">development</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="social" class="wpa-views">Social</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="buzz" class="wpa-views">Buzz</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="framework" class="wpa-views">Framework</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="community" class="wpa-views">Community</a>';
 	$views[] = '<a href="javascript:void(0)" data-column="authors" class="wpa-views">Authors</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="brand" class="wpa-views">Brand</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="content" class="wpa-views">Content</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="products" class="wpa-views">Products</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="systems" class="wpa-views">Systems</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="valuation" class="wpa-views">Valuation</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="scores" class="wpa-views">Scores</a>';
+	$views[] = '<a href="javascript:void(0)" data-column="action" class="wpa-views">Action</a>';
 	
 	return $views;
 }
@@ -646,32 +686,5 @@ function site_manager_remove_meta_box(){
 	remove_meta_box( 'woothemes-settings' , 'site' , 'normal' );
 }
 
-// Enqueue Scripts
-add_action( 'admin_head-post.php', array($custom_post_site, 'site_manager_scripts') );
-add_action( 'admin_head-edit.php', array($custom_post_site, 'site_manager_scripts') );
-
-// Register Post Type
-add_action( 'init', array($custom_post_site, 'register_post_type') );
-add_action( 'init', array($custom_post_site, 'register_taxonomies') );
 add_action( 'add_meta_boxes', 'site_manager_remove_meta_box', 40 );
-
-// Add filter Boxes
-// add_action( 'restrict_manage_posts', array('Sites_CPT', 'add_filter_boxes') );
-add_action( 'wp', array($custom_post_site, 'remove_alien_filters') );
-add_filter( 'parse_query', array($custom_post_site, 'convert_term_id_to_taxonomy_term_in_query') );
 add_filter( 'views_edit-site', 'awp_add_view_links' );
-
-// Add Bulk action item
-add_action( 'admin_footer-edit.php', array($custom_post_site, 'site_manager_bulk_action_item') );
-add_action( 'load-edit.php', array($custom_post_site, 'site_manager_bulk_action_handle') );
-
-// Custom Sortable Columns
-add_filter( 'manage_site_posts_columns', array($custom_post_site, 'site_columns') );
-add_filter( 'manage_edit-site_sortable_columns', array($custom_post_site, 'site_columns_head') );
-add_action( 'manage_site_posts_custom_column', array($custom_post_site, 'site_columns_content'), 10, 2);
-
-add_action( 'pre_get_posts', array($custom_post_site, 'site_orderby_rank') );
-
-// Add meta boxes
-add_action( 'add_meta_boxes', array($custom_post_site, 'add_meta_boxes') );
-add_action( 'save_post', array($custom_post_site, 'save_post') );

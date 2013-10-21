@@ -26,6 +26,7 @@ load_template( trailingslashit( PLUGINPATH ) . 'classes/cron.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/scrapewp.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/topSites.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/template-loader.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/shortcodes.class.php' );
 
 register_activation_hook( __FILE__, 'awp_activate' );
 register_deactivation_hook( __FILE__, 'awp_deactivate' );
@@ -972,7 +973,7 @@ function awp_admin_pages(){
                                 <th scope="row"><label for="wpa_metrics_type">Field Type</label></th>
                                 <td><?php
                                 	if(!$editable){
-										?><input type="text" name="wpa_metrics[type]" id="wpa_metrics_type" class="regular-text" value="<?php echo ($field['type']) ? $field['type'] : ''; ?>" readonly="readonly" /><?php
+										?><input type="text" name="wpa_metrics[type]" id="wpa_metrics_type" class="regular-text" value="<?php echo ($field['type']) ? $field['type'] : ''; ?>" readonly /><?php
 									} else {
 										?><select name="wpa_metrics[type]" id="wpa_metrics_type" <?php echo (!$editable) ? 'disabled="disabled"' : '' ?>>
                                             <option value="text" <?php selected($field['type'], 'text'); ?>>Text</option>
@@ -998,7 +999,7 @@ function awp_admin_pages(){
                                 <th scope="row"><label for="wpa_metrics_group">Field Group</label></th>
                                 <td><?php
 									if(!$editable){
-										?><input type="text" name="wpa_metrics[group]" id="wpa_metrics_group" class="regular-text" value="<?php echo ($field['group']) ? $field['group'] : ''; ?>" readonly="readonly" /><?php
+										?><input type="text" name="wpa_metrics[group]" id="wpa_metrics_group" class="regular-text" value="<?php echo ($field['group']) ? $field['group'] : ''; ?>" readonly /><?php
 									} else {
 										?><select name="wpa_metrics[group]" id="wpa_metrics_group" <?php echo (!$editable) ? 'disabled="disabled"' : '' ?>><?php
 											$metricsGroup = wpa_get_metrics_groups();
@@ -1535,3 +1536,39 @@ function wpa_paginate($pages = ''){
 		echo '</ul></div>';
 	}
 }
+
+remove_filter('sanitize_title', 'sanitize_title_with_dashes');
+
+function sanitize_title_with_dots_and_dashes($title) {
+	$title = strip_tags($title);
+	// Preserve escaped octets.
+	$title = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '---$1---', $title);
+	// Remove percent signs that are not part of an octet.
+	$title = str_replace('%', '', $title);
+	// Restore octets.
+	$title = preg_replace('|---([a-fA-F0-9][a-fA-F0-9])---|', '%$1', $title);
+
+	$title = remove_accents($title);
+	if (seems_utf8($title)) {
+		if (function_exists('mb_strtolower')) {
+			$title = mb_strtolower($title, 'UTF-8');
+		}
+		$title = utf8_uri_encode($title);
+	}
+
+	$title = strtolower($title);
+	$title = preg_replace('/&.+?;/', '', $title); // kill entities
+	$title = preg_replace('/[^%a-z0-9 ._-]/', '', $title);
+	$title = preg_replace('/\s+/', '-', $title);
+	$title = preg_replace('|-+|', '-', $title);
+	$title = trim($title, '-');
+	$title = str_replace('-.-', '.', $title);
+	$title = str_replace('-.', '.', $title);
+	$title = str_replace('.-', '.', $title);
+	$title = preg_replace('|([^.])\.$|', '$1', $title);
+	$title = trim($title, '-'); // yes, again
+
+	return $title;
+}
+
+add_filter('sanitize_title', 'sanitize_title_with_dots_and_dashes');

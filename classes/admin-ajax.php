@@ -1,8 +1,24 @@
 <?php
+
+add_action( 'wp_ajax_user_defined_view_groups', 'user_defined_view_groups_callback');
 add_action( 'wp_ajax_evaluate_js', 'evaluate_js_callback');
 add_action( 'wp_ajax_search_term', 'search_term_callback');
 
 define('GOOGLE_MAGIC', 0xE6359A60);
+
+function user_defined_view_groups_callback(){
+	if ( !is_user_logged_in() )
+		return;
+	
+	get_currentuserinfo();
+	global $user_ID;
+	
+	if( isset($_POST) && '' != $_POST['view'] ){
+		update_user_meta($user_ID, 'user_defined_view', $_POST['view']);
+	}
+	
+	die();
+}
 
 function search_term_callback(){
 	if( isset($_POST) && '' != $_POST['taxonomy'] ){
@@ -156,12 +172,14 @@ function evaluate_js_callback( $args = null ){
 		wpa_update_scores($id);
 		
 		if($die){
+			header( 'HTTP/1.1 200 OK' );
 			echo 'true';
 		} else {
 			return true;
 		}
 	} else {
 		if($die){
+			header( 'HTTP/1.1 200 OK' );
 			echo 'false';
 		}
 		 else {

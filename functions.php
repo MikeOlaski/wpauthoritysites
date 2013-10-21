@@ -143,6 +143,22 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 		
+		$fields[$shortname.'-editor'] = array(
+			'name' => 'Editor',
+			'id' => $shortname.'-editor',
+			'type' => 'text',
+			'group' => $shortname.'-owners',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-ceo'] = array(
+			'name' => 'CEO',
+			'id' => $shortname.'-ceo',
+			'type' => 'text',
+			'group' => $shortname.'-owners',
+			'readonly' => true
+		);
+		
 		$fields[$shortname.'-member'] = array(
 			'name' => 'Network Member',
 			'id' => $shortname.'-member',
@@ -263,7 +279,7 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 		
-		// Network
+		// Community
 		$fields[$shortname.'-social'] = array(
 			'name' => 'Community',
 			'id' => $shortname.'-social',
@@ -315,6 +331,22 @@ function wpa_default_metrics(){
 		$fields[$shortname.'-twitter'] = array(
 			'name' => 'Twitter URL',
 			'id' => $shortname.'-twitter',
+			'type' => 'text',
+			'group' => $shortname.'-social',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-youtube-followers'] = array(
+			'name' => 'Youtube Followers',
+			'id' => $shortname.'-youtube-followers',
+			'type' => 'text',
+			'group' => $shortname.'-social',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-youtube'] = array(
+			'name' => 'Youtube URL',
+			'id' => $shortname.'-youtube',
 			'type' => 'text',
 			'group' => $shortname.'-social',
 			'readonly' => true
@@ -425,8 +457,103 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 	
-	
-	
+		$fields[$shortname.'-klout-score'] = array(
+			'name' => 'Klout Score',
+			'id' => $shortname.'-klout-score',
+			'type' => 'text',
+			'group' => $shortname.'-buzz',
+			'readonly' => true
+		);
+		
+		// Framework
+		$fields[$shortname.'-framework'] = array(
+			'name' => 'Framework',
+			'id' => $shortname.'-framework',
+			'type' => 'heading',
+			'category' => 'signals',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-plugins-paid'] = array(
+			'name' => 'Plugins (Paid)',
+			'id' => $shortname.'-plugins-paid',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-plugins-free'] = array(
+			'name' => 'Plugins (free)',
+			'id' => $shortname.'-plugins-free',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-plugins-custom'] = array(
+			'name' => 'Plugins (Custom)',
+			'id' => $shortname.'-plugins-custom',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-functions-custom'] = array(
+			'name' => 'Functions (Custom)',
+			'id' => $shortname.'-functions-custom',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-theme-paid'] = array(
+			'name' => 'Theme (Paid)',
+			'id' => $shortname.'-theme-paid',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-theme-framework'] = array(
+			'name' => 'Theme Framework',
+			'id' => $shortname.'-theme-framework',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-theme-custom'] = array(
+			'name' => 'Theme (Custom)',
+			'id' => $shortname.'-theme-custom',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-services-facebook'] = array(
+			'name' => 'Services (Facebook)',
+			'id' => $shortname.'-services-facebook',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-services-twitter'] = array(
+			'name' => 'Services (Twitter)',
+			'id' => $shortname.'-services-twitter',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-services-google'] = array(
+			'name' => 'Services (Google+)',
+			'id' => $shortname.'-services-google',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
 	// Valuation
 	$fields[$shortname.'-valuation'] = array(
 		'name' => 'Valuation',
@@ -500,6 +627,22 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 		
+		$fields[$shortname.'-site-score'] = array(
+			'name' => 'Site',
+			'id' => $shortname.'-site-score',
+			'type' => 'text',
+			'group' => $shortname.'-score',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-project-score'] = array(
+			'name' => 'Project',
+			'id' => $shortname.'-project-score',
+			'type' => 'text',
+			'group' => $shortname.'-score',
+			'readonly' => true
+		);
+		
 		$fields[$shortname.'-google-rank'] = array(
 			'name' => 'Google Score',
 			'id' => $shortname.'-google-rank',
@@ -527,6 +670,22 @@ function wpa_default_metrics(){
 		$fields[$shortname.'-social-scores'] = array(
 			'name' => 'Social Score',
 			'id' => $shortname.'-social-scores',
+			'type' => 'text',
+			'group' => $shortname.'-score',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-buzz-score'] = array(
+			'name' => 'Buzz',
+			'id' => $shortname.'-buzz-score',
+			'type' => 'text',
+			'group' => $shortname.'-score',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-score'] = array(
+			'name' => 'Framework',
+			'id' => $shortname.'-framework-score',
 			'type' => 'text',
 			'group' => $shortname.'-score',
 			'readonly' => true
@@ -564,9 +723,33 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 		
+		$fields[$shortname.'-systems-score'] = array(
+			'name' => 'Systems',
+			'id' => $shortname.'-systems-score',
+			'type' => 'text',
+			'group' => $shortname.'-score',
+			'readonly' => true
+		);
+		
 		$fields[$shortname.'-authors-scores'] = array(
 			'name' => 'Authors Score',
 			'id' => $shortname.'-authors-scores',
+			'type' => 'text',
+			'group' => $shortname.'-score',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-scores-score'] = array(
+			'name' => 'Scores',
+			'id' => $shortname.'-scores-score',
+			'type' => 'text',
+			'group' => $shortname.'-score',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-valuation-score'] = array(
+			'name' => 'Valuation',
+			'id' => $shortname.'-valuation-score',
 			'type' => 'text',
 			'group' => $shortname.'-score',
 			'readonly' => true
@@ -669,13 +852,6 @@ function wpa_default_metrics(){
 			'group' => $shortname.'-engagement',
 			'readonly' => true
 		);
-	
-		/*Financials
-		$fields[] = array(
-			'name' => 'Financials',
-			'id' => $shortname.'-financials',
-			'type' => 'heading'
-		);*/
 		
 		// valuation
 		$fields[$shortname.'-valuation'] = array(
@@ -683,6 +859,30 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-valuation',
 			'type' => 'heading',
 			'category' => 'valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-replacement-content'] = array(
+			'name' => 'Replacement - Content',
+			'id' => $shortname.'-replacement-content',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-replacement-technology'] = array(
+			'name' => 'Replacement - Technology',
+			'id' => $shortname.'-replacement-technology',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-replacement-community'] = array(
+			'name' => 'Replacement - Community',
+			'id' => $shortname.'-replacement-community',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
 			'readonly' => true
 		);
 		
@@ -866,6 +1066,30 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 		
+		$fields[$shortname.'-author-paid'] = array(
+			'name' => 'Paid',
+			'id' => $shortname.'-author-paid',
+			'type' => 'text',
+			'group' => $shortname.'-authors',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-author-free'] = array(
+			'name' => 'Free',
+			'id' => $shortname.'-author-free',
+			'type' => 'text',
+			'group' => $shortname.'-authors',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-revenue-share'] = array(
+			'name' => 'Revenue Share',
+			'id' => $shortname.'-revenue-share',
+			'type' => 'text',
+			'group' => $shortname.'-authors',
+			'readonly' => true
+		);
+		
 		$fields[$shortname.'-profiles-number'] = array(
 			'name' => 'Number of Connected Profiles',
 			'id' => $shortname.'-profiles-number',
@@ -873,20 +1097,72 @@ function wpa_default_metrics(){
 			'group' => $shortname.'-authors',
 			'readonly' => true
 		);
-	
-		/*Brand
-		$fields[] = array(
-			'name' => 'Brand',
-			'id' => $shortname.'-brand',
-			'type' => 'heading'
+		
+		// Products (Old = Brand)
+		$fields[$shortname.'-products'] = array(
+			'name' => 'Products',
+			'id' => $shortname.'-products',
+			'type' => 'heading',
+			'category' => 'valuation',
+			'readonly' => true
 		);
 		
-		$fields[] = array(
-			'name' => 'Brand Keywords',
-			'id' => $shortname.'-brand-keywords',
+		$fields[$shortname.'-brand-number'] = array(
+			'name' => 'Number',
+			'id' => $shortname.'-brand-number',
 			'type' => 'text',
-			'group' => $shortname.'-brand'
-		);*/
+			'group' => $shortname.'-products',
+			'readonly' => true
+		);
+		
+		// Systems
+		$fields[$shortname.'-systems'] = array(
+			'name' => 'Systems',
+			'id' => $shortname.'-systems',
+			'type' => 'heading',
+			'category' => 'valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-system-content'] = array(
+			'name' => 'Content',
+			'id' => $shortname.'-system-content',
+			'type' => 'text',
+			'group' => $shortname.'-systems',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-system-marketing'] = array(
+			'name' => 'Marketing',
+			'id' => $shortname.'-system-marketing',
+			'type' => 'text',
+			'group' => $shortname.'-systems',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-system-sales'] = array(
+			'name' => 'Sales',
+			'id' => $shortname.'-system-sales',
+			'type' => 'text',
+			'group' => $shortname.'-systems',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-system-fulfilment'] = array(
+			'name' => 'Fulfillment',
+			'id' => $shortname.'-system-fulfilment',
+			'type' => 'text',
+			'group' => $shortname.'-systems',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-system-management'] = array(
+			'name' => 'Management (Staff)',
+			'id' => $shortname.'-system-management',
+			'type' => 'text',
+			'group' => $shortname.'-systems',
+			'readonly' => true
+		);
 	
 	$cfields = get_option('wpa_metrics');
 	
