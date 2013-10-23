@@ -779,6 +779,7 @@ $fields[] = array(
         <h1 class="entry-title"><a href="<?php the_permalink(); ?>" title="<?php echo esc_attr( sprintf( __( 'Permalink to %s', 'awp' ), the_title_attribute( 'echo=0' ) ) ); ?>" rel="bookmark"><?php the_title(); ?></a></h1>
         <span><a href="http://<?php the_title(); ?>/" target="_blank"><?php the_title(); ?></a></span>
         <?php endif; ?>
+        <?php edit_post_link('Edit'); ?>
     </header><!-- .entry-header -->
 	
 	<div class="clear"></div><?php

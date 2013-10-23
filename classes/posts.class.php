@@ -48,7 +48,7 @@ class Sites_CPT{
 				),
 				'edit.php'
 			);
-			$acts['audit'] = sprintf('<a href="%s" title="Audit this item">Audit</a>', $link );
+			$acts['audit'] = sprintf('<a class="auditinline" data-id="%s" href="%s" title="Audit this item">Audit</a>', $post->ID, $link );
 		}
 		$actions = wp_parse_args($actions, $acts);
 		return $actions;
@@ -594,6 +594,7 @@ class Sites_CPT{
 				array(
 					'ajax_url' => admin_url( 'admin-ajax.php' ),
 					'post_url' => admin_url('post.php'),
+					'manage_Screen' => admin_url('edit.php?post_type=site'),
 					'defined_view' => $view
 				)
 			);

@@ -48,6 +48,18 @@ jQuery(document).ready(function($) {
 		$this = $('a[data-column=' + WPAJAX_OBJ.defined_view + ']');
 		changeViewGroups( $this, selector );
 		updateUserDefinedView( $this );
+	} else {
+		$('.metabox-prefs .hide-column-tog').each(function(i,e){
+			$(this).attr('checked', false);
+		});
+		
+		$('thead th.manage-column').css('display','none');
+		$('tfoot th.manage-column').css('display','none');
+		$('tbody td').not('.inline-edit-row td:first-child').css('display','none');
+		
+		$('thead th#cb, th#title').css('display','table-cell');
+		$('tfoot th.column-cb, th.column-title').css('display','table-cell');
+		$('td.check-column, td.post-title').css('display','table-cell');
 	}
 	
 	function updateUserDefinedView( $this ){
@@ -262,4 +274,154 @@ jQuery(document).ready(function($) {
 		});
 	}
 	
+	$('#doaction, #doaction2').bind('click', function(e){
+		if( $(this).siblings('select').val() == 'evaluate' ){
+			$('#awp-popup').center();
+			console.log('Collecting data');
+			
+			posts = $('input[name*=post]:checked').map(function(e){
+                return $(this).val();
+            }).get();
+			
+			if(posts == ''){
+				console.log( 'Auditor is terminated' );
+				$('#awp-popup .awp-popup-message').html('Audit unsuccessful!');
+				$('#awp-popup').addClass('awp-popup-error').show('slow', '', function(){
+					$('#awp-popup').center();
+				});
+				
+				setTimeout(function(e){
+					$('#awp-popup').hide('slow');
+				}, 3000)
+				return false;
+			}
+			
+			var data = {
+				action: 'bulk_evaluate',
+				post: posts
+			};
+			
+			console.log( 'Auditor Initializing' );
+			$('#awp-popup').removeClass('awp-popup-error');
+			$('#awp-popup .awp-popup-message').html('Initializing Auditor');
+			$('#awp-popup').show('slow', '', function(){
+				$('#awp-popup').center();
+			});
+			
+			console.log('Auditor Running in Background');
+			setTimeout(function(e){
+				$('#awp-popup').removeClass('awp-popup-error');
+				$('#awp-popup .awp-popup-message').html('Auditor Running in Background');
+				$('#awp-popup').show('slow', '', function(){
+					$('#awp-popup').center();
+				});
+			}, 3000);
+			
+			$.post(WPAJAX_OBJ.ajax_url, data, function(response) {
+				console.log( 'response is ', response );
+				if('true' == response){
+					$('#awp-popup .awp-popup-message').html('Audit Successful!');
+					$('#awp-popup').removeClass('awp-popup-error').center();
+					setTimeout(function(e){
+						window.location.href = WPAJAX_OBJ.manage_Screen + '&audited=' + posts.length;
+					},1500);
+				} else {
+					setTimeout(function(e){
+						$('#awp-popup').addClass('awp-popup-error').show();
+						$('#awp-popup .awp-popup-message').html('Audit unsuccessful!');
+						$('#awp-popup').show('slow', '', function(){
+							$('#awp-popup').center();
+						});
+					}, 3000);
+					
+					setTimeout(function(e){
+						$('#awp-popup').hide('slow');
+					}, 6000);
+				}
+			});
+			
+			e.preventDefault();
+			return false;
+		}
+	});
+	
+	$('.auditinline').click(function(e) {
+		$('#awp-popup').center();
+		console.log('Collecting data');
+		
+		posts = [$(this).attr('data-id')];
+		
+		if(posts == ''){
+			console.log( 'Auditor is terminated' );
+			$('#awp-popup .awp-popup-message').html('Audit unsuccessful!');
+			$('#awp-popup').addClass('awp-popup-error').show('slow', '', function(){
+				$('#awp-popup').center();
+			});
+			
+			setTimeout(function(e){
+				$('#awp-popup').hide('slow');
+			}, 3000)
+			return false;
+		}
+		
+		var data = {
+			action: 'bulk_evaluate',
+			post: posts
+		};
+		
+		console.log( 'Auditor Initializing' );
+		$('#awp-popup').removeClass('awp-popup-error');
+		$('#awp-popup .awp-popup-message').html('Initializing Auditor');
+		$('#awp-popup').show('slow', '', function(){
+			$('#awp-popup').center();
+		});
+		
+		console.log('Auditor Running in Background');
+		setTimeout(function(e){
+			$('#awp-popup').removeClass('awp-popup-error');
+			$('#awp-popup .awp-popup-message').html('Auditor Running in Background');
+			$('#awp-popup').show('slow', '', function(){
+				$('#awp-popup').center();
+			});
+		}, 3000);
+		
+		$.post(WPAJAX_OBJ.ajax_url, data, function(response) {
+			console.log( 'response is ', response );
+			if('true' == response){
+				$('#awp-popup .awp-popup-message').html('Audit Successful!');
+				$('#awp-popup').removeClass('awp-popup-error').center();
+				setTimeout(function(e){
+					window.location.href = WPAJAX_OBJ.manage_Screen + '&audited=' + posts.length;
+				},1500);
+			} else {
+				setTimeout(function(e){
+					$('#awp-popup').addClass('awp-popup-error').show();
+					$('#awp-popup .awp-popup-message').html('Audit unsuccessful!');
+					$('#awp-popup').show('slow', '', function(){
+						$('#awp-popup').center();
+					});
+				}, 3000);
+				
+				setTimeout(function(e){
+					$('#awp-popup').hide('slow');
+				}, 6000);
+			}
+		});
+		
+        e.preventDefault();
+		return false;
+    });
+	
+	$('.wrap h2').after('<div id="awp-popup" class="awp-js-popup"><div class="awp-popup-message">Initializing Auditor</div></div>');
 });
+
+jQuery.fn.center = function($) {
+	var w = jQuery(window);
+	this.css({
+		'position':'absolute',
+		'top':Math.abs(((w.height() - this.outerHeight()) / 2)),
+		'left':Math.abs(((w.width() - this.outerWidth()) / 2)),
+		'margin-left' : ( 0 - this.outerWidth() / 2 )
+	});
+	return this;
+}

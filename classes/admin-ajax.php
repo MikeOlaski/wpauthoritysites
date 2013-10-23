@@ -2,9 +2,30 @@
 
 add_action( 'wp_ajax_user_defined_view_groups', 'user_defined_view_groups_callback');
 add_action( 'wp_ajax_evaluate_js', 'evaluate_js_callback');
+add_action( 'wp_ajax_bulk_evaluate', 'bulk_evaluate_callback');
 add_action( 'wp_ajax_search_term', 'search_term_callback');
 
 define('GOOGLE_MAGIC', 0xE6359A60);
+
+function bulk_evaluate_callback(){
+	if( isset($_POST) && '' != $_POST['post'] ){
+		$ids = array();
+		foreach($_POST['post'] as $data){
+			$url = get_post_meta($data, 'awp-url', true);
+			if(!$url){
+				$url = 'http://' . get_the_title($data);
+			}
+			$return = evaluate_js_callback( array('url' => $url, 'id' => $data) );
+			$ids[] = $data;
+		}
+		if($return){
+			echo 'true';
+		}
+	} else {
+		echo 'false';
+	}
+	die();
+}
 
 function user_defined_view_groups_callback(){
 	if ( !is_user_logged_in() )
@@ -168,7 +189,10 @@ function evaluate_js_callback( $args = null ){
 			update_post_meta($id, $meta_key, $meta_value);
 		}
 		
-		// Update score counts
+		// Update score counts and status tag
+		$term = array( '!Audited' );
+		$term[] = '!Auditor Ran – ' . date('y.m.d;H:i');
+		wp_set_object_terms( $id, $term, 'site-status', true );
 		wpa_update_scores($id);
 		
 		if($die){

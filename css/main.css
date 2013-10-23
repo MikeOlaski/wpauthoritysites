@@ -2,6 +2,15 @@
 	display: none;
 }
 
+.post .post-edit-link{
+	font-size: 12px;
+	color: #F00;
+}
+
+.single .post .post-edit-link{
+	float: none;
+}
+
 #primary #content{
 	float: left;
 	width: 64.89%;
@@ -194,6 +203,10 @@
 	-webkit-box-sizing: border-box;
 }
 
+.wpa-display-archives.grid .edit-enabled{
+	height: 400px;
+}
+
 .wpa-display-archives .wpa-grid-item{
 	/* text-transform: uppercase; */
 	word-break: break-all;
@@ -243,6 +256,10 @@
 	
 	line-height: 25px;
 	vertical-align: middle;
+}
+
+.wpa-display-archives .wpa-grid-item .post-edit-link{
+	float: none;
 }
 
 .wpa-display-archives .wpa-grid-item .meta .wpa-icons{
@@ -368,6 +385,10 @@
 	margin: 0 0 5px;
 	
 	font-size: 16px;
+}
+
+.wpa-display-archives .wpa-detail-item .post-edit-link{
+	float: right;
 }
 
 .wpa-display-archives .wpa-detail-item .entry-title a{

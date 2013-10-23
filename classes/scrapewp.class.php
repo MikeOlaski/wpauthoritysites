@@ -58,11 +58,11 @@ class scrapeWordpress {
 		$links = array();
 		foreach($sites as $rating=>$site) {
 			set_time_limit(500); //  Increased the timeout
-			$data = file_get_contents('http://' . $site);
+			$data = file_get_contents('http://' . $site['name']);
 			
 			preg_match($regex,$data,$match);
 				if( !empty($match) ) {
-					$links[] = array('name' => $site, 'rating' => $rating);
+					$links[] = array('name' => $site['name'], 'rating' => $rating, 'taxonomies' => $site['taxonomies']);
 				} else {
 					// Do something for those websites that
 					// are not a WordPress
@@ -120,6 +120,14 @@ class scrapeWordpress {
 					update_post_meta( $post_id, 'awp-domain', $slug );
 					update_post_meta( $post_id, 'awp-tld', '.' . $slugs[$slugCount - 1] );
 					update_post_meta( $post_id, 'awp-url', 'http://'.$po['name'] );
+					
+					if( isset($po['taxonomies']) && $po['taxonomies'] != '' ){
+						foreach( $po['taxonomies'] as $taxonomy=>$terms){
+							wp_set_object_terms( $post_id, $terms, $taxonomy, true );
+						}
+					}
+					
+					wp_set_object_terms( $post_id, '$Wordpress', 'site-type', true );
 				}
 			}
 		}

@@ -75,8 +75,84 @@ function awp_sidebars(){
 	) );
 }
 
-add_action( 'admin_init', 'awp_options_handle' );
+add_action('template_redirect', 'awp_archive_tax_query');
+function awp_archive_tax_query(){
+	global $post, $wp_query;
+	$settings = get_option('awp_settings');
+	$query = array('relation' => 'AND');
+	
+	$types = array();
+	$typeObj = get_terms('site-type', array(
+		'orderby'       => 'name', 
+		'order'         => 'ASC',
+		'hide_empty'    => false
+	));
+	
+	if( !$settings['xtype'] )
+		$settings['xtype'] = array();
+	
+	foreach($typeObj as $type){
+		if( in_array($type->slug, $settings['xtype']) ){
+			if($settings['action_taxonomy'] == 'exclude'){
+				continue;
+			} elseif($settings['action_taxonomy'] == 'include'){
+				$types[] = $type->slug;
+			}
+		} elseif( !in_array($type->slug, $settings['xtype']) ) {
+			if($settings['action_taxonomy'] == 'exclude'){
+				$types[] = $type->slug;
+			}
+		}
+	}
 
+	if( !empty($types) ){
+		$query[] = array(
+			'taxonomy' => 'site-type',
+			'field' => 'slug',
+			'terms' => $types
+		);
+	}
+	
+	$statuses = array();
+	$statusObj = get_terms('site-status', array(
+		'orderby'       => 'name', 
+		'order'         => 'ASC',
+		'hide_empty'    => false
+	));
+	
+	if( !$settings['xStatus'] )
+		$settings['xStatus'] = array();
+	
+	foreach($statusObj as $status){
+		if( in_array($status->slug, $settings['xStatus']) ) {
+			if($settings['action_taxonomy'] == 'exclude'){
+				continue;
+			} elseif($settings['action_taxonomy'] == 'include'){
+				$statuses[] = $status->slug;
+			}
+		} elseif( !in_array($status->slug, $settings['xStatus']) ) {
+			if($settings['action_taxonomy'] == 'exclude'){
+				$statuses[] = $status->slug;
+			}
+		}
+	}
+	
+	if( !empty($statuses) ){
+		$query[] = array(
+			'taxonomy' => 'site-status',
+			'field' => 'slug',
+			'terms' => $statuses
+		);
+	}
+			
+	if ( is_post_type_archive( array('site') ) ){
+		$wp_query->set("tax_query", $query);
+	}
+	
+	$wp_query->get_posts();
+}
+
+add_action( 'admin_init', 'awp_options_handle' );
 function awp_options_handle(){
 	$requests = get_option('awp_requests');
 	$settings = get_option('awp_settings');
@@ -192,7 +268,10 @@ function awp_options_handle(){
 										'name' => $data[1],
 										'rank' => $data[0],
 										'check' => false,
-										'date' => date('c')
+										'date' => date('c'),
+										'taxonomies' => array(
+											'site-status' => array('!Imported by CSV')
+										)
 									);
 									$row++;
 								}
@@ -273,11 +352,16 @@ function awp_options_handle(){
 				'archive_meta_keywords',
 				'archive_page_title',
 				'archive_content_before',
-				'archive_content_after'
+				'archive_content_after',
+				
+				// Action Tags
+				'action_taxonomy',
+				'xtype',
+				'xStatus'
 			);
 			
 			foreach( $fields as $fl ){
-				isset($awp_settings[$fl]) ? $settings[$fl] = $awp_settings[$fl] : null;
+				( isset($awp_settings[$fl]) || $awp_settings[$fl] != $settings[$fl]) ? $settings[$fl] = $awp_settings[$fl] : null;
 			}
 			
 			$return = update_option('awp_settings', $settings);
@@ -364,7 +448,10 @@ function awp_options_handle(){
 				$links = array();
 				
 				$data = $websites[$_REQUEST['link']];
-				$links[$data['rank']] = $data['name'];
+				$links[$data['rank']] = array(
+					'name' => $data['name'],
+					'taxonomies' => $data['taxonomies']
+				);
 				
 				$scrape = new scrapeWordpress();
 				$scrape->scrape( $links );
@@ -543,6 +630,7 @@ function awp_overview_page(){
             <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
             <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab">Metrics</a>
             <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
+            <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
             <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
         </h2><div>&nbsp;</div><?php
         
@@ -696,6 +784,7 @@ function awp_admin_pages(){
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
 					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab">Metrics</a>
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
                     <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
 				</h2><div>&nbsp;</div><?php
 				
@@ -782,6 +871,7 @@ function awp_admin_pages(){
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab nav-tab-active">Cron</a>
 					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab">Metrics</a>
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
                     <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
 				</h2><div>&nbsp;</div><?php
 				
@@ -853,6 +943,7 @@ function awp_admin_pages(){
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
 					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab nav-tab-active">Metrics</a>
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
                     <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
 				</h2><div>&nbsp;</div><?php
 				
@@ -934,6 +1025,7 @@ function awp_admin_pages(){
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
 					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab nav-tab-active">Metrics</a>
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
                     <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
 				</h2><div>&nbsp;</div><?php
 				
@@ -1063,6 +1155,7 @@ function awp_admin_pages(){
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
 					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab nav-tab-active">Metrics</a>
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
                     <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
 				</h2><div>&nbsp;</div>
                 
@@ -1221,6 +1314,7 @@ function awp_admin_pages(){
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
 					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab">Metrics</a>
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab nav-tab-active">Content & SEO</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
                     <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
 				</h2><div>&nbsp;</div><?php
 				
@@ -1291,6 +1385,92 @@ function awp_admin_pages(){
 				</form><?php
 				break;
 			
+			case 'action':
+				?><div id="icon-ows" class="icon32"><img src="<?php echo PLUGINURL; ?>images/icon32.jpg" alt="WP Sites" /></div>
+                <h2 class="nav-tab-wrapper supt-nav-tab-wrapper"><?php
+					// _e('WP Sites');
+					?><a href="<?php echo admin_url('admin.php?page=wpauthorities'); ?>" class="nav-tab">Overview</a>
+					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=upload'); ?>" class="nav-tab">Import</a>
+					<a href="<?php echo admin_url('admin.php?page=wpauthority'); ?>" class="nav-tab">Connect</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
+					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab">Metrics</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab nav-tab-active">Action Tags</a>
+                    <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
+				</h2><div>&nbsp;</div><?php
+				
+				if( isset( $_REQUEST['settings-updated'] ) ){
+					if( $_REQUEST['settings-updated'] == 'true' ){
+						?><div id="setting-error" class="updated settings-error">
+                        	<p><strong><?php _e('Settings saved.'); ?></strong></p>
+                        </div><?php
+					} else {
+						?><div id="setting-error" class="error settings-error">
+                        	<p><strong><?php _e('Settings not saved.'); ?></strong></p>
+                        </div><?php
+					}
+				}
+				
+				?><form name="awp_settings" method="post" action="<?php admin_url('options-general.php?page=wpauthority'); ?>">
+                	<h3><?php _e('Action Tags', 'wpa'); ?></h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="action_taxonomy">Exclude or Include</label></th>
+                            <td>
+                            	<select name="awp_settings[action_taxonomy]" id="action_taxonomy">
+                                	<option value="exclude" <?php selected($settings['action_taxonomy'], 'exclude'); ?>>Exclude</option>
+                                	<option value="include" <?php selected($settings['action_taxonomy'], 'include'); ?>>Include</option>
+                                </select>
+                            </td>
+                        </tr>
+                    	<tr>
+                        	<th scope="row"><label for="">$Types to Omit from Sites Archive:</label><br>
+                            <small class="description">Check terms not to include.</small></th>
+                            <td><?php
+								$types = get_terms('site-type', array(
+									'orderby'       => 'name', 
+									'order'         => 'ASC',
+									'hide_empty'    => false
+								));
+								
+								if(!$settings['xtype'])
+									$settings['xtype'] = array();
+								
+								foreach($types as $tm){
+									$checked = in_array($tm->slug, $settings['xtype']) ? 'checked="checked"' : '';
+									?><label><input type="checkbox" name="awp_settings[xtype][]" value="<?php echo $tm->slug ?>" <?php echo $checked; ?> /> <?php echo $tm->name; ?> </label><br><?php
+								}
+                            ?></td>
+                        </tr>
+                        <tr>
+                        	<th scope="row"><label for="">!Statuses to Omit from Sites Archive:</label><br>
+                            <small class="description">Check terms not to include.</small></th>
+                            <td><?php
+								$types = get_terms('site-status', array(
+									'orderby'       => 'name', 
+									'order'         => 'ASC',
+									'hide_empty'    => false
+								));
+								
+								if(!$settings['xStatus'])
+									$settings['xStatus'] = array();
+								
+								foreach($types as $tm){
+									$checked = in_array($tm->slug, $settings['xStatus']) ? 'checked="checked"' : '';
+									?><label><input type="checkbox" name="awp_settings[xStatus][]" value="<?php echo $tm->slug ?>" <?php echo $checked; ?> /> <?php echo $tm->name; ?> </label><br><?php
+								}
+                            ?></td>
+                        </tr>
+                    </table>
+                    
+                    <p>
+                    	<input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=action&settings-updated=true'); ?>" />
+                    	<input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" />
+                    </p>
+                </form><?php
+				break;
+			
 			case 'checker':
 			
 				?><div id="icon-ows" class="icon32"><img src="<?php echo PLUGINURL; ?>images/icon32.jpg" alt="WP Sites" /></div>
@@ -1302,6 +1482,7 @@ function awp_admin_pages(){
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
 					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab">Metrics</a>
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
                     <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
 				</h2><div>&nbsp;</div>
 				
@@ -1325,6 +1506,7 @@ function awp_admin_pages(){
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
 					<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab">Metrics</a>
                     <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
+                    <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
                     <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
 				</h2><div>&nbsp;</div><?php
                 
@@ -1572,3 +1754,29 @@ function sanitize_title_with_dots_and_dashes($title) {
 }
 
 add_filter('sanitize_title', 'sanitize_title_with_dots_and_dashes');
+
+add_action( 'admin_bar_menu', 'wpa_admin_bar_menu', 40 );
+function wpa_admin_bar_menu(){
+	global $wp_admin_bar;
+	
+	if ( !is_super_admin() || !is_admin_bar_showing() )
+		return;
+	
+	$wp_admin_bar->add_menu(
+		array(
+			'parent' => 'new-content',
+			'title' => __('WP Site'),
+			'href' => admin_url('post-new.php?post_type=site')
+		)
+	);
+	
+	if( is_single() ){
+		global $post;
+		$wp_admin_bar->add_menu(
+			array(
+				'title' => __('Edit Site'),
+				'href' => admin_url('post.php?post=' . $post->ID . '&action=edit')
+			)
+		);
+	}
+}

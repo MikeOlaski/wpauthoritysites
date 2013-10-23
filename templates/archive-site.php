@@ -23,13 +23,6 @@ if ( get_query_var( 'paged' ) && ( get_query_var( 'paged' ) != '' ) ) { $paged =
 if ( get_query_var( 'page' ) && ( get_query_var( 'page' ) != '' ) ) { $paged = get_query_var( 'page' ); }
 
 $wp_query->set("paged", $paged);
-/*$wp_query->set("tax_query", array(
-	array(
-		'taxonomy' => 'site-type',
-		'field' => 'slug',
-		'terms' => 'wpa'
-	)
-));*/
 
 $archivePage = get_post_type_archive_link('site') . '?';
 $orderby = isset($wp_query->query['orderby']) ? $wp_query->query['orderby'] : 'id';
@@ -49,7 +42,7 @@ if(isset($_REQUEST['meta_key'])){
 
 $wp_query->get_posts();
 
-/*?><pre><?php print_r( $wp_query ); ?></pre><?php wp_die();*/
+//wp_die( '<pre>' . print_r( $wp_query, true ) . '</pre>' );
 
 $columns = array();
 
@@ -995,6 +988,7 @@ get_header();
 					
 					$post_id = get_the_ID();
 					$class = (is_sticky()) ? 'sticky-site' : '';
+					$class .= (current_user_can('edit_post')) ? ' edit-enabled' : '';
 					$attachment = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ) );
 					$attachmentURL = ($attachment) ? PLUGINURL . '/timthumb.php?src=' . $attachment[0] . '&w=150&h=150' : null;
 					$thumbnailURL = ($attachment) ? PLUGINURL . '/timthumb.php?src=' . $attachment[0] . '&w=180&h=100' : null;
@@ -1032,6 +1026,7 @@ get_header();
                                 ?></a>
                             </div></div>
                             <div class="wpa-td wpa-td-description">
+                            	<?php edit_post_link('Edit'); ?>
                             	<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
                             </div>
                             
@@ -1044,6 +1039,7 @@ get_header();
                         	<div class="wpa-td wpa-td-count"><?php echo $metrics['awp-one-rank'][0]; ?></div>
                             <div class="wpa-td wpa-td-title">
                             	<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                                <?php edit_post_link('Edit'); ?>
                             </div><?php
 							
 							foreach($columns as $class=>$group){
@@ -1184,6 +1180,7 @@ get_header();
                                 ?><p class="clear"><strong>One Score</strong></p>
                                 <span class="meta">One Score: <?php echo $metrics['awp-one-score'][0]; ?></span>
                                 <span class="meta">One Rank: <?php echo $metrics['awp-one-rank'][0]; ?></span>
+                                <?php edit_post_link('Edit'); ?>
                             </div><!-- .entry-summary -->
                             
                             <div class="clear"></div>
@@ -1203,6 +1200,7 @@ get_header();
 							
 							<div class="entry-summary">
                                 <header class="entry-header">
+                                	<?php edit_post_link('Edit'); ?>
                                     <h3 class="entry-title"><a href="<?php the_permalink(); ?>" title="<?php echo esc_attr( sprintf( __( 'Permalink to %s', 'awp' ), the_title_attribute( 'echo=0' ) ) ); ?>" rel="bookmark"><?php the_title(); ?></a></h3>
                                 </header><!-- .entry-header --><?php
 								

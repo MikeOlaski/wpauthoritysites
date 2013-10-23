@@ -221,3 +221,27 @@ select[name=seo_filter]{
 .awp-controls .description{
 	color: #aaa;
 }
+
+.wrap{
+	position: relative;
+}
+
+.awp-js-popup{
+	position: absolute;
+	-moz-border-radius: 12px;
+	background: rgba(0,0,0,0.4);
+	color: #fff;
+	font-size: 24px;
+	text-align: center;
+	display: none;
+	z-index: 10;
+}
+
+.awp-js-popup .awp-popup-message{
+	background: url(../images/happy.png) 20px 50% no-repeat;
+	padding: 30px 30px 30px 70px;
+}
+
+.awp-popup-error .awp-popup-message{
+	background: url(../images/sad.png) 20px 50% no-repeat;
+}
