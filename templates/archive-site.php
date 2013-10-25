@@ -803,120 +803,208 @@ get_header();
 	/*<div id="secondary" class="widget-area" role="complementary">
     </div>*/
     
-    ?><div id="content" role="main"><?php
+    ?><div id="content" role="main">
+    	<div class="wpaSearchForm">
+            <form name="s" action="<?php echo home_url(); ?>" method="get">
+                <p>
+                <select name="taxonomy" id="wpa-taxonomy">
+                    <option value="0">Search Fields</option><?php
+                    $taxes = get_taxonomies( array('object_type' => array('site')), 'objects' );
+                    foreach($taxes as $tax){
+                        ?><option value="<?php echo $tax->name; ?>"><?php echo $tax->label; ?></option><?php
+                    }
+                ?></select>
+                
+                <select name="term" id="wpa-term" disabled="disabled">
+                    <option value="0">Select Type</option><?php
+                    $terms = get_terms('site-type', array('hide_empty' => 0));
+                    foreach($terms as $tm){
+                        ?><option value="<?php echo $tm->slug; ?>"><?php echo $tm->name; ?></option><?php
+                    }
+                ?></select>
+                
+                <input type="text" name="s" id="search_field" value="<?php echo get_search_query(); ?>" />
+                <input type="hidden" name="post_type" value="site" />
+                <input type="submit" name="search" value="Search" /></p>
+            </form>
+            
+            <ul class="filterButtons">
+            	<li><a id="addFilterButton" href="javascript:void(0);" title="Add new conditional filter row">Add new Conditional Filter</a></li>
+                <li>
+                	<a id="filterGroups" class="wpa-filterg-btn" href="javascript:void(0);" title="Extra Buttons">Extra Buttons</a>
+                    <div class="wpa-filter-groups">
+                    	<span class="displayOptionshead"><?php _e('DISPLAY OPTIONS'); ?></span>
+                        <p>
+                        	Show 
+                        	<label class="star-1 wpa-rating"><input type="checkbox" name="" id="" value="1" />1</label>
+                            <label class="star-2 wpa-rating"><input type="checkbox" name="" id="" value="2" />2</label>
+                            <label class="star-3 wpa-rating"><input type="checkbox" name="" id="" value="3" />3</label>
+                            <label class="star-4 wpa-rating"><input type="checkbox" name="" id="" value="4" />4</label>
+                            <label class="star-5 wpa-rating"><input type="checkbox" name="" id="" value="5" />5</label>
+                        	rated sites
+                        </p>
+                        <ul class="filterGroup">
+                        	<li><label> <input type="checkbox" name="" id="" value="" /> Categories</label></li>
+                            <li><label> <input type="checkbox" name="" id="" value="" /> Tags</label></li>
+                            <li><label> <input type="checkbox" name="" id="" value="" /> Actions</label></li>
+                            <li><label> <input type="checkbox" name="" id="" value="" /> Status</label></li>
+                            <li><label> <input type="checkbox" name="" id="" value="" /> Include</label></li>
+                            <li><label> <input type="checkbox" name="" id="" value="" /> Topic</label></li>
+                            <li><label> <input type="checkbox" name="" id="" value="" /> Type</label></li>
+                            <li><label> <input type="checkbox" name="" id="" value="" /> Location</label></li>
+                            <li><label> <input type="checkbox" name="" id="" value="" /> Assignment</label></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
 		
-		// Collapsable area
+		<ul class="wpa-display-controls">
+            <li class="wpa-number-control"><span>Show <select name="posts_per_page" id="posts_per_page"><?php
+                for($i=1; $i<=10; $i++){
+                    $count = $i * 10;
+                    $thisPage = $archivePage;
+                    if(isset($_REQUEST['posts_per_page']))
+                        $thisPage = get_post_type_archive_link('site') . '?';
+                    
+                    $URLquery = $thisPage . 'posts_per_page=' .$count . '&';
+                    ?><option value="<?php echo $URLquery; ?>" <?php selected($number, $count); ?>><?php echo $count; ?></option><?
+                }
+            ?></select> Per page</span></li>
+            <li><a href="#grid" class="wpa-control grid current" title="Grid View">Grid</a></li>
+            <li><a href="#detail" class="wpa-control detail" title="Detail View">Detail</a></li>
+            <li><a href="#list" class="wpa-control list" title="Detailed List View">Detail list</a></li>
+            <li><a href="#line" class="wpa-control line" title="Line List View">Line List</a></li>
+            <li>&nbsp;</li>
+            <li class="openSearch"><a href="#openSearch" class="wpa-control search" title="Screen Options">Open Search</a>
+            	<div class="wpa-screen-options hide">
+					<span class="displayOptionshead"><?php _e('DISPLAY OPTIONS'); ?></span><?php
+					foreach($columns as $name=>$group){
+						?><h4> <strong><?php echo ucwords(str_replace('wpa-col-', '', $name)); ?></strong> <p><?php
+						
+						foreach($group as $col){
+							
+							if( isset($col['meta_key']) ) { 
+								$inputID = $col['meta_key'].'-option';
+								$inputVal = '.metrics-' . $col['meta_key'];
+							} elseif( isset($col['value']) ) {
+								$inputID = $col['value'].'-option';
+								$inputVal = '.metrics-' . $col['value'];
+							} elseif( isset($col['taxonomy']) ) {
+								$inputID = $col['taxonomy'].'-option';
+								$inputVal = '.metrics-' . $col['taxonomy'];
+							} elseif( isset($col['post']) ) {
+								$inputID = $col['post'].'-option';
+								$inputVal = '.metrics-' . $col['post'];
+							}
+							
+							?><label for="<?php echo $inputID; ?>"><input type="checkbox" class="ch-box checkbox-<?php echo $name; ?>" id="<?php echo $inputID; ?>" value="<?php echo $inputVal; ?>" <?php echo ($name == 'wpa-col-site') ? 'checked="checked"' : ''; ?> /><?php echo $col['name']; ?></label><?php
+						}
+						?></p>
+                        <span class="clear"></span>
+						</h4><?php
+					}
+					?><div class="clear"></div>
+				</div>
+            </li>
+            <li class="openExport">
+            	<a href="#export" class="wpa-control export" title="Export Options">Export</a>
+                <div class="wpa-export-options hide">
+                	<span class="displayOptionshead"><?php _e('DISPLAY OPTIONS'); ?></span>
+                	<ul class="export">
+                    	<li><a href="#">Save to CSV</a></li>
+                        <li><a href="#">Save to PDF</a></li><?php
+							$max_num_pages = $wp_query->max_num_pages;
+							if($max_num_pages > 10){
+								?><li>Pagination: <?php
+									$pagination = 10;
+									while($pagination < $max_num_pages){
+										$pagination += 25;
+										?><a href="<?php echo get_pagenum_link($pagination); ?>"><?php echo $pagination; ?></a><?php
+									}
+								?></li><?php
+							}
+                    ?></ul>
+                </div>
+            </li>
+        </ul>
+		
+		<div class="clear"></div>
+		
+		<div class="wpa-group-column alignleft">
+            <ul>
+                <li class="first current"><a href=".wpa-col">All</a></li>
+                <li class="first"><a href=".wpa-default">Summary</a></li><?php
+                foreach($columns as $name=>$group){
+                    $classes = array();
+                    if($name == 'wpa-col-action'){
+                        $classes[] = 'last';
+                    }
+                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('wpa-col-', '', $name) ); ?></a></li><?php
+                }
+            ?></ul>
+        </div><?php
+		
+		$sortbytitle = $archivePage . 'orderby=title&order='. $order;
+		$sortbyPR = $archivePage . 'meta_key=awp-google-rank&orderby=meta_value_num&order=' . $order;
+		$sortbyalexa = $archivePage . 'meta_key=awp-alexa-rank&orderby=meta_value_num&order=' . $order;
+		
+		/* Sort Header */
+		?><div class="wpa-sort-wrapper alignright">
+			<p>Sort by:
+			<a href="<?php echo $sortbytitle; ?>" class="wpa-sortable <?php echo $order; echo ($orderby == 'title') ? ' current' : ''; ?>" >Title</a> |
+			<a href="<?php echo $sortbyPR; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-google-rank') ? ' current' : ''; ?>">Google Rank</a> |
+			<a href="<?php echo $sortbyalexa; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-alexa-rank') ? ' current' : ''; ?>">Alexa Rank</a>
+			</p>
+		</div>
+		
+		<div class="clear"></div>
+		
+		<form class="wpa-filter-form hide" name="filter" action="<?php echo site_url('sites'); ?>" method="post">
+			<span class="displayOptionshead"><?php _e('New Filter'); ?></span>
+            <fieldset>
+            	<select name="filter[action][]" id="wpa-action">
+                    <option value="include">Include</option>
+                    <option value="exclude">Exclude</option>
+				</select>
+                
+                <select name="filter[term][]" id="wpa-filter-term">
+                    <option value="0">Keyword</option>
+                </select>
+                
+                <input type="text" name="filter[s][]" id="wpa-filter-search" value="" />
+            </fieldset>
+            
+            <input type="submit" class="wpa-submit-button" id="wpa-filter-button" name="search" value="Search" />
+            
+            <div class="clear"></div>
+		</form><?php
+		
+		/* Collapsable area
 		?><div class="wpa-collapse-wrapper">
 			<a href="javascript:void(0);" class="wpa-collapse-btn">
 				<span>Open Search</span>
 				<span style="display:none;">Close Search</span>
 			</a>
 			<div class="wpa-collapse">
-				<form name="s" action="<?php echo home_url(); ?>" method="get">
-					<p>
-					<select name="taxonomy" id="wpa-taxonomy">
-						<option value="0">Select Filter</option><?php
-						$taxes = get_taxonomies( array('object_type' => array('site')), 'objects' );
-						foreach($taxes as $tax){
-							?><option value="<?php echo $tax->name; ?>"><?php echo $tax->label; ?></option><?php
-						}
-					?></select>
-					
-					<select name="term" id="wpa-term" disabled="disabled">
-						<option value="0">Select Type</option><?php
-						$terms = get_terms('site-type', array('hide_empty' => 0));
-						foreach($terms as $tm){
-							?><option value="<?php echo $tm->slug; ?>"><?php echo $tm->name; ?></option><?php
-						}
-					?></select>
-					
-					<input type="text" name="s" id="search_field" value="<?php echo get_search_query(); ?>" />
-					<input type="hidden" name="post_type" value="site" />
-					<input type="submit" name="search" value="Search" /></p>
-				</form>
-				
-                <div class="wpa-screen-options hide"><?php
-				
-					foreach($columns as $name=>$group){
-						?><h4><?php echo $group[0]['group']; ?></h4><?php
-						
-						if($group[0]['group'] == 'Site'){ ?><p><input type="checkbox" id="wpa-thumbnail-option" value=".metrics-thumbnail" checked="checked" /><label for="wpa-thumbnail-option">Thumbnail</label><?php } else { echo '<p>'; }
-						
-						foreach($group as $col){
-							$inputID = $col['meta_key'].'-option';
-							$inputVal = '.metrics-' . $col['meta_key'];
-							?><input type="checkbox" class="ch-box checkbox-<?php echo $name; ?>" id="<?php echo $inputID; ?>" value="<?php echo $inputVal; ?>" <?php echo ($name == 'wpa-col-site') ? 'checked="checked"' : ''; ?> /><label for="<?php echo $inputID; ?>"><?php echo $col['name']; ?></label><?php
-						}
-						?></p><?php
-					}
-					
-					?><div class="clear"></div>
-				</div>
                 
-				<div class="wpa-group-column hide">
-					<ul>
-						<li class="first current"><a href=".wpa-col">All</a></li>
-						<li class="first"><a href=".wpa-default">Summary</a></li><?php
-						foreach($columns as $name=>$group){
-							$classes = array();
-							if($name == 'wpa-col-action'){
-								$classes[] = 'last';
-							}
-							?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('wpa-col-', '', $name) ); ?></a></li><?php
-						}
-					?></ul>
-				</div>
 			</div>
 		</div><?php
-		/* End of Collapsable area */
+		End of Collapsable area */
 		
 		if ( $wp_query->have_posts() ) :
 		
-			?><ul class="wpa-display-controls">
-            	<li class="wpa-number-control"><span>Show <select name="posts_per_page" id="posts_per_page"><?php
-					for($i=1; $i<=10; $i++){
-						$count = $i * 10;
-						$thisPage = $archivePage;
-						if(isset($_REQUEST['posts_per_page']))
-							$thisPage = get_post_type_archive_link('site') . '?';
-						
-						$URLquery = $thisPage . 'posts_per_page=' .$count . '&';
-						?><option value="<?php echo $URLquery; ?>" <?php selected($number, $count); ?>><?php echo $count; ?></option><?
-					}
-				?></select> Per page</span></li>
-                <li><a href="#grid" class="wpa-control grid current">Grid</a></li>
-                <li><a href="#detail" class="wpa-control detail">Detail</a></li>
-                <li><a href="#list" class="wpa-control list">Detail list</a></li>
-                <li><a href="#line" class="wpa-control line">Line Line</a></li>
-            </ul>
-            
-            <header class="page-header">
+			?><header class="page-header">
                 <h1 class="page-title"><?php
-					
 					$title = apply_filters('wpa_archive_page_title', 'WordPress Authority Site Directory');
 					echo $title;
-					
 				?></h1>
             </header><?php
             
             $content_before = apply_filters('wpa_archive_content_before', '');
 			echo $content_before;
 			
-            ?><div class="wpa-display-archives grid"><?php
-				
-				$sortbytitle = $archivePage . 'orderby=title&order='. $order;
-				$sortbyPR = $archivePage . 'meta_key=awp-google-rank&orderby=meta_value_num&order=' . $order;
-				$sortbyalexa = $archivePage . 'meta_key=awp-alexa-rank&orderby=meta_value_num&order=' . $order;
-				
-				/* Grid and Detail Header */
-				?><div class="wpa-sort-wrapper">
-					<p>Sort by:
-                    <a href="<?php echo $sortbytitle; ?>" class="wpa-sortable <?php echo $order; echo ($orderby == 'title') ? ' current' : ''; ?>" >Title</a> |
-                    <a href="<?php echo $sortbyPR; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-google-rank') ? ' current' : ''; ?>">Google Rank</a> |
-                    <a href="<?php echo $sortbyalexa; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-alexa-rank') ? ' current' : ''; ?>">Alexa Rank</a>
-                    </p>
-				</div>
-                
+            ?><div class="wpa-display-archives grid">
                 <!-- Line List View -->
                 <div class="wpa-line-header">
                     <div class="wpa-th wpa-th-thumbnail">Thumbnail</div>
@@ -953,7 +1041,17 @@ get_header();
 							$class[] = ($meta == $col['meta_key']) ? 'current' : null;
 							
 							$classes = array('wpa-th', 'wpa-col', 'hide');
-							$classes[] = 'metrics-' . $col['meta_key'];
+							
+							if( isset($col['meta_key']) ) { 
+								$classes[] = 'metrics-' . $col['meta_key'];
+							} elseif( isset($col['value']) ) {
+								$classes[] = 'metrics-' . $col['value'];
+							} elseif( isset($col['taxonomy']) ) {
+								$classes[] = 'metrics-' . $col['taxonomy'];
+							} elseif( isset($col['post']) ) {
+								$classes[] = 'metrics-' . $col['post'];
+							}
+							
 							$classes[] = $col['header'];
 							$classes[] = $name;
 							
@@ -1049,8 +1147,10 @@ get_header();
 									$classes[] = $col['body'];
 									$classes[] = $class;
 									
-									if( isset($col['meta_key']) ){
+									if( isset($col['meta_key']) ) { 
 										$classes[] = 'metrics-' . $col['meta_key'];
+									} elseif( isset($col['value']) ) {
+										$classes[] = 'metrics-' . $col['value'];
 									} elseif( isset($col['taxonomy']) ) {
 										$classes[] = 'metrics-' . $col['taxonomy'];
 									} elseif( isset($col['post']) ) {
