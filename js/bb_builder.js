@@ -1,7 +1,17 @@
 jQuery(document).ready(function($){
-	jQuery( "#bb_sortable" ).sortable({
-		placeholder: "ui-state-highlight"
+	jQuery( "#bb_dept_templates" ).sortable({
+		placeholder: "ui-state-highlight",
+		forcePlaceholderSize: true,
+		connectWith: "ul"
 	});
+	
+	jQuery( "#bb_sortable" ).sortable({
+		placeholder: "ui-state-highlight",
+		forcePlaceholderSize: true,
+		dropOnEmpty: false
+	});
+	
+	jQuery( "#bb_dept_templates, #bb_sortable" ).disableSelection();
 	
 	jQuery( ".ui-form-slider" ).slider({
 		value: 0,
@@ -13,13 +23,29 @@ jQuery(document).ready(function($){
     });
 	
 	function slideChange( $this, event, ui ) {
-		$this.siblings('input.ui-text-field').val( ui.value + "%" );
-		Avg = updateAvgScale();
 		
-		$( ".ui-form-slider" ).each(function(i, e) {
+		if(ui == ''){
+			ui = { value: $this.slider("value") };
+		}
+		
+		$this.siblings('input.ui-text-field').val( ui.value + "%" );
+		
+		Avg = updateAvgScale( $this );
+		
+		if($this == ''){
+			return;
+		} else if($this.hasClass('value_scale')) {
+			friends = '.value_scale';
+		} else if($this.hasClass('work_scale')) {
+			friends = '.work_scale';
+		} else if($this.hasClass('influence_scale')) {
+			friends = '.influence_scale';
+		}
+		
+		$( ".ui-form-slider" + friends ).each(function(i, e) {
 			if(Avg == 100){
 				if( $(this).slider("option", "value") === 0 ){
-					$(this).slider( "disable" ).siblings('input.ui-text-field').attr('readonly', true);
+					$(this).slider("disable").siblings('input.ui-text-field').attr('readonly', true);
 				}
 			} else if(Avg > 100){
 				topDeptsCount = countActiveSlider( $this );
@@ -35,34 +61,8 @@ jQuery(document).ready(function($){
 			} else {
 				$(this).slider( "enable" ).siblings('input.ui-text-field').removeAttr('readonly');
 			}
-			Avg = updateAvgScale();
+			Avg = updateAvgScale($this);
 		});
-		
-		/*if(Avg == 100){
-			$( ".ui-form-slider" ).each(function(i, e) {
-				if( $(this).slider("option", "value") === 0 ){
-					$(this).slider( "disable" ).siblings('input.ui-text-field').attr('readonly', true);
-				}
-			});
-		} else if(Avg > 100){
-			topDeptsCount = countActiveSlider( $this );
-			resultOfMod = Avg % 100;
-			resultOfDeduct = Math.round(resultOfMod / topDeptsCount);
-			
-			$( ".ui-form-slider" ).each(function(i, e) {
-				if( $(this).slider("option", "value") === 0 ){
-					$(this).slider( "disable" ).siblings('input.ui-text-field').attr('readonly', true);
-				} else {
-					value = parseInt($(this).slider("option", "value") - resultOfDeduct);
-					$(this).slider({ value: value });
-				}
-			});
-			
-		} else {
-			$( ".ui-form-slider" ).each(function(i, e) {
-				$(this).slider( "enable" ).siblings('input.ui-text-field').removeAttr('readonly');
-			});
-		}*/
 	}
 	
 	function countActiveSlider( $this ){
@@ -87,7 +87,7 @@ jQuery(document).ready(function($){
 				$(this).val( 100 + "%" ).trigger('change');
 			}
 			
-			updateAvgScale();
+			updateAvgScale($(this));
 		});
 		
 		$(this).on('change',function(e){
@@ -99,12 +99,17 @@ jQuery(document).ready(function($){
 	
 	$('.ui-remove-button').live('click', function(e){
 		if (confirm('Are you sure you want to remove this item?')) {
-			$(this).parent('li').addClass('removed').hide(500, function(){
+			$(this).parent().parent().addClass('removed').hide(500, function(){
 				jQuery(this).remove();
 			});
 		}
-		updateAvgScale();
-		slideChange( $( ".ui-form-slider li:first-child" ), '', '' );
+		
+		updateAvgScale(false);
+		
+		$( "#bb_sortable li .ui-form-slider" ).each(function(index, element) {
+            slideChange( $(this), '', '' );
+        });
+		
 		e.preventDefault();
 	});
 	
@@ -123,7 +128,7 @@ jQuery(document).ready(function($){
 			if( checkDupeDept( bb_Id ) ){
 				addNewDept(bb_Id, bb_label);
 			}
-			updateAvgScale();
+			updateAvgScale(false);
         });
     });
 	
@@ -132,42 +137,96 @@ jQuery(document).ready(function($){
 			jQuery('<li />', {
 				class : 'ui-state-default ' + bb_Id
 			}).append(
-				jQuery('<span />', {
-					class : 'hand'
-				}).append(bb_label),
-				jQuery('<label />', {
-					class : 'hide',
-					for : bb_Id
-				}).append(bb_label),
-				jQuery('<div />',{
-					class : 'ui-form-slider',
-					id : bb_Id + '-ui-slider'
-				}).slider({
-					value: 0,
-					min: 0,
-					max: 100,
-					step: 1,
-					slide: function(event, ui){ slideChange( $(this), event, ui ); },
-					change: function(event, ui){ slideChange( $(this), event, ui ); }
-				}),
-				jQuery('<input />', {
-					name : 'departments[' + bb_Id + ']',
-					class : 'ui-text-field',
-					type : 'text',
-					id : bb_Id + '-ui-id',
-					style : 'border: 0; color: #f6931f; font-weight: bold;',
-					value : '0%'
-				}),
-				jQuery('<a />',{
-					class : 'ui-remove-button',
-					href : ''
-				}).append('Remove Department'),
-				jQuery('<div />',{
-					class : 'clear'
-				})
+				jQuery('<div />').append(
+					jQuery('<span />', {
+						class : 'hand'
+					}).append(bb_label),
+					jQuery('<label />', {
+						class : 'hide',
+						for : bb_Id
+					}).append(bb_label),
+					jQuery('<div />',{
+						class: 'alignleft wpa-column'
+					}).append(
+						jQuery('<div />',{
+							class : 'value_scale ui-form-slider',
+							id : bb_Id + '-ui-slider'
+						}).slider({
+							value: 0,
+							min: 0,
+							max: 100,
+							step: 1,
+							slide: function(event, ui){ slideChange( $(this), event, ui ); },
+							change: function(event, ui){ slideChange( $(this), event, ui ); }
+						}),
+						jQuery('<input />', {
+							name : 'departments[value][' + bb_Id + ']',
+							class : 'value_scale ui-text-field',
+							type : 'text',
+							id : bb_Id + '-ui-id',
+							style : 'border: 0; color: #f6931f; font-weight: bold;',
+							value : '0%'
+						})
+					),
+					jQuery('<div />',{
+						class: 'alignleft wpa-column'
+					}).append(
+						jQuery('<div />',{
+							class : 'work_scale ui-form-slider',
+							id : bb_Id + '-ui-slider'
+						}).slider({
+							value: 0,
+							min: 0,
+							max: 100,
+							step: 1,
+							slide: function(event, ui){ slideChange( $(this), event, ui ); },
+							change: function(event, ui){ slideChange( $(this), event, ui ); }
+						}),
+						jQuery('<input />', {
+							name : 'departments[work][' + bb_Id + ']',
+							class : 'work_scale ui-text-field',
+							type : 'text',
+							id : bb_Id + '-ui-id',
+							style : 'border: 0; color: #f6931f; font-weight: bold;',
+							value : '0%'
+						})
+					),
+					jQuery('<div />',{
+						class: 'alignleft wpa-column'
+					}).append(
+						jQuery('<div />',{
+							class : 'influence_scale ui-form-slider',
+							id : bb_Id + '-ui-slider'
+						}).slider({
+							value: 0,
+							min: 0,
+							max: 100,
+							step: 1,
+							slide: function(event, ui){ slideChange( $(this), event, ui ); },
+							change: function(event, ui){ slideChange( $(this), event, ui ); }
+						}),
+						jQuery('<input />', {
+							name : 'departments[influence][' + bb_Id + ']',
+							class : 'influence_scale ui-text-field',
+							type : 'text',
+							id : bb_Id + '-ui-id',
+							style : 'border: 0; color: #f6931f; font-weight: bold;',
+							value : '0%'
+						})
+					),
+					jQuery('<a />',{
+						class : 'ui-remove-button',
+						href : ''
+					}).append('Remove Department'),
+					jQuery('<div />',{
+						class : 'clear'
+					})
+				)
 			)
 		);
-		slideChange( $( ".ui-form-slider li:first-child" ), '', '' );
+		$( "#bb_sortable li .ui-form-slider" ).each(function(index, element) {
+            slideChange( $(this), '', '' );
+        });
 	}
 	
 	function checkDupeDept( department ){
@@ -177,11 +236,32 @@ jQuery(document).ready(function($){
 		return true;
 	}
 	
-	function updateAvgScale(){
+	function updateAvgScale( element ){
+		if( !element ){
+			updateAvgScale( $('input.value_scale:first-child') );
+			updateAvgScale( $('input.work_scale:first-child') );
+			updateAvgScale( $('input.influence_scale:first-child') );
+			
+			return;
+		}
+		
 		var topDepts;
 		var topDeptsCount;
 		var totalScale;
 		var Avg;
+		
+		if(element.hasClass('value_scale')) {
+			target = $('.ui-total-field[name=total_value_scale]');
+			scaleCounts = 'input.ui-text-field.value_scale';
+		} else if(element.hasClass('work_scale')) {
+			target = $('.ui-total-field[name=total_work_scale]');
+			scaleCounts = 'input.ui-text-field.work_scale';
+		} else if(element.hasClass('influence_scale')) {
+			target = $('.ui-total-field[name=total_influence_scale]');
+			scaleCounts = 'input.ui-text-field.influence_scale';
+		} else {
+			return;
+		}
 		
 		topDepts = jQuery( "#bb_sortable li:not(.removed)" );
 		topDeptsCount = topDepts.length;
@@ -190,18 +270,16 @@ jQuery(document).ready(function($){
 		
 		if(topDeptsCount > 0){
 			topDepts.each(function(i,e) {
-                totalScale += parseInt( $(this).find('input.ui-text-field').val().replace("%", "") );
+                totalScale += parseInt( $(this).find( scaleCounts ).val().replace("%", "") );
             });
 		}
 		
 		Avg = totalScale; /// topDeptsCount;
-		
-		$('.ui-total-field').val( Avg + "%" );
-		
+		target.val( Avg + "%" );
 		return Avg;
 	}
 	
-	// Auto Complete Custom departments
+	/*Auto Complete Custom departments*/
 	var arrProducts = [];
 	$.each(bbObj, function(i, d) {
 		var dept = {};
@@ -223,10 +301,92 @@ jQuery(document).ready(function($){
 				addNewDept(bb_Id, bb_label);
 			}
 			
-			updateAvgScale();
+			$(this).val('');
+			
+			updateAvgScale(false);
 			e.preventDefault();
 		}
     });
 	
-	updateAvgScale();
+	updateAvgScale(false);
+	
+	$('input[name=survey_taker_btn').click(function(e){
+		$('#wpa_help_popup').fadeIn(100, '', function(e){
+			$(this).center();
+		});
+		
+		e.preventDefault();
+	});
+	
+	$('a#cancel_submit').click(function(e) {
+        $('#wpa_help_popup').fadeOut(100, '', function(e){
+			$(this).center();
+		});
+		
+		e.preventDefault();
+    });
+	
+	$('a#submit_survey').click(function(e){
+		
+		// STEP 1: Watch the video
+		
+		// STEP 2: Create the people/user CPT
+		/*var data = {
+			action: 'submit_people',
+			first_name: $('#survey_fname').val(),
+			last_name: $('#survey_lname').val(),
+			email: $('#survey_email').val(),
+			role: $('#survey_role').val()
+		};
+		
+		$.post(wpaObj.ajaxurl, data, function(response) {
+			if( response == 'true' ){
+				$('#survey_fname').val('');
+				$('#survey_lname').val('');
+				$('#survey_email').val('');
+				$('#survey_role').val('');
+			} else {
+				alert( response );
+			}
+		});*/
+		
+		// STEP 3: Get the survey data and scores
+		var survey = {
+			action: 'submit_departments',
+			departments: $('form[name=bb_builder_form]').serialize()
+		};
+		
+		$('form[name=bb_builder_form]').submit();
+		
+		$('#wpa_help_popup').center();
+		$('#wpa_help_popup').fadeOut(100, '', function(e){
+			$(this).center();
+		});
+		
+		e.preventDefault();
+	});
+	
+	jQuery(window).scroll(function() {
+		jQuery('#wpa_help_popup').center();
+	});
 });
+
+(function($){
+	$.fn.extend({
+		center: function () {
+			return this.each(function() {
+				var top = ($(window).height() - $(this).outerHeight()) / 2;
+				var left = ($(window).width() - $(this).outerWidth()) / 2;
+				top += document.body.scrollTop;
+				
+				$(this).css({
+					position: 'absolute',
+					'margin-top': 0 - ($(this).height() / 2),
+					'margin-left': 0 - ($(this).width() / 2),
+					top: (top > 0 ? top : 0)+'px',
+					left: (left > 0 ? left : 0)+'px'
+				});
+			});
+		}
+	}); 
+})(jQuery);

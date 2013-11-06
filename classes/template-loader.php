@@ -31,7 +31,7 @@ class SiteTemplate
      **/
     public function init_all() 
     {
-        add_action( 'wp_enqueue_scripts',   array( $this, 'frontend_scripts' ) );
+		add_action( 'wp_enqueue_scripts',   array( $this, 'frontend_scripts' ) );
         add_filter( 'body_class',           array( $this, 'filter_body_class' ) );
         add_filter( 'template_include',     array( $this, 'site_template' ) );
 		
@@ -53,12 +53,48 @@ class SiteTemplate
     public function frontend_scripts() 
     {
         global $post;
-        if( $this->pt != get_post_type( $post->ID ) )
+		
+        if( !in_array( get_post_type( $post->ID ), array($this->pt, 'survey' ) ) )
             return;
 		
-		wp_enqueue_script( 'awpmain', PLUGINURL . '/js/main.js', array('jquery') );
+		if( is_singular('survey') ){
+			
+			$departments = array();
+			$AutoCompletes = $depts = get_terms( 'site-department', array(
+				'orderby'       => 'count', 
+				'order'         => 'ASC',
+				'hide_empty'    => true,
+				'number'		=> 10 
+			));
+			
+			foreach( $AutoCompletes as $ac){
+				$departments[$ac->slug] = $ac->name;
+			}
+			
+			wp_register_script('jquery-ui-custom', 'http://code.jquery.com/ui/1.10.3/jquery-ui.js', array('jquery'));
+			wp_register_script('bb_builder', PLUGINURL . 'js/bb_builder.js', array('jquery', 'jquery-ui-custom', 'jquery-ui-widget'));
+			wp_enqueue_style('jquery-ui-theme', PLUGINURL . 'css/jquery-ui.css');
+			wp_enqueue_style('bb_builder', PLUGINURL . 'css/bb_builder.css');
+			wp_enqueue_script('bb_builder');
+			wp_localize_script('bb_builder', 'bbObj', $departments);
+		}
+		
+		if( is_singular($this->pt) ){
+			wp_register_script( 'flexslider', PLUGINURL . 'js/jquery.flexslider.js', array('jquery') );
+			wp_enqueue_script( 'cBoxScript', PLUGINURL . 'js/jquery.colorbox.js', array('jquery') );
+			
+			wp_enqueue_script('jquery-ui-core');
+			wp_enqueue_script('jquery-ui-tabs');
+			
+			wp_enqueue_style( 'ui-css', 'http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css' );
+			wp_enqueue_style( 'cBoxStyle', PLUGINURL . 'css/flexslider.css' );
+			wp_enqueue_style( 'cBoxStyle', PLUGINURL . 'css/colorbox.css' );
+		}
+		
+		wp_enqueue_script( 'awpmain', PLUGINURL . 'js/main.js', array('jquery') );
 		wp_localize_script( 'awpmain', 'wpaObj', array('ajaxurl' => admin_url( 'admin-ajax.php' )));
-		wp_enqueue_style( 'awpmain', PLUGINURL . '/css/main.css' );
+		
+		wp_enqueue_style( 'awpmain', PLUGINURL . 'css/main.css' );
     }
 
     /**
@@ -68,8 +104,7 @@ class SiteTemplate
      * @param array $classes
      * @return array
      **/
-    public function filter_body_class( $classes ) 
-    {
+    public function filter_body_class( $classes ) {
         global $post;
         if( $this->pt != get_post_type( $post->ID ) )
             return $classes;
@@ -90,14 +125,14 @@ class SiteTemplate
      * @return string
      **/
     public function site_template( $template ) {
-        $post_types = array( $this->pt );
+        $post_types = array( $this->pt, 'survey' );
         $theme = wp_get_theme();
 
         if ( is_post_type_archive( $post_types ) )
             $template = $this->path . '/templates/archive-site.php';
 
         if ( is_singular( $post_types ) )
-            $template = $this->path . '/templates/single-site.php';
+            $template = $this->path . '/templates/single.php';
 
         return $template;
     }

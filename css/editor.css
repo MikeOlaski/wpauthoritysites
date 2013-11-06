@@ -9,31 +9,30 @@ select[name=seo_filter]{
 }
 
 #site_manage_meta .inside #awp_tabs{
+	background: #eaeaea;
 	border: none;
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 	box-shadow: none;
+	padding: 0;
 }
 
 #site_manage_meta .inside #awp_tabs .awp-tabber{
 	background: #eaeaea;
 	
-	width: 150px;
+	width: 20%;
+	max-width: 175px;
 	float: left;
 	padding: 0 0 10px;
 	margin: 0;
 	
 	overflow: visible;
-	line-height: 1em;
 	zoom: 1;
-	
-	-webkit-box-shadow: inset 0 -1px 0 0 #d5d5d5;
-	-moz-box-shadow: inset 0 -1px 0 0 x #d5d5d5;
-	box-shadow: inset 0 -1px 0 0 #d5d5d5;
 }
 
 #site_manage_meta .inside #awp_tabs .awp-tab{
 	position: relative;
+	min-height: 35px;
 	border: none;
 	
 	-webkit-box-shadow: none;
@@ -43,6 +42,11 @@ select[name=seo_filter]{
 	float: none;
 	padding: 0;
 	margin: 0;
+}
+
+#site_manage_meta .inside #awp_tabs .wp-menu-separator{
+	min-height: 0px;
+	width: 100%;
 }
 
 #site_manage_meta .inside #awp_tabs .awp-tab a{
@@ -70,9 +74,9 @@ select[name=seo_filter]{
 	-moz-border-radius: none;
 	-webkit-border-radius: none;
 	
-	-webkit-box-shadow: inset 0 1px 0 1px rgba(255, 255, 255, 0.5);
-	-moz-box-shadow: inset 0 1px 0 1px rgba(255, 255, 255, 0.5);
-	box-shadow: inset 0 1px 0 1px rgba(255, 255, 255, 0.5);
+	-webkit-box-shadow: inset 0 0px 0 0px rgba(255, 255, 255, 0.5);
+	-moz-box-shadow: inset 0 0px 0 0px rgba(255, 255, 255, 0.5);
+	box-shadow: inset 0 0px 0 0px rgba(255, 255, 255, 0.5);
 }
 
 #site_manage_meta .inside #awp_tabs .awp-tab a:hover{
@@ -130,16 +134,21 @@ select[name=seo_filter]{
 	background-image: -moz-linear-gradient(bottom,#6d6d6d,#808080);
 	background-image: -o-linear-gradient(bottom,#6d6d6d,#808080);
 	background-image: linear-gradient(to top,#6d6d6d,#808080);
+}
+
+#site_manage_meta .inside #awp_tabs li.ui-tabs-active .wp-menu-arrow,
+#site_manage_meta .inside #awp_tabs li.ui-tabs-active .wp-menu-arrow > div{
 	display: block;
 }
 
 #site_manage_meta .inside #awp_tabs li.ui-tabs-active .wp-menu-arrow{
+	right: 150px;
 	top: 2px;
 }
 
 .awp-panels{
 	float: left;
-	width: 75%;
+	width: 80%;
 	max-width: 715px;
 }
 
@@ -244,4 +253,9 @@ select[name=seo_filter]{
 
 .awp-popup-error .awp-popup-message{
 	background: url(../images/sad.png) 20px 50% no-repeat;
+}
+
+.of-option-image{
+	max-width: 360px;
+	height: auto;
 }

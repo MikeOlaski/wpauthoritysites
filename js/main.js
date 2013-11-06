@@ -251,4 +251,15 @@ jQuery(document).ready(function($) {
 	}
 	
 	setListHeight();
+	
+	if( $.fn.colorbox ){
+		$('a.cboxElement[rel=inline]').colorbox({
+			inline: true,
+			width: '75%'
+		});
+	}
+	
+	if( $('#wpa-scores').length > 0 ){
+		$('#wpa-scores').tabs();
+	}
 });

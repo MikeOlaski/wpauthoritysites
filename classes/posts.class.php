@@ -452,11 +452,33 @@ class Sites_CPT{
 				}
 				
             ?></div>
+            <div class="clear"></div>
+            
 		</div>
 		<script type="text/javascript">
 			jQuery(document).ready(function($){
 				var index = $('.awp-tabber li:not(li.not-tab)').first().index();
                 $('#awp_tabs').tabs({ disabled: [<?php echo implode(',', $disabled); ?>], active: index });
+				
+				$('.image_upload_button').click(function(e) {
+					var send_attachment_bkp = wp.media.editor.send.attachment;
+					var button = $(this);
+					var id = button.attr('id').replace('_button', '_upload');
+					var image = button.attr('id').replace('_button', '');
+					
+					_custom_media = true;
+					wp.media.editor.send.attachment = function(props, attachment){
+						if ( _custom_media ) {
+							$("#"+id).val(attachment.url);
+							$("#image_"+image).attr('src', attachment.url);
+						} else {
+							return _orig_send_attachment.apply( this, [props, attachment] );
+						};
+					}
+					
+					wp.media.editor.open(button);
+					return false;
+				});
             });
 		</script>
         
@@ -550,6 +572,13 @@ class Sites_CPT{
 							?><textarea class="regular-textarea" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>"><?php echo stripslashes($metavalue); ?></textarea>
                             <br /><span class="description"><?php echo $control['desc']; ?></span><?php
 							break;
+						
+						case 'upload':
+							?><input type="text" class="regular-text of-input" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>_upload" value="<?php echo $metavalue; ?>" /><?php
+							if( !empty($metavalue) ) {
+								?><br /><a class="of-uploaded-image" href="<?php echo $metavalue; ?>"><img class="of-option-image" id="image_<?php echo $metaID; ?>" src="<?php echo $metavalue; ?>" alt="" /></a><br /><?php
+							}
+							?><span class="button image_upload_button" id="<?php echo $metaID; ?>_button">Upload Image</span><?php
 					}
 					
 				?></div>

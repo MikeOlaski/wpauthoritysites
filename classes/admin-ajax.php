@@ -5,7 +5,74 @@ add_action( 'wp_ajax_evaluate_js', 'evaluate_js_callback');
 add_action( 'wp_ajax_bulk_evaluate', 'bulk_evaluate_callback');
 add_action( 'wp_ajax_search_term', 'search_term_callback');
 
+// Add new people on frontend
+add_action('wp_ajax_submit_people', 'submit_people_callback');
+add_action('wp_ajax_nopriv_submit_people', 'submit_people_callback');
+
+// Record scores on frontend
+add_action('wp_ajax_submit_departments', 'submit_departments_callback');
+add_action('wp_ajax_nopriv_submit_departments', 'submit_departments_callback');
+
 define('GOOGLE_MAGIC', 0xE6359A60);
+
+function submit_departments_callback(){
+	if( isset($_POST) && '' != $_POST['departments'] ){
+		echo 'true';
+	}
+	
+	die();
+}
+
+function submit_people_callback(){
+	if( isset($_POST) && '' != $_POST['email'] ){
+		$fname = $_POST['first_name'];
+		$lname = $_POST['last_name'];
+		$email = $_POST['email'];
+		$urole = $_POST['role'];
+		
+		$post_title = $fname . ' ' . $lname;
+		
+		// Check if user can manage the survey
+		if( !current_user_can('publish_posts') ){
+			echo 'You don\'t have sufficient permission.'; die();
+		}
+		
+		// Verify the email
+		if(!is_email($email)){
+			echo 'Please use a valid email address'; die();
+		}
+		
+		// Check if people exists
+		$pID = get_page_by_title( $post_title, OBJECT, 'people' );
+		if( $pID ){
+			$pID = wp_update_post(
+				array(
+					'ID' => $pID->ID,
+					'post_type' => 'people',
+					'post_title' => $post_title,
+					'post_status' => 'publish'
+				)
+			);
+		} else {
+			$pID = wp_insert_post(
+				array(
+					'post_type' => 'people',
+					'post_title' => $post_title,
+					'post_status' => 'publish'
+				)
+			);
+		}
+		
+		update_post_meta($pID, '_base_people_fname', $fname);
+		update_post_meta($pID, '_base_people_lname', $lname);
+		update_post_meta($pID, '_base_people_email', $email);
+		update_post_meta($pID, '_base_people_role', $urole);
+		
+		echo 'true';
+	}
+	
+	die();
+}
 
 function bulk_evaluate_callback(){
 	if( isset($_POST) && '' != $_POST['post'] ){
@@ -153,7 +220,13 @@ function evaluate_js_callback( $args = null ){
 		$grabzIt = new GrabzItClient($grabApiKey, $grabApiSecret);
 		
 		// Take a screenshot
+		/* Upgrade your acount from GrabzIt to allow you
+		 * to grab a custom size of the screenshot..
+		 * $grabzIt->SetImageOptions( $url, null, null, null, '720', '480' );
+		 * The maximum size your current package allows is 200.
+		 */
 		$grabzIt->SetImageOptions( $url );
+		
 		$file = $name;
 		$filepath = PLUGINPATH . "uploads/$file.jpg";
 		$grabzIt->SaveTo($filepath);

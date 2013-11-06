@@ -22,6 +22,14 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 		
+		$fields[$shortname.'-thumbnail'] = array(
+			'name' => 'Image URL',
+			'id' => $shortname.'-thumbnail',
+			'type' => 'upload',
+			'group' => $shortname.'-general',
+			'readonly' => true
+		);
+		
 		$fields[$shortname.'-name'] = array(
 			'name' => 'Name',
 			'id' => $shortname.'-name',

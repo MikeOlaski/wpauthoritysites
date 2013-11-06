@@ -23,9 +23,12 @@ load_template( trailingslashit( PLUGINPATH ) . 'classes/admin-ajax.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/posts.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/base.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/cron.class.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/integration.class.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/bb_builder.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/scrapewp.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/topSites.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/template-loader.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/template-hooks.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/shortcodes.class.php' );
 
 register_activation_hook( __FILE__, 'awp_activate' );
@@ -57,6 +60,7 @@ function awp_deactivate(){
 	delete_option('awp_requests');
 	delete_option('awp_settings');
 	delete_option('wpa_metrics');
+	delete_option('bb_builder_depts');
 	
 	// On deactivation, remove all functions from the scheduled action hook.
 	wp_clear_scheduled_hook( 'wp_authority_update' );
@@ -353,6 +357,8 @@ function awp_options_handle(){
 				'archive_page_title',
 				'archive_content_before',
 				'archive_content_after',
+				'single_sidebar',
+				'bb_builder_page',
 				
 				// Action Tags
 				'action_taxonomy',
@@ -1370,10 +1376,45 @@ function awp_admin_pages(){
 								));
 							?></td>
                         </tr>
-                        
-                        <tr>
-                        	<th scope="row"><label for=""></label></th>
-                            <td></td>
+                    </table>
+                    
+                    <h3><?php _e('Single Site', 'wpa'); ?></h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="wpa_single_sidebar"><?php _e('Single Sidebar', ''); ?></label></th>
+                            <td><select name="awp_settings[single_sidebar]" id="wpa_single_sidebar">
+								<option value="0" <?php selected($settings['single_sidebar'], 0); ?>>None</option><?php
+								
+								global $wp_registered_sidebars;
+								foreach($wp_registered_sidebars as $id=>$args){
+									?><option value="<?php echo $id; ?>" <?php selected($settings['single_sidebar'], $id); ?>><?php echo $args['name'] ?></option><?php
+								}
+								
+                            ?></select>
+							</td>
+                        </tr>
+                    </table>
+                    
+                    <h3><?php _e('Auhotiry Business Builder'); ?></h3>
+                    
+                    <table class="form-table">
+                    	<tr>
+                        	<th scope="row"><label for="awp_bb_builder_page">Business Builder Page</label></th>
+                            <td><select name="awp_settings[bb_builder_page]" id="awp_bb_builder_page">
+                            	<option value="0" <?php selected($settings['bb_builder_page'], 0); ?>>Select Page</option><?php
+                                
+								$pageObg = get_pages(array(
+									'post_type' => 'page',
+									'post_status' => 'publish',
+									'sort_column' => 'post_title'
+								));
+								
+								foreach($pageObg as $page){
+									?><option value="<?php echo $page->ID; ?>" <?php selected($settings['bb_builder_page'], $page->ID); ?>><?php echo $page->post_title; ?></option><?php
+								}
+								
+                            ?></select></td>
                         </tr>
                     </table>
                     
@@ -1772,11 +1813,25 @@ function wpa_admin_bar_menu(){
 	
 	if( is_single() ){
 		global $post;
-		$wp_admin_bar->add_menu(
-			array(
-				'title' => __('Edit Site'),
-				'href' => admin_url('post.php?post=' . $post->ID . '&action=edit')
-			)
-		);
+		
+		if($post->post_type == 'site'){
+			$wp_admin_bar->add_menu(
+				array(
+					'title' => __('Edit Site'),
+					'href' => admin_url('post.php?post=' . $post->ID . '&action=edit')
+				)
+			);
+		}
+	}
+}
+
+function get_user_by_display_name( $display_name ) {
+    global $wpdb;
+	
+	$user = $wpdb->get_row("SELECT `ID` FROM wp_users WHERE `display_name` = '" . $display_name . "'");
+    if ( $user ) {
+		return get_user_by( 'id', $user->ID );
+	} else {
+		return false;
 	}
 }
