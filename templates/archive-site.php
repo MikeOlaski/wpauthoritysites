@@ -832,7 +832,7 @@ get_header();
             	<li><a id="addFilterButton" href="javascript:void(0);" title="Add new conditional filter row">Add new Conditional Filter</a></li>
                 <li>
                 	<a id="filterGroups" class="wpa-filterg-btn" href="javascript:void(0);" title="Extra Buttons">Extra Buttons</a>
-                    <div class="wpa-filter-groups">
+                    <div class="wpa-filter-groups hide">
                     	<span class="displayOptionshead"><?php _e('DISPLAY OPTIONS'); ?></span>
                         <p>
                         	Show 

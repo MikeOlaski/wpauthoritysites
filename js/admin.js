@@ -22,4 +22,25 @@ jQuery(document).ready(function($) {
 			$('#wpa-options-row').css('display', 'none');
 		}
 	});
+	
+	// Clean admin nav menu items
+	var base = $('#adminmenu li#menu-posts-site ul.wp-submenu');
+	var target = $('#adminmenu li#menu-posts-site li a[href*="javascript"]').parent('li');
+	var subsubmenu = jQuery('<ul/>', {
+		id: 'menu-tags-site',
+		class: 'wp-submenu wp-submenu-wrap'
+	});
+	$('#adminmenu li#menu-posts-site ul.wp-submenu li').each(function(i,e) {
+		var achr = $(this).find('a[href*="edit-tags.php"]');
+		if( achr.text() != '' ){
+			$(this).appendTo( subsubmenu );
+		}
+		
+		if( achr.hasClass('current') ){
+			target.addClass('current').find('a').addClass('current');
+		}
+    });
+	base.addClass('base-menu-site');
+	target.addClass('menu-tags-site');
+	subsubmenu.appendTo(target);
 });

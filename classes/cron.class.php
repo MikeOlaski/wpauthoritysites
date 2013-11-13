@@ -21,7 +21,7 @@ class Base_Cron{
 		global $wpdb;
 		$option = get_option('awp_options');
 		$settings = get_option('awp_settings');
-		$websites = get_option('awp_websites');
+		// $websites = get_option('awp_websites');
 		
 		// Make sure that starting line is lower than end line
 		if($option['StartNum'] <= $option['cronLimit']) {
@@ -67,7 +67,26 @@ class Base_Cron{
 				$this->scrapeSites();
 			}
 			
-			// Update all scanned websites
+			foreach($websites as $site){
+				if( !get_page_by_title($site['name'], OBJECT, 'site') ){
+					$pID = wp_insert_post(
+						array(
+							'post_type' => 'site',
+							'post_date' => $site['date'],
+							'post_title' => $site['name'],
+							'post_status' => 'publish'
+						)
+					);
+					
+					if( isset($site['taxonomies']) ){
+						foreach( $site['taxonomies'] as $tax=>$terms ){
+							wp_set_object_terms( $pID, $terms, $tax, true );
+						}
+					}
+				}
+			}
+			
+			/* Update all scanned websites
 			foreach( $webs as $rank=>$name ){
 				$websites[$name] = array(
 					'name' => $name,
@@ -75,10 +94,9 @@ class Base_Cron{
 					'check' => true,
 					'date' => date('c')
 				);
-			}
+			} */
 			
-			/*?><pre><?php print_r($webs); ?></pre><?php wp_die();*/
-			update_option('awp_websites', $websites);
+			// update_option('awp_websites', $websites);
 		}
 	}
 	

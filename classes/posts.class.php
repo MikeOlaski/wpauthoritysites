@@ -14,6 +14,9 @@ class Sites_CPT{
 		add_action( 'init', array($this, 'register_post_type') );
 		add_action( 'init', array($this, 'register_taxonomies') );
 		
+		// Register a Custom Post Status
+		add_action( 'init', array($this, 'wpa_register_site_status') );
+		
 		// Remove Unnescessary filter objects
 		add_action( 'wp', array($this, 'remove_alien_filters') );
 		add_filter( 'parse_query', array($this, 'convert_term_id_to_taxonomy_term_in_query') );
@@ -35,12 +38,46 @@ class Sites_CPT{
 		
 		// Add another row action
 		add_filter('post_row_actions', array($this, 'add_action_row'), 10, 2);
+		
+		// Add filter
+		add_action( 'restrict_manage_posts', array($this, 'filter_restrict_manage_posts_site'), 10 );
+	}
+	
+	function filter_restrict_manage_posts_site(){
+		$type = isset($_GET['post_type']) ? $_GET['post_type'] : 'post';
+		if ('site' == $type){
+			$statuses = get_terms('site-status', array(
+				'orderby' 		=> 'count',
+				'hide_empty'	=> 0
+			));
+			
+			$types = get_terms('site-type', array(
+				'orderby' 		=> 'count',
+				'hide_empty'	=> 0
+			));
+			
+			?><select name="site-status">
+            	<option value=""><?php _e('Filter Status By ', 'wpa'); ?></option><?php
+				$current_s = isset($_GET['site-status']) ? $_GET['site-status'] : '';
+				foreach ($statuses as $status) {
+					?><option value="<?php echo $status->slug ?>" <?php selected( $current_s, $status->slug ); ?>><?php echo $status->name; ?></option><?php
+                }
+        	?></select>
+            
+            <select name="site-status">
+            	<option value=""><?php _e('Filter Type By ', 'wpa'); ?></option><?php
+				$current_t = isset($_GET['site-type']) ? $_GET['site-type'] : '';
+				foreach ($types as $type) {
+					?><option value="<?php echo $type->slug ?>" <?php selected( $current_t, $type->slug ); ?>><?php echo $type->name; ?></option><?php
+                }
+        	?></select><?php
+		}
 	}
 	
 	function add_action_row($actions, $post){
 		$acts = array();
 		if ($post->post_type =="site"){
-			$link = add_query_arg(
+			$audit = add_query_arg(
 				array(
 					'post_type' => 'site',
 					'action' => 'evaluate',
@@ -48,7 +85,25 @@ class Sites_CPT{
 				),
 				'edit.php'
 			);
-			$acts['audit'] = sprintf('<a class="auditinline" data-id="%s" href="%s" title="Audit this item">Audit</a>', $post->ID, $link );
+			$wp_checker = add_query_arg(
+				array(
+					'post_type' => 'site',
+					'action' => 'wp_checker',
+					'post' => array($post->ID)
+				),
+				'edit.php'
+			);
+			$auth_checker = add_query_arg(
+				array(
+					'post_type' => 'site',
+					'action' => 'auth_checker',
+					'post' => array($post->ID)
+				),
+				'edit.php'
+			);
+			$acts['audit'] = sprintf('<a class="auditinline" data-id="%s" href="%s" title="Audit this item">Audit</a>', $post->ID, $audit );
+			$acts['wp_checker'] = sprintf('<a class="wpchecker" data-id="%s" href="%s" title="Check if this item is a WordPress Site">Check for WordPress</a>', $post->ID, $wp_checker );
+			$acts['auth_checker'] = sprintf('<a class="auth_checker" data-id="%s" href="%s" title="Check if this item is a Authority Site">Check for Authority</a>', $post->ID, $auth_checker );
 		}
 		$actions = wp_parse_args($actions, $acts);
 		return $actions;
@@ -60,7 +115,7 @@ class Sites_CPT{
 	
 	function register_post_type(){
 		$labels = array(
-			'name' => 'WP Sites',
+			'name' => 'Sites',
 			'singular_name' => 'Site',
 			'add_new' => 'Add New',
 			'add_new_item' => 'Add New Site',
@@ -72,7 +127,7 @@ class Sites_CPT{
 			'not_found' =>  'No sites found',
 			'not_found_in_trash' => 'No sites found in Trash', 
 			'parent_item_colon' => '',
-			'menu_name' => 'WP Sites'
+			'menu_name' => 'Sites'
 		);
 		
 		$args = array(
@@ -80,14 +135,14 @@ class Sites_CPT{
 			'public' => true,
 			'publicly_queryable' => true,
 			'show_ui' => true, 
-			'show_in_menu' => false, 
+			'show_in_menu' => true, 
 			'query_var' => true,
 			'rewrite' => array( 'slug' => 'sites' ),
 			'taxonomies' => array('site-category', 'site-tags'),
 			'capability_type' => 'post',
 			'has_archive' => true,
 			'hierarchical' => false,
-			'menu_position' => null,
+			'menu_position' => 2,
 			'menu_icon' => PLUGINURL . 'images/favicon.ico',
 			'supports' => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' )
 		);
@@ -190,6 +245,17 @@ class Sites_CPT{
 				)
 			);
 		}
+	}
+	
+	function wpa_register_site_status(){
+		register_post_status( 'uncheck', array(
+			'label'	=> _x( 'Uncheck', 'post' ),
+			'public' => true,
+			'exclude_from_search' => false,
+			'show_in_admin_all_list' => true,
+			'show_in_admin_status_list' => true,
+			'label_count' => _n_noop( 'Uncheck <span class="count">(%s)</span>', 'Uncheck <span class="count">(%s)</span>' )
+		));
 	}
 	
 	// Add manage screen table
@@ -612,7 +678,7 @@ class Sites_CPT{
 		get_currentuserinfo();
 		global $post, $user_ID;
 		
-		if('site' == $post->post_type){
+		if( ('site' == $post->post_type) || ('site' == $_GET['post_type']) ){
 			wp_enqueue_script('jquery');
 			wp_enqueue_style( 'awpeditor', PLUGINURL . '/css/editor.css' );
 			wp_enqueue_script( 'awpeditor', PLUGINURL . '/js/editor.js', array('jquery') );
@@ -636,8 +702,15 @@ class Sites_CPT{
 		if($post->post_type == 'site') {
 			?><script type="text/javascript">
 				jQuery(document).ready(function($) {
+					jQuery('<option>').val('wp_checker').text('Check for Wordpress').prependTo("select[name='action']");
+					jQuery('<option>').val('wp_checker').text('Check for Wordpress').prependTo("select[name='action2']");
+					
+					jQuery('<option>').val('auth_checker').text('Check for Authority').prependTo("select[name='action']");
+					jQuery('<option>').val('auth_checker').text('Check for Authority').prependTo("select[name='action2']");
+					
 					jQuery('<option>').val('evaluate').text('Audit').prependTo("select[name='action']");
 					jQuery('<option>').val('evaluate').text('Audit').prependTo("select[name='action2']");
+					
 					<?php if( isset($_REQUEST['audited']) ){ ?>
 						<?php if(!empty($_REQUEST['audited'])){ ?>
 							var message = '<div id="message" class="updated"><p><?php echo sprintf( _n( '%s post audited.', '%s posts audited.', $_REQUEST['audited'] ), number_format_i18n( $_REQUEST['audited'] ) ); ?></p></div>';

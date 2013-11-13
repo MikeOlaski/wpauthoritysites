@@ -1263,3 +1263,25 @@ function wpa_get_metrics_by_id($id){
 	
 	return $metric;
 }
+
+function wpa_add_url_scheme( $url, $scheme = 'http://' ){
+    if (parse_url($url, PHP_URL_SCHEME) === null) {
+        return $scheme . $url;
+    }
+    return $url;
+}
+
+function wpa_get_tld( $url ){
+	$urlData = parse_url( $url );
+	$domain = $urlData['host'];
+	if($domain != "") {
+		preg_match('/[^.]+$/', $domain, $matches);
+		$tld = $matches[0];
+	}
+	return $tld;
+}
+
+function wpa_get_host( $url ){
+	$urlData = parse_url( $url );
+	return $urlData['host'];
+}

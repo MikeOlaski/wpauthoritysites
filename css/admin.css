@@ -1,0 +1,40 @@
+#menu-posts-site .wp-menu-image{
+	background-image: none;
+}
+
+#adminmenu li#menu-posts-site .base-menu-site{
+	background: #fff url(../images/menu-shadow.png) top right repeat-y;
+	z-index: 21;
+}
+
+#adminmenu li#menu-posts-site li ul#menu-tags-site{
+	display: none;
+	position: absolute;
+	left: 145px;
+	right: 0px;
+	top: 0px;
+	
+	border-color: #dfdfdf;
+	-webkit-box-shadow: 2px 3px 6px rgba(0,0,0,0.4);
+	box-shadow: 2px 3px 6px rgba(0,0,0,0.4);
+}
+
+#adminmenu li#menu-posts-site li.menu-tags-site{
+	position: relative;
+	overflow: visible;
+}
+
+#adminmenu li#menu-posts-site li.menu-tags-site a{
+	position: relative;
+	font-weight: normal;
+	color: #21759b;
+}
+
+#adminmenu li#menu-posts-site li.menu-tags-site a.current{
+	font-weight: bold;
+	color: #333;
+}
+
+#adminmenu li#menu-posts-site li.menu-tags-site:hover #menu-tags-site{
+	display: block;
+}
