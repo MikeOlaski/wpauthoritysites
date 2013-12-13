@@ -5,13 +5,17 @@ add_action( 'wp_ajax_evaluate_js', 'evaluate_js_callback');
 add_action( 'wp_ajax_bulk_evaluate', 'bulk_evaluate_callback');
 add_action( 'wp_ajax_search_term', 'search_term_callback');
 
-// Add new people on frontend
+add_action( 'wp_ajax_wp_checker_js', 'wp_checker_js_callback' );
+add_action('wp_ajax_nopriv_wp_checker_js', 'wp_checker_js_callback');
+
+// Add new people on frontend (Dormant)
 add_action('wp_ajax_submit_people', 'submit_people_callback');
 add_action('wp_ajax_nopriv_submit_people', 'submit_people_callback');
 
 // Record scores on frontend
 add_action('wp_ajax_submit_departments', 'submit_departments_callback');
 add_action('wp_ajax_nopriv_submit_departments', 'submit_departments_callback');
+// (/Dormant)
 
 define('GOOGLE_MAGIC', 0xE6359A60);
 
@@ -19,7 +23,56 @@ function submit_departments_callback(){
 	if( isset($_POST) && '' != $_POST['departments'] ){
 		echo 'true';
 	}
-	
+	die();
+}
+
+function wp_checker_js_callback(){
+	if( isset($_POST) && '' != $_POST['check_link'] ){
+		
+		$links = array(
+			$_POST['id'] => strtolower(get_the_title($_POST['id']))
+		);
+		
+		$scrape = new scrapeWordpress();
+		$scrape->scrape( $links );
+		
+		if( $scrape->wp_sites ){
+			foreach( $scrape->wp_sites as $wp ){
+				wp_update_post(
+					array(
+						'ID' => $wp['ID'],
+						'post_status' => 'publish'
+					)
+				);
+				
+				update_post_meta( $wp['ID'], 'awp-name', $wp['name'] );
+				update_post_meta( $wp['ID'], 'awp-domain', wpa_get_host($wp['name']) );
+				update_post_meta( $wp['ID'], 'awp-tld', wpa_get_tld($wp['name']) );
+				update_post_meta( $wp['ID'], 'awp-url', wpa_add_url_scheme($wp['name']) );
+				update_post_meta( $wp['ID'], '_wpa_last_wpcheck', date('c') );
+				
+				wp_set_object_terms( $wp['ID'], '$Wordpress', 'site-type', true );
+				wp_remove_object_terms( $wp['ID'], '$NotWordpress', 'site-type' );
+			}
+		}
+		
+		if( $scrape->not_wp_sites ){
+			foreach( $scrape->not_wp_sites as $not_wp ){
+				wp_update_post(
+					array(
+						'ID' => $not_wp['ID'],
+						'post_status' => 'publish'
+					)
+				);
+				update_post_meta( $not_wp['ID'], '_wpa_last_wpcheck', date('c') );
+				
+				wp_set_object_terms( $not_wp['ID'], '$NotWordpress', 'site-type', true );
+				wp_remove_object_terms( $not_wp['ID'], '$Wordpress', 'site-type' );
+			}
+		}
+		
+		echo 'true';
+	}
 	die();
 }
 
@@ -80,7 +133,7 @@ function bulk_evaluate_callback(){
 		foreach($_POST['post'] as $data){
 			$url = get_post_meta($data, 'awp-url', true);
 			if(!$url){
-				$url = 'http://' . get_the_title($data);
+				$url = 'http://' . strtolower(get_the_title($data));
 			}
 			$return = evaluate_js_callback( array('url' => $url, 'id' => $data) );
 			$ids[] = $data;
@@ -257,6 +310,7 @@ function evaluate_js_callback( $args = null ){
 		update_post_meta($id, 'awp-domain', $domain);
 		update_post_meta($id, 'awp-tld', '.' . $domains[$slugCount - 1]);
 		update_post_meta($id, 'awp-url', 'http://www.'.$name);
+		update_post_meta($id, '_wpa_last_audit', date('c'));
 		
 		foreach( $return as $meta_key=>$meta_value ){
 			update_post_meta($id, $meta_key, $meta_value);
@@ -265,7 +319,10 @@ function evaluate_js_callback( $args = null ){
 		// Update score counts and status tag
 		$term = array( '!Audited' );
 		$term[] = '!Auditor Ran – ' . date('y.m.d;H:i');
+		
 		wp_set_object_terms( $id, $term, 'site-status', true );
+		wp_remove_object_terms( $id, '!NotAudited', 'site-status' );
+		
 		wpa_update_scores($id);
 		
 		if($die){
@@ -399,270 +456,326 @@ function awp_sharecounts($url, $type, $pID = ''){
 	$settings = get_option('awp_settings');
 	
 	if(filter_var($url, FILTER_VALIDATE_URL)){
-		// Shares and Likes
-		if($type == 'googlePlus'){
-			//source http://www.helmutgranda.com/2011/11/01/get-a-url-google-count-via-php/
-			$content = parse("https://plusone.google.com/u/0/_/+1/fastbutton?url=".$url."&count=true");
-		  
-			$dom = new DOMDocument;
-			$dom->preserveWhiteSpace = false;
-			@$dom->loadHTML($content);
-			$domxpath = new DOMXPath($dom);
-			$newDom = new DOMDocument;
-			$newDom->formatOutput = true;
-			
-			$filtered = $domxpath->query("//div[@id='aggregateCount']");
-			if (isset($filtered->item(0)->nodeValue)){
-				// $count = str_replace('>', '', $filtered->item(0)->nodeValue);
-				return str_replace('>', '', $filtered->item(0)->nodeValue);
-			}
-		
-		} else if($type == 'facebookShares'){
-			$content = parse_curl("https://graph.facebook.com/fql?q=SELECT%20url,%20share_count%20FROM%20link_stat%20WHERE%20url='".$url."'");
-			$content = json_decode( $content );
-			return $content->data[0]->share_count;
-		
-		} else if($type == 'facebookLikes'){
-			$content = parse_curl("https://graph.facebook.com/fql?q=SELECT%20url,%20like_count%20FROM%20link_stat%20WHERE%20url='".$url."'");
-			$content = json_decode( $content );
-			return $content->data[0]->like_count;
-			
-		} else if($type == 'twitterShares'){
-			$content = parse_curl("http://urls.api.twitter.com/1/urls/count.json?url=".$url);
-			$content = json_decode( $content );
-			return $content->count;
-			
-			/* Using Twitter API v1.1 just to be ready if they decprecate the v1.0
-			if( class_exists('TwitterAPIExchange') ){
+		switch( $type ) :
+			case 'googlePlus':
+				//source http://www.helmutgranda.com/2011/11/01/get-a-url-google-count-via-php/
+				$content = parse("https://plusone.google.com/u/0/_/+1/fastbutton?url=".$url."&count=true");
+				$dom = new DOMDocument;
+				$dom->preserveWhiteSpace = false;
+				@$dom->loadHTML($content);
+				$domxpath = new DOMXPath($dom);
+				$newDom = new DOMDocument;
+				$newDom->formatOutput = true;
 				
-				$twittings = array(
-					'oauth_access_token' => $settings['twitter_access_token'],
-					'oauth_access_token_secret' => $settings['twitter_access_secret'],
-					'consumer_key' => $settings['twitter_cons_key'],
-					'consumer_secret' => $settings['twitter_cons_secret']
-				);
+				$filtered = $domxpath->query("//div[@id='aggregateCount']");
+				if (isset($filtered->item(0)->nodeValue)){
+					$result = str_replace('>', '', $filtered->item(0)->nodeValue);
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: plus.google.com'));
+				}
 				
-				$url = 'https://api.twitter.com/1.1/statuses/user_timeline.json';
-				$getfield = '?screen_name=Android';
-				$requestMethod = 'GET';
-				$twitter = new TwitterAPIExchange( $twittings );
-				$follow_count=$twitter->setGetfield($getfield)->buildOauth($url, $requestMethod)->performRequest();
-				$testCount = json_decode($follow_count, true);
+				break;
+			
+			case 'facebookShares':
+				$handle = "https://graph.facebook.com/fql?q=SELECT url, share_count FROM link_stat WHERE url=";
+				$content = parse_curl(urlencode($handle."'".$url."'"));
+				$content = json_decode( $content );
+				if (isset($content->data[0]->share_count)){
+					$result = $content->data[0]->share_count;
+				} else {
+					$result = new WP_Error(__('Broke'), $content->error->message);
+				}
+				break;
+			
+			case 'facebookLikes':
+				$handle = "https://graph.facebook.com/fql?q=SELECT url, like_count FROM link_stat WHERE url=";
+				$content = parse_curl(urlencode($handle."'".$url."'"));
+				$content = json_decode( $content );
+				if (isset($content->data[0]->like_count)){
+					$result = $content->data[0]->like_count;
+				} else {
+					$result = new WP_Error(__('Broke'), $content->error->message);
+				}
+				break;
+			
+			case 'twitterShares':
+				$content = parse_curl("http://urls.api.twitter.com/1/urls/count.json?url=".$url);
+				$content = json_decode( $content );
+				if (isset($content->count)){
+					$result = $content->count;
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Twitter shares count'));
+				}
+				break;
+			
+			case 'pinterest':
+				$content = parse_curl("http://api.pinterest.com/v1/urls/count.json?callback=&url=".$url);
+				$content = json_decode( str_replace(array('(', ')'), array('', ''), $content) );
+				if (is_int($content->count)){
+					$result = $content->count;
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Pinterest shares count'));
+				}
+				break;
+			
+			case 'linkedin':
+				$content = parse_curl("http://www.linkedin.com/countserv/count/share?format=json&url=".$url);
+				$content = json_decode( $content );
+				if (isset($content->count)){
+					$result = $content->count;
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: LinkedIn shares count'));
+				}
+				break;
+			
+			case 'klout':
+				$result = ''; // Continue;
+				break;
+			
+			case 'stumbleupon':
+				$data = parse("http://www.stumbleupon.com/services/1.01/badge.getinfo?url=$url");
+				$content = json_decode($data);
+				if (isset($content->result->views)){
+					$result = $content->result->views;
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: StumbleUpon shares count'));
+				}
+				break;
+			
+			case 'location':
+				$ip = gethostbyname( str_replace('http://www.', '', $url) );
+				$content = parse_curl("http://www.geoplugin.net/php.gp?ip=".$ip);
+				$content = unserialize( $content );
+				if($content){
+					$result = $content['geoplugin_city'] . ', ' . $content['geoplugin_countryName'];
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Geo Location error'));
+				}
+				break;
+			
+			case 'language':
+				$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
+				$xml = simplexml_load_string($content);
+				if(isset($xml->SD[0]->LANG)){
+					$result = (string)$xml->SD[0]->LANG->attributes()->LEX;
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Language error'));
+				}
+				break;
+			
+			case 'founded':
+				$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
+				$xml = simplexml_load_string($content);
+				if( isset($xml->SD[0]->CREATED) ){
+					$result = (string)$xml->SD[0]->CREATED->attributes()->DATE[0];
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Founded date error'));
+				}
+				break;
+			
+			case 'facebookPage':
+				$result = parse_social_links($url, 'facebook');
+				break;
+			
+			case 'googleplusPage':
+				$result = parse_social_links($url, 'plus.google');
+				break;
+			
+			case 'twitterPage':
+				$result = parse_social_links($url, 'twitter');
+				break;
+			
+			case 'pinterestPage':
+				$result = parse_social_links($url, 'pinterest');
+				break;
+			
+			case 'linkedinPage':
+				$result = parse_social_links($url, 'linkedin');
+				break;
+			
+			case 'kloutPage':
+				$result = parse_social_links($url, 'klout');
+				break;
+			
+			case 'ggfollowers':
+				$GGurl = parse_social_links($url, 'plus.google');
+				if($GGurl){
+					$result = awp_sharecounts($GGurl, 'googlePlus');
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Google Followers error'));
+				}
+				break;
+			
+			case 'fbfollowers':
+				$FBurl = parse_social_links($url, 'facebook');
+				if($FBurl){
+					$result = awp_sharecounts($FBurl, 'facebookLikes');
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Facebook Likes error'));
+				}
+				break;
+			
+			case 'ttfollowers':
+				$TTurl = parse_social_links($url, 'twitter');
+				if($TTurl){
+					$result = awp_sharecounts($TTurl, 'twitterShares');
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Facebook Followers error'));
+				}
+				break;
+			
+			case 'pifollowers':
+				$PIurl = parse_social_links($url, 'pinterest');
+				if($PIurl){
+					$result = awp_sharecounts($PIurl, 'pinterest');
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Pinterest Followers error'));
+				}
+				break;
+			
+			case 'lifollowers':
+				$LIurl = parse_social_links($url, 'linkedin');
+				if($LIurl){
+					$result = awp_sharecounts($LIurl, 'linkedin');
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: LinkedIn Followers error'));
+				}
+				break;
+			
+			case 'klfollowers':
+				$KLurl = parse_social_links($url, 'klout');
+				if($KLurl){
+					$result = awp_sharecounts($KLurl, 'klout');
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Klout Followers error'));
+				}
+				break;
+			
+			case 'rssPage':
+				$result = parse_social_links($url, 'rss');
+				break;
+			
+			case 'googleBackLinks':
+				$result_in_html = file_get_contents("http://www.google.com/search?q=link:{$url}");
+				if (preg_match('/Results .*? of about (.*?) from/sim', $result_in_html, $regs)){
+					$indexed_pages = trim(strip_tags($regs[1])); //use strip_tags to remove bold tags
+					$result = $indexed_pages;
+				} elseif (preg_match('/About (.*?) results/sim', $result_in_html, $regs)){
+					$indexed_pages = trim(strip_tags($regs[1])); //use strip_tags to remove bold tags
+					$result = $indexed_pages;
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Google Backlinks error'));
+				}
+				break;
+			
+			case 'alexaBackLinks':
+				$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
+				$xml = simplexml_load_string($content);
+				if( isset($xml->SD[0]->LINKSIN) ){
+					$result = number_format( (float)$xml->SD[0]->LINKSIN->attributes()->NUM[0] );
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Alexa Backlinks error'));
+				}
+				break;
+			
+			case 'yahooBackLinks':
+				$result = '';
+				break;
+			
+			case 'majesticBackLinks':
+				$api_key = $settings['majestic_api_key'];
 				
-				return $testCount[0]['user']['followers_count'];
-			} else {
-				return 0;
-			}
-			*/
-		
-		} else if($type == 'pinterest'){
-			$content = parse_curl("http://api.pinterest.com/v1/urls/count.json?callback=&url=".$url);
-			$content = json_decode( str_replace(array('(', ')'), array('', ''), $content) );
-			if (is_int($content->count)){
-				return $content->count;
-			} else {
-				return 0;
-			}
-		
-		} else if($type == 'linkedin'){
-			$content = parse_curl("http://www.linkedin.com/countserv/count/share?format=json&url=".$url);
-			$content = json_decode( $content );
-			return $content->count;
-		
-		} else if($type == 'klout'){
-			return '';
-		
-		} else if($type == 'stumbleupon'){
-			$content = parse("http://www.stumbleupon.com/services/1.01/badge.getinfo?url=$url");
+				if(!$api_key)
+					return;
+				
+				$endpoint = 'http://developer.majesticseo.com/api_command';
+				
+				$api_service = new APIService($api_key, $endpoint);
+				$parameters = array();
+				$parameters["datasource"] = "fresh";
+				$parameters["MaxSourceURLs"] = 10;
+				$parameters["URL"] = $url;
+				$parameters["GetUrlData"] = 1;
+				$parameters["MaxSourceURLsPerRefDomain"] = 1;
+				$response = $api_service->executeCommand("GetTopBackLinks", $parameters);
+				if ( $response->isOK() == "false" ){
+					$result = new WP_Error(__('Broke'), $response->getErrorMessage());
+				} else {
+					$table = $response->getTableForName("URL");
+					$rows = $table->getTableRows();
+					$count = 1;
+					foreach ( $rows as $row) {
+						$count++;
+					}
+					$result = $count;
+				}
+				break;
 			
-			$result = json_decode($content);
-			if (isset($result->result->views)){
-				$count = $result->result->views;
-			}
-		
-		// Site
-		} else if($type == 'location'){
-			$ip = gethostbyname( str_replace('http://www.', '', $url) );
-			$content = parse_curl("http://www.geoplugin.net/php.gp?ip=".$ip);
-			$content = unserialize( $content );
-			return $content['geoplugin_city'] . ', ' . $content['geoplugin_countryName'];
-		
-		} else if($type == 'language'){
-			$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
-			$xml = simplexml_load_string($content);
-			return isset($xml->SD[0]->LANG) ? (string)$xml->SD[0]->LANG->attributes()->LEX : '';
-		
-		} else if($type == 'founded'){
-			$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
-			$xml = simplexml_load_string($content);
-			return isset($xml->SD[0]->CREATED) ? (string)$xml->SD[0]->CREATED->attributes()->DATE[0] : '';
-		
-		// Network
-		} else if($type == 'facebookPage'){
-			// http://graph.facebook.com/?id=http://reuters.com
-			$content = parse_curl("http://graph.facebook.com/?id=".$url);
-			$content = json_decode( $content );
-			// return isset($content->name) ? 'https://www.facebook.com/' . $content->name : '';
-			return parse_social_links($url, 'facebook');
-		
-		} else if($type == 'googleplusPage'){
-			return parse_social_links($url, 'plus.google');
-			// return 'https://plus.google.com/u/0/';
-		
-		} else if($type == 'twitterPage'){
-			/*$domains = array(".aero",".biz",".cat",".com",".coop",".edu",".gov",".info",".int",".jobs",".mil",".mobi",".museum", ".name",".net",".org",".travel",".ac",".ad",".ae",".af",".ag",".ai",".al",".am",".an",".ao",".aq",".ar",".as",".at",".au",".aw", ".az",".ba",".bb",".bd",".be",".bf",".bg",".bh",".bi",".bj",".bm",".bn",".bo",".br",".bs",".bt",".bv",".bw",".by",".bz",".ca", ".cc",".cd",".cf",".cg",".ch",".ci",".ck",".cl",".cm",".cn",".co",".cr",".cs",".cu",".cv",".cx",".cy",".cz",".de",".dj",".dk",".dm", ".do",".dz",".ec",".ee",".eg",".eh",".er",".es",".et",".eu",".fi",".fj",".fk",".fm",".fo",".fr",".ga",".gb",".gd",".ge",".gf",".gg",".gh", ".gi",".gl",".gm",".gn",".gp",".gq",".gr",".gs",".gt",".gu",".gw",".gy",".hk",".hm",".hn",".hr",".ht",".hu",".id",".ie",".il",".im", ".in",".io",".iq",".ir",".is",".it",".je",".jm",".jo",".jp",".ke",".kg",".kh",".ki",".km",".kn",".kp",".kr",".kw",".ky",".kz",".la",".lb", ".lc",".li",".lk",".lr",".ls",".lt",".lu",".lv",".ly",".ma",".mc",".md",".mg",".mh",".mk",".ml",".mm",".mn",".mo",".mp",".mq", ".mr",".ms",".mt",".mu",".mv",".mw",".mx",".my",".mz",".na",".nc",".ne",".nf",".ng",".ni",".nl",".no",".np",".nr",".nu", ".nz",".om",".pa",".pe",".pf",".pg",".ph",".pk",".pl",".pm",".pn",".pr",".ps",".pt",".pw",".py",".qa",".re",".ro",".ru",".rw", ".sa",".sb",".sc",".sd",".se",".sg",".sh",".si",".sj",".sk",".sl",".sm",".sn",".so",".sr",".st",".su",".sv",".sy",".sz",".tc",".td",".tf", ".tg",".th",".tj",".tk",".tm",".tn",".to",".tp",".tr",".tt",".tv",".tw",".tz",".ua",".ug",".uk",".um",".us",".uy",".uz", ".va",".vc", ".ve",".vg",".vi",".vn",".vu",".wf",".ws",".ye",".yt",".yu",".za",".zm",".zr",".zw");
+			case 'alexaRank':
+				$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
+				$xml = simplexml_load_string($content);
+				if( isset( $xml->SD[1]->POPULARITY ) ){
+					$result = (string)$xml->SD[1]->POPULARITY->attributes()->TEXT;
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Alexa Rank error'));
+				}
+				break;
 			
-			$name = str_replace('http://', '', $url);
-			$name = str_replace('www.', '', $name);
-			$name = str_replace( $domains, array(''), $name);
+			case 'googleRank':
+				$pr = new PR();
+				if($pr){
+					$result = $pr->get_google_pagerank($url);
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Google Rank error'));
+				}
+				break;
 			
-			$twitter = 'https://twitter.com/' . $name;
+			case 'competeRank':
+				$capi = ($settings['compete_api_key']) ? $settings['compete_api_key'] : 'ce9406ca48b0089750b76ded1ececaea';
+				$name = str_replace('http://', '', $url);
+				$name = str_replace('www.', '', $name);
+				
+				$content = parse_curl('http://apps.compete.com/sites/' . $name . '/trended/Rank/?apikey=' . $capi);
+				$content = json_decode($content);
+				if( isset($content->data->trends->rank[12]->value) ){
+					$result = (string)$content->data->trends->rank[12]->value;
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Compete Rank error'));
+				}
+				break;
 			
-			if( !url_exists( $twitter ) )
-				return 0;
+			case 'oneRank':
+				$ar = get_post_meta($pID, 'awp-alexa-rank', true);
+				$gr = get_post_meta($pID, 'awp-google-rank', true);
+				$cr = get_post_meta($pID, 'awp-compete-rank', true);
+				$sr = get_post_meta($pID, 'awp-semrush-rank', true);
+				$result = (int) ($ar + $gr + $cr + $sr) / 4;
+				break;
 			
-			return $twitter;*/
-			return parse_social_links($url, 'twitter');
+			case 'pageSpeed':
+				$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
+				$xml = simplexml_load_string($content);
+				if( isset( $xml->SD[0]->SPEED ) ){
+					$result = (string)$xml->SD[0]->SPEED->attributes()->TEXT;
+				} else {
+					$result = new WP_Error(__('Broke'), __('Error: Page Speed Calculation error'));
+				}
+				break;
 			
-		} else if($type == 'pinterestPage'){
-			return parse_social_links($url, 'pinterest');
-		
-		} else if($type == 'linkedinPage'){
-			return parse_social_links($url, 'linkedin');
-		
-		} else if($type == 'kloutPage'){
-			return parse_social_links($url, 'klout');
-		
-		} else if($type == 'ggfollowers'){
-			$GGurl = parse_social_links($url, 'plus.google');
-			return awp_sharecounts($GGurl, 'googlePlus');
-		
-		} else if($type == 'fbfollowers'){
-			$FBurl = parse_social_links($url, 'facebook');
-			return awp_sharecounts($FBurl, 'facebookLikes');
-		
-		} else if($type == 'ttfollowers'){
-			$TTurl = parse_social_links($url, 'twitter');
-			return awp_sharecounts($TTurl, 'twitterShares');
-		
-		} else if($type == 'pifollowers'){
-			$PIurl = parse_social_links($url, 'pinterest');
-			return awp_sharecounts($PIurl, 'pinterest');
-		
-		} else if($type == 'lifollowers'){
-			$LIurl = parse_social_links($url, 'linkedin');
-			return awp_sharecounts($LIurl, 'linkedin');
-		
-		} else if($type == 'klfollowers'){
-			$KLurl = parse_social_links($url, 'klout');
-			return awp_sharecounts($KLurl, 'klout');
-		
-		} else if($type == 'rssPage'){
-			return parse_social_links($url, 'rss');
-		
-		// Links
-		} else if($type == 'googleBackLinks'){
-			
-			/*$link = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q=link:" . $url;
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $link);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch, CURLOPT_REFERER, $domain);
-			$body = curl_exec($ch);
-			curl_close($ch);
-			
-			$json = json_decode($body);
-			$urls = array();
-			foreach($json->responseData->results as $result) // Loop through the objects in the result
-    			$urls[] = $result->unescapedUrl;
-			
-			return count($urls);*/
-			
-			$result_in_html = file_get_contents("http://www.google.com/search?q=link:{$url}");
-			if (preg_match('/Results .*? of about (.*?) from/sim', $result_in_html, $regs)){
-				$indexed_pages = trim(strip_tags($regs[1])); //use strip_tags to remove bold tags
-				return $indexed_pages;
-			} elseif (preg_match('/About (.*?) results/sim', $result_in_html, $regs)){
-				$indexed_pages = trim(strip_tags($regs[1])); //use strip_tags to remove bold tags
-				return $indexed_pages;
-			} else {
-				return 0;
-			}
-		
-		} else if($type == 'alexaBackLinks'){
-			$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
-			$xml = simplexml_load_string($content);
-			return isset($xml->SD[0]->LINKSIN) ? number_format( (float)$xml->SD[0]->LINKSIN->attributes()->NUM[0] ) : '';
-		
-		} else if($type == 'yahooBackLinks'){
-			$yapi = ($settings['yahoo_api_key']) ? $settings['yahoo_api_key'] : '2RWSO5rV34H1olTtqv201ziFbzAfZLgjWPWIV7hyOXQ1PI6qR914Fs2v6aIpVYcDb6yXnfN_';
-			return 0;
-		
-		} else if($type == 'majesticBackLinks'){
-			$api_key = $settings['majestic_api_key'];
-			
-			if(!$api_key)
-				return;
-			
-			$endpoint = 'http://developer.majesticseo.com/api_command';
-			
-			$api_service = new APIService($api_key, $endpoint);
-			$parameters = array();
-			$parameters["datasource"] = "fresh";
-			$parameters["MaxSourceURLs"] = 10;
-			$parameters["URL"] = $url;
-			$parameters["GetUrlData"] = 1;
-			$parameters["MaxSourceURLsPerRefDomain"] = 1;
-			$response = $api_service->executeCommand("GetTopBackLinks", $parameters);
-			if ( $response->isOK() == "false" ){
-				// echo "Error Occured" . $response->getErrorMessage(); exit;
-				return 0;
-			}
-			$table = $response->getTableForName("URL");
-			$rows = $table->getTableRows();
-			$count = 1;
-			foreach ( $rows as $row) {
-				$count++;
-				// echo "URL: ".$row["SourceURL"] ."\n"; echo "AC Rank: ".$row["ACRank"] ."\n";
-			}
-			return $count;
-		
-		// Rank
-		} else if($type == 'alexaRank'){
-			$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
-			$xml = simplexml_load_string($content);
-			return isset( $xml->SD[1]->POPULARITY ) ? (string)$xml->SD[1]->POPULARITY->attributes()->TEXT : 0;
-		
-		} else if($type == 'googleRank'){
-			// $pr = getPageRank( $url );
-			// return $pr;
-			
-			$pr = new PR();
-			return $pr->get_google_pagerank($url);
-		
-		} else if($type == 'competeRank'){
-			$capi = ($settings['compete_api_key']) ? $settings['compete_api_key'] : 'ce9406ca48b0089750b76ded1ececaea';
-			$name = str_replace('http://', '', $url);
-			$name = str_replace('www.', '', $name);
-			
-			$content = parse_curl('http://apps.compete.com/sites/' . $name . '/trended/Rank/?apikey=' . $capi);
-			$content = json_decode($content);
-			return (string)$content->data->trends->rank[12]->value;
-		
-		} else if($type == 'oneRank'){
-			$ar = get_post_meta($pID, 'awp-alexa-rank', true);
-			$gr = get_post_meta($pID, 'awp-google-rank', true);
-			$cr = get_post_meta($pID, 'awp-compete-rank', true);
-			$sr = get_post_meta($pID, 'awp-semrush-rank', true);
-			return (int) ($ar + $gr + $cr + $sr) / 4;
-			
-		} else if($type == 'pageSpeed'){
-			$content = parse_curl('http://data.alexa.com/data?cli=10&dat=snbamz&url=' . $url);
-			$xml = simplexml_load_string($content);
-			return isset( $xml->SD[0]->SPEED ) ? (string)$xml->SD[0]->SPEED->attributes()->TEXT : 0;
-		}
+			default:
+				$result = '';
+				break;
+		endswitch;
+	} else {
+		$result = new WP_Error(__('Broke'), __('No valid URL'));
 	}
-	return null;
+	
+	if( is_wp_error($result) ){
+		// echo $result->get_error_message();
+		return 0;
+	}
+	
+	return $result;
 }
 
 function wpa_update_scores($pID){

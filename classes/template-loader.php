@@ -29,8 +29,7 @@ class SiteTemplate
      *
      * @return void
      **/
-    public function init_all() 
-    {
+    public function init_all(){
 		add_action( 'wp_enqueue_scripts',   array( $this, 'frontend_scripts' ) );
         add_filter( 'body_class',           array( $this, 'filter_body_class' ) );
         add_filter( 'template_include',     array( $this, 'site_template' ) );
@@ -50,14 +49,14 @@ class SiteTemplate
      *
      * @return void
      **/
-    public function frontend_scripts() 
-    {
+    public function frontend_scripts(){
+		$settings = get_option('awp_settings');
         global $post;
 		
-        if( !in_array( get_post_type( $post->ID ), array($this->pt, 'survey' ) ) )
+        if( !in_array( get_post_type( $post->ID ), array($this->pt, 'page' ) ) )
             return;
 		
-		if( is_singular('survey') ){
+		if( is_page() && $post->ID == $settings['bb_builder_page'] ){
 			
 			$departments = array();
 			$AutoCompletes = $depts = get_terms( 'site-department', array(
@@ -81,7 +80,6 @@ class SiteTemplate
 		
 		if( is_singular($this->pt) ){
 			wp_register_script( 'flexslider', PLUGINURL . 'js/jquery.flexslider.js', array('jquery') );
-			wp_enqueue_script( 'cBoxScript', PLUGINURL . 'js/jquery.colorbox.js', array('jquery') );
 			
 			wp_enqueue_script('jquery-ui-core');
 			wp_enqueue_script('jquery-ui-tabs');
@@ -91,6 +89,7 @@ class SiteTemplate
 			wp_enqueue_style( 'cBoxStyle', PLUGINURL . 'css/colorbox.css' );
 		}
 		
+		wp_enqueue_script( 'cBoxScript', PLUGINURL . 'js/jquery.colorbox.js', array('jquery') );
 		wp_enqueue_script( 'awpmain', PLUGINURL . 'js/main.js', array('jquery') );
 		wp_localize_script( 'awpmain', 'wpaObj', array('ajaxurl' => admin_url( 'admin-ajax.php' )));
 		
@@ -125,14 +124,19 @@ class SiteTemplate
      * @return string
      **/
     public function site_template( $template ) {
-        $post_types = array( $this->pt, 'survey' );
+		$settings = get_option('awp_settings');
+        $post_types = array( $this->pt );
         $theme = wp_get_theme();
+		global $post;
 
         if ( is_post_type_archive( $post_types ) )
-            $template = $this->path . '/templates/archive-site.php';
+            $template = $this->path . 'templates/archive.php';
 
         if ( is_singular( $post_types ) )
-            $template = $this->path . '/templates/single.php';
+            $template = $this->path . 'templates/single.php';
+		
+		if( is_page() && $post->ID == $settings['bb_builder_page'] )
+			$template = $this->path . 'templates/template-survey.php';
 
         return $template;
     }

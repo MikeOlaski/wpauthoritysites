@@ -2,10 +2,41 @@ jQuery(document).ready(function($) {
 	
 	$('#toplevel_page_wpauthorities, li#toplevel_page_wpauthorities > a').addClass('wp-has-current-submenu wp-menu-open').removeClass('wp-not-current-submenu');
 	
-	$('#awp-evaluate').click(function(e){
+	$('#awp-wp-checker').click(function(e) {
+        // Set Preloader
+		$(this).parents('ul').next('.preloader').show();
+		console.log('Collecting data...');
 		
+		var url = $('#awp-awp-url').val();
+		var id = $('#post_ID').val();
+		if('' == url){
+			url = 'http://' + $('#title').val();
+		}
+		
+		var data = {
+			action: 'wp_checker_js',
+			check_link: url,
+			id: id
+		};
+		
+		console.log('Posting variables...');
+		
+		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
+		$.post(WPAJAX_OBJ.ajax_url, data, function(response) {
+			console.log( 'response is ', response );
+			
+			if('true' == response){
+				window.location.href = WPAJAX_OBJ.post_url + '?post=' + id + '&action=edit&message=1';
+			} else {
+				$(this).next('.preloader').hide();
+				$(this).parent().append('<p style="color:#f00;">Error: Cannot Check for Wordpress.</p>');
+			}
+		});
+    });
+	
+	$('#awp-evaluate').click(function(e){
 		// Set preloader
-		$(this).next('.preloader').show();
+		$(this).parents('ul').next('.preloader').show();
 		console.log('Collecting data...');
 		
 		var url = $('#awp-awp-url').val();
@@ -34,62 +65,105 @@ jQuery(document).ready(function($) {
 		});
 	});
 	
-	$('.wpa-views').each(function(i,e) {
-        $(this).click(function(e) {
-            selector = $(this).attr('data-column');
-			changeViewGroups( $(this), selector );
-			updateUserDefinedView( $(this) );
-			e.preventDefault();
-        });
-    });
+	$('.wpa-views').live('click', function(e) {
+		selector = $(this).attr('data-column');
+		changeViewGroups( $(this), selector );
+		updateUserDefinedView( $(this) );
+		e.preventDefault();
+	});
 	
 	if(WPAJAX_OBJ.defined_view != ''){
 		selector = WPAJAX_OBJ.defined_view;
 		$this = $('a[data-column=' + WPAJAX_OBJ.defined_view + ']');
+		
+		if( !$this.hasClass('current') ){
+			$this.addClass('current');
+		}
+		$('a.wpa-views').not($this).removeClass('current');
+		
 		changeViewGroups( $this, selector );
 		updateUserDefinedView( $this );
-	} else {
-		$('.metabox-prefs .hide-column-tog').each(function(i,e){
-			$(this).attr('checked', false);
-		});
-		
-		$('thead th.manage-column').css('display','none');
-		$('tfoot th.manage-column').css('display','none');
-		$('tbody td').not('.inline-edit-row td:first-child').css('display','none');
-		
-		$('thead th#cb, th#title').css('display','table-cell');
-		$('tfoot th.column-cb, th.column-title').css('display','table-cell');
-		$('td.check-column, td.post-title').css('display','table-cell');
 	}
 	
-	function updateUserDefinedView( $this ){
-		var data = {
-			action: 'user_defined_view_groups',
-			view: $this.attr('data-column')
-		};
-		jQuery.post(WPAJAX_OBJ.ajax_url, data, function(response) {
-			// Silence is golden
+	function updateUserDefinedView( $view ){
+		// before anything else make sure that screen options checkboxes are saved
+		var iTeration = $('.hide-column-tog').length;
+		var dfd=$.Deferred();
+		var hidden;
+		$i = 1;
+		$('.hide-column-tog', '#adv-settings').each(function(i,e) {
+            var $t = $(this);
+			var column = $t.val();
+			//if ( $t.prop('checked') ){
+			
+			console.log( $t.prop('checked') );
+			
+			if( $t.is(':checked') ){
+				$('.column-' + column).show();
+				diff = +1;
+			} else {
+				$('.column-' + column).hide();
+				diff = -1;
+			}
+			
+			var $table = $('table').find('.colspanchange'), n;
+			if ( !$table.length ){
+				//
+			} else {
+				n = parseInt( $table.attr('colspan'), 10 ) + diff;
+				$table.attr('colspan', n.toString());
+			}
+			
+			hidden = $('.manage-column').filter(':hidden').map(function(){
+				return this.id;
+			}).get().join(',');
+			
+			if( iTeration > $i ){
+				dfd.resolve();
+			}
+			$i++;
 		});
+		
+		$.when.apply($, dfd).done(function(){
+			// Save our user defined view links option
+			jQuery.post(WPAJAX_OBJ.ajax_url, {
+					action: 'user_defined_view_groups',
+					view: $view.attr('data-column')
+				}, function(response) {
+					
+			});
+			
+			jQuery.post(WPAJAX_OBJ.ajax_url, {
+				action: 'hidden-columns',
+				hidden: hidden,
+				screenoptionnonce: $('#screenoptionnonce').val(),
+				page: pagenow
+			}, function(a) {
+				console.log( a );
+			});
+		});
+        
 	}
 	
 	function changeViewGroups( $this, selector ){
 		if( $this.hasClass('') ){
 			return;
 		} else {
-			$this.addClass('current').parent().siblings().find('a.wpa-views').removeClass('current');
+			$('a.wpa-views').not($this).removeClass('current');
+			$this.addClass('current');
 		}
 		
 		$('.metabox-prefs .hide-column-tog').each(function(i,e){
 			$(this).attr('checked', false);
 		});
 		
-		$('thead th.manage-column').css('display','none');
-		$('tfoot th.manage-column').css('display','none');
-		$('tbody td').not('.inline-edit-row td:first-child').css('display','none');
+		/*$('table.wp-list-table thead th.manage-column').css('display','none');
+		$('table.wp-list-table tfoot th.manage-column').css('display','none');
+		$('table.wp-list-table tbody td').not('.inline-edit-row td:first-child').css('display','none');
 		
-		$('thead th#cb, th#title').css('display','table-cell');
-		$('tfoot th.column-cb, th.column-title').css('display','table-cell');
-		$('td.check-column, td.post-title').css('display','table-cell');
+		$('table.wp-list-table thead th#cb, th#title').css('display','table-cell');
+		$('table.wp-list-table tfoot th.column-cb, th.column-title').css('display','table-cell');
+		$('table.wp-list-table td.check-column, td.post-title').css('display','table-cell');*/
 		
 		var fields;
 		switch(selector){
@@ -268,9 +342,9 @@ jQuery(document).ready(function($) {
 		
 		jQuery.each(fields, function(i,e){
 			$('input[value='+ e +']').attr('checked','checked');
-			$('th.manage-column#' + e).css('display', 'table-cell');
-			$('tfoot th.manage-column.column-' + e).css('display', 'table-cell');
-			$('td.' + e).css('display', 'table-cell');
+			/*$('table.wp-list-table th.manage-column#' + e).css('display', 'table-cell');
+			$('table.wp-list-table tfoot th.manage-column.column-' + e).css('display', 'table-cell');
+			$('td.' + e).css('display', 'table-cell');*/
 		});
 	}
 	

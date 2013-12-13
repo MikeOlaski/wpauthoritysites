@@ -3,27 +3,6 @@
  * Shortcode scripts
  */
 
-add_action('init', 'bb_builder_callback');
-function bb_builder_callback(){
-	$bb_departments = get_option('bb_departments');
-	
-	if( isset($_POST['bb_builder_callback']) && $_POST['bb_builder_callback'] == 'true'){
-		foreach($_POST as $key=>$val){
-			$$key = $val;
-		}
-		
-		foreach($departments as $dept=>$score){
-			$bb_departments[$dept] = ucwords(str_replace('-', ' ', $dept));
-		}
-		
-		update_option('bb_departments', $bb_departments);
-		
-		wp_die( '<pre>' . print_r($_POST, true) . '</pre>' );
-	}
-	
-	return;
-}
-
 add_shortcode('business_builder', 'shortcode_bbuilder_callback');
 function shortcode_bbuilder_callback( $atts, $content = null ){
 	$bb_departments = get_option('bb_departments');

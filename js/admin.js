@@ -43,4 +43,14 @@ jQuery(document).ready(function($) {
 	base.addClass('base-menu-site');
 	target.addClass('menu-tags-site');
 	subsubmenu.appendTo(target);
+	
+	if( $('#has_custom_row').length > 0 ){
+		$('#has_custom_row').change(function(e) {
+			if( $(this).is(':checked') ){
+				$('tr.csv_cutom_row').show();
+			} else {
+				$('tr.csv_cutom_row').hide();
+			}
+        });
+	}
 });

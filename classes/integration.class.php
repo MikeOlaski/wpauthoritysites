@@ -13,6 +13,7 @@ function wpa_base_people_metabox( $post ){
 	$fname = get_post_meta( $post->ID, '_base_people_fname', true );
 	$lname = get_post_meta( $post->ID, '_base_people_lname', true );
 	$email = get_post_meta( $post->ID, '_base_people_email', true );
+	$website = get_post_meta( $post->ID, '_base_people_website', true );
 	$urole = get_post_meta( $post->ID, '_base_people_role', true );
 	
 	?><table class="woo_metaboxes_table">
@@ -29,6 +30,11 @@ function wpa_base_people_metabox( $post ){
         <tr>
             <th class="woo_metabox_names"><label class="selectit" for="_base_people_email"><?php _e( "Email", 'wpa' ); ?></label></th>
             <td><input class="regular-text" type="text" id="_base_people_email" name="_base_people_email" value="<?php echo esc_attr( $email ) ?>" /></td>
+        </tr>
+        
+        <tr>
+            <th class="woo_metabox_names"><label class="selectit" for="_base_people_website"><?php _e( "Website", 'wpa' ); ?></label></th>
+            <td><input class="regular-text" type="text" id="_base_people_website" name="_base_people_website" value="<?php echo esc_attr( $website ) ?>" /></td>
         </tr>
         
         <tr>

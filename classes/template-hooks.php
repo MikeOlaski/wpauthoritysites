@@ -58,56 +58,33 @@ function wpa_layout_body_class( $classes ){
 	$settings = get_option('awp_settings');
 	global $post, $woo_options;
 	
-	if(is_single() && $post->post_type == 'site' && $settings['single_sidebar'] != ''){
-		if($settings['single_sidebar'] == '0'){
+	if( is_single() && $post->post_type == 'site' ){
+		if( '' == get_post_meta( $post->ID, 'layout', true ) ){
 			$layout = 'one-col';
-		} else {
-			$layout = 'two-col-left';
+			
+			unset( $classes[array_search('one-col',$classes)] );
+			unset( $classes[array_search('two-col-left',$classes)] );
+			unset( $classes[array_search('two-col-right',$classes)] );
+			unset( $classes[array_search('three-col-left',$classes)] );
+			unset( $classes[array_search('three-col-right',$classes)] );
+			unset( $classes[array_search('three-col-middle',$classes)] );
+			
+			unset( $classes[array_search('one-col' . '-' . $width,$classes)] );
+			unset( $classes[array_search('two-col-left' . '-' . $width,$classes)] );
+			unset( $classes[array_search('two-col-right' . '-' . $width,$classes)] );
+			unset( $classes[array_search('three-col-left' . '-' . $width,$classes)] );
+			unset( $classes[array_search('three-col-right' . '-' . $width,$classes)] );
+			unset( $classes[array_search('three-col-middle' . '-' . $width,$classes)] );
+			
+			// Specify site width
+			$width = intval( str_replace( 'px', '', get_option( 'woo_layout_width', '960' ) ) );
+			
+			$classes[] = $layout;
+			$classes[] = $layout . '-' . $width;
 		}
-		
-		unset( $classes[array_search('one-col',$classes)] );
-		unset( $classes[array_search('two-col-left',$classes)] );
-		unset( $classes[array_search('two-col-right',$classes)] );
-		unset( $classes[array_search('three-col-left',$classes)] );
-		unset( $classes[array_search('three-col-right',$classes)] );
-		unset( $classes[array_search('three-col-middle',$classes)] );
-		
-		unset( $classes[array_search('one-col' . '-' . $width,$classes)] );
-		unset( $classes[array_search('two-col-left' . '-' . $width,$classes)] );
-		unset( $classes[array_search('two-col-right' . '-' . $width,$classes)] );
-		unset( $classes[array_search('three-col-left' . '-' . $width,$classes)] );
-		unset( $classes[array_search('three-col-right' . '-' . $width,$classes)] );
-		unset( $classes[array_search('three-col-middle' . '-' . $width,$classes)] );
-		
-		// Specify site width
-		$width = intval( str_replace( 'px', '', get_option( 'woo_layout_width', '960' ) ) );
-		
-		$classes[] = $layout;
-		$classes[] = $layout . '-' . $width;
 	}
 	
-	if( is_single() && $post->post_type == 'survey' ){
-		$layout = 'two-col-left';
-		
-		unset( $classes[array_search('one-col',$classes)] );
-		unset( $classes[array_search('two-col-left',$classes)] );
-		unset( $classes[array_search('two-col-right',$classes)] );
-		unset( $classes[array_search('three-col-left',$classes)] );
-		unset( $classes[array_search('three-col-right',$classes)] );
-		unset( $classes[array_search('three-col-middle',$classes)] );
-		
-		unset( $classes[array_search('one-col' . '-' . $width,$classes)] );
-		unset( $classes[array_search('two-col-left' . '-' . $width,$classes)] );
-		unset( $classes[array_search('two-col-right' . '-' . $width,$classes)] );
-		unset( $classes[array_search('three-col-left' . '-' . $width,$classes)] );
-		unset( $classes[array_search('three-col-right' . '-' . $width,$classes)] );
-		unset( $classes[array_search('three-col-middle' . '-' . $width,$classes)] );
-		
-		// Specify site width
-		$width = intval( str_replace( 'px', '', get_option( 'woo_layout_width', '960' ) ) );
-		
-		$classes[] = $layout;
-		$classes[] = $layout . '-' . $width;
+	if( is_page() && $post->ID == $settings['bb_builder_page'] ){
 		$classes[] = 'bb_builder_page';
 	}
 	
@@ -117,9 +94,10 @@ function wpa_layout_body_class( $classes ){
 // Canvas theme Fix for version 5.2.7 and later
 add_filter( 'post_class', 'wpa_survey_post_class', 50 );
 function wpa_survey_post_class( $classes ){
+	$settings = get_option('awp_settings');
 	global $post;
 	
-	if( is_single() && 'survey' == $post->post_type ){
+	if( is_page() && $post->ID == $settings['bb_builder_page'] ){
 		unset($classes[ array_search('post', $classes) ]);
 	}
 	
@@ -672,20 +650,27 @@ function wpa_metrics_table(){
 	}
 }
 
-add_action('wpa_content_after', 'survey_popup', 10);
-function survey_popup(){
-	if( is_singular('survey') ){
-		?><div class="wpa_popup" id="wpa_help_popup">
-        	<p><span class="wpa_popup_icon"></span>
-			<?php _e('Have you completed all the fields marked in orange?'); ?><br>
-			<?php _e('If you need help, please watch the video.'); ?></p>
+add_filter('after_bb_builder_form', 'survey_popup', 10);
+function survey_popup( $after ){
+	$settings = get_option('awp_settings');
+	global $post;
+	
+	if( is_page() && $post->ID == $settings['bb_builder_page'] ){
+		$after = '<div style="display:none;"><div class="wpa_popup" id="wpa_help_popup">';
+        	$after .= '<p><span class="wpa_popup_icon"></span>';
+			$after .= __('Have you completed all the fields marked in orange?');
+			$after .= '<br>';
+			$after .= __('If you need help, please watch the video.');
+			$after .= '</p>';
             
-            <div class="wpa_popup_actions">
-            	<a href="javascript:void(0)" id="cancel_submit" class="wpa_button cancel">Cancel</a>
-            	<a href="javascript:void(0)" id="submit_survey" class="wpa_button submit">Continue</a>
-            </div>
-            
-            <div class="clear"></div>
-		</div><?php
+			$after .= '<div class="wpa_popup_actions">';
+				$after .= '<input type="button" id="cancel_submit" class="wpa_button cancel" value="Cancel" />';
+            	$after .= '<input type="submit" id="submit_survey" class="wpa_button submit" value="Continue" />';
+			$after .= '</div>';
+			
+			$after .= '<div class="clear"></div>';
+		$after .= '</div></div>';
 	}
+	
+	return $after;
 }

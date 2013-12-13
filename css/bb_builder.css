@@ -177,10 +177,6 @@
 	width: 80px;
 }
 
-.bb_builder_submit{
-	float: left;
-}
-
 .bb_builder .ui-add-button{
 	background: url(../images/ui-add-button.png) no-repeat top left;
 	display: inline-block;
@@ -241,6 +237,11 @@
 }
 
 .field-group{
+	margin-bottom: 10px;
+}
+
+.rightAlign{
+	text-align: right;
 }
 
 .field-group label{
@@ -252,6 +253,7 @@
 .field-group input[type=email],
 .field-group input[type=password]{
 	width: 70%;
+	margin: 0;
 	
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;

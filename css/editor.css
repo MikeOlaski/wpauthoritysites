@@ -1,3 +1,12 @@
+.wpas-view-groups{
+	width: 700px;
+	float: left;
+}
+
+ul.subsubsub{
+	margin: 0;
+}
+
 select[name=seo_filter]{
 	display: none;
 }
@@ -233,6 +242,11 @@ select[name=seo_filter]{
 
 .wrap{
 	position: relative;
+	z-index: 1;
+}
+
+#screen-meta-links .screen-meta-toggle{
+	z-index: 9;
 }
 
 .awp-js-popup{

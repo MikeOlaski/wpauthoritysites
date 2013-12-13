@@ -7,6 +7,7 @@ class Sites_CPT{
 	
 	function __construct(){
 		// Enqueue Scripts
+		add_action( 'admin_head-post-new.php', array($this, 'site_manager_scripts') );
 		add_action( 'admin_head-post.php', array($this, 'site_manager_scripts') );
 		add_action( 'admin_head-edit.php', array($this, 'site_manager_scripts') );
 		
@@ -22,6 +23,7 @@ class Sites_CPT{
 		add_filter( 'parse_query', array($this, 'convert_term_id_to_taxonomy_term_in_query') );
 		
 		// Add Bulk action item
+		add_filter( 'bulk_post_updated_messages', array($this, 'site_bulk_post_updated_messages_filter'), 10, 2 );
 		add_action( 'admin_footer-edit.php', array($this, 'site_manager_bulk_action_item') );
 		add_action( 'load-edit.php', array($this, 'site_manager_bulk_action_handle') );
 		
@@ -41,10 +43,63 @@ class Sites_CPT{
 		
 		// Add filter
 		add_action( 'restrict_manage_posts', array($this, 'filter_restrict_manage_posts_site'), 10 );
+		
+		// View Groups
+		add_action( 'admin_footer-edit.php', array($this, 'wpas_view_groups') );
+	}
+	
+	function wpas_view_groups(){
+		global $post;
+		
+		if( $post->post_type == 'site' ){
+			?><div rel="wpas-view-groups" style="display:none;">
+				<ul class="subsubsub clear">
+					<li><a href="javascript:void(0);" data-column="action" class="wpa-views">Action</a></li>
+				</ul>
+				<ul class="subsubsub clear">
+					<li><a href="javascript:void(0);" data-column="site" class="wpa-views">Site</a> |</li>
+					<li><a href="javascript:void(0);" data-column="project" class="wpa-views">Team</a> |</li>
+					<li><a href="javascript:void(0);" data-column="framework" class="wpa-views">Framework</a> |</li>
+					<li><a href="javascript:void(0);" data-column="authors" class="wpa-views">Authors</a> |</li>
+					<li><a href="javascript:void(0);" data-column="content" class="wpa-views">Content</a> |</li>
+					<li><a href="javascript:void(0);" data-column="products" class="wpa-views">Products</a> |</li>
+					<li><a href="javascript:void(0);" data-column="systems" class="wpa-views">Systems</a> |</li>
+					<li><a href="javascript:void(0);" data-column="valuation" class="wpa-views">Valuation</a></li>
+				</ul>
+				<ul class="subsubsub clear">
+					<li><a href="javascript:void(0);" data-column="links" class="wpa-views">Links</a> |</li>
+					<li><a href="javascript:void(0);" data-column="social" class="wpa-views">Social</a> |</li>
+					<li><a href="javascript:void(0);" data-column="buzz" class="wpa-views">Buzz</a> |</li>
+					<li><a href="javascript:void(0);" data-column="community" class="wpa-views">Community</a> |</li>
+					<li><a href="javascript:void(0);" data-column="scores" class="wpa-views">Scores</a></li>
+				</ul>
+				<ul class="subsubsub clear">
+					<li><a href="<?php echo admin_url('edit.php?post_type=site&site-type=wordpress'); ?>"><?php _e('WordPress Sites', 'wpas'); ?></a> |</li>
+					<li><a href="<?php echo admin_url('edit.php?site-type=authority+NotWordpress&post_type=site'); ?>"><?php _e('Authority Sites', 'wpas'); ?></a> |</li>
+					<li><a href="<?php echo admin_url('edit.php?post_type=site&site-type=authority+wordpress'); ?>"><?php _e('WordPress Authority Sites', 'wpas'); ?></a> |</li>
+					<li><a href="<?php echo admin_url('edit.php?post_type=site'); ?>"><?php _e('Sites', 'wpas'); ?></a> |</li>
+					<li><a href="<?php echo admin_url('edit.php?post_status=uncheck&post_type=site'); ?>"><?php _e('UnChecked', 'wpas'); ?></a> |</li>
+					<li><a href="<?php echo admin_url('edit.php?post_type=site&site-status=NotAudited'); ?>"><?php _e('UnAudited Sites', 'wpas'); ?></a></li>
+				</ul>
+				<div class="clear"></div>
+			</div>
+			
+			<script type="text/javascript">
+				jQuery(document).ready(function($) {
+					var viewGroupsTemplate = $('div[rel=wpas-view-groups]').clone();
+					viewGroupsTemplate.attr('class', 'wpas-view-groups clear').removeAttr('rel');
+					viewGroupsTemplate.insertAfter('.wrap .subsubsub:first').show();
+					
+					$('div[rel=wpas-view-groups]').remove();
+				});
+			</script><?php
+		}
 	}
 	
 	function filter_restrict_manage_posts_site(){
 		$type = isset($_GET['post_type']) ? $_GET['post_type'] : 'post';
+		$settings = get_option('awp_settings');
+		
 		if ('site' == $type){
 			$statuses = get_terms('site-status', array(
 				'orderby' 		=> 'count',
@@ -60,11 +115,15 @@ class Sites_CPT{
             	<option value=""><?php _e('Filter Status By ', 'wpa'); ?></option><?php
 				$current_s = isset($_GET['site-status']) ? $_GET['site-status'] : '';
 				foreach ($statuses as $status) {
-					?><option value="<?php echo $status->slug ?>" <?php selected( $current_s, $status->slug ); ?>><?php echo $status->name; ?></option><?php
+					if( $settings['hide_timestamp'] == 'true' && preg_match('/[;|:]/', $status->name, $matches) ){
+						// continue;
+					} else {
+						?><option value="<?php echo $status->slug ?>" <?php selected( $current_s, $status->slug ); ?>><?php echo $status->name; ?></option><?php
+					}
                 }
         	?></select>
             
-            <select name="site-status">
+            <select name="site-type">
             	<option value=""><?php _e('Filter Type By ', 'wpa'); ?></option><?php
 				$current_t = isset($_GET['site-type']) ? $_GET['site-type'] : '';
 				foreach ($types as $type) {
@@ -76,7 +135,7 @@ class Sites_CPT{
 	
 	function add_action_row($actions, $post){
 		$acts = array();
-		if ($post->post_type =="site"){
+		if ($post->post_type == "site" && $post->post_status != 'trash'){
 			$audit = add_query_arg(
 				array(
 					'post_type' => 'site',
@@ -249,12 +308,12 @@ class Sites_CPT{
 	
 	function wpa_register_site_status(){
 		register_post_status( 'uncheck', array(
-			'label'	=> _x( 'Uncheck', 'post' ),
+			'label'	=> _x( 'Unchecked', 'post' ),
 			'public' => true,
 			'exclude_from_search' => false,
 			'show_in_admin_all_list' => true,
 			'show_in_admin_status_list' => true,
-			'label_count' => _n_noop( 'Uncheck <span class="count">(%s)</span>', 'Uncheck <span class="count">(%s)</span>' )
+			'label_count' => _n_noop( 'Unchecked <span class="count">(%s)</span>', 'Unchecked <span class="count">(%s)</span>' )
 		));
 	}
 	
@@ -303,11 +362,40 @@ class Sites_CPT{
 	
 	// Show custom column data
 	function site_columns_content($column_name, $post_ID) {
+		$settings = get_option('awp_settings');
+		
 		switch($column_name){
 			case 'rank':
 				$rank = get_post_meta($post_ID, 'rating', true);
 				$rank = ($rank) ? $rank : get_post_meta($post_ID, 'awp-alexa-rank', true);
 				echo ($rank) ? __( $rank ) : __(0);
+				break;
+			
+			case 'site-status':
+				$terms = wp_get_post_terms( $post_ID, $column_name );
+				
+				if( $terms ){
+					$max = count($terms);
+					$i = 1;
+					$content = array();
+					foreach( $terms as $tm ){
+						if( $settings['hide_timestamp'] == 'true' ){
+							if( !preg_match('/[;|:]/', $tm->name, $matches) ){
+								$tlink = sprintf( 'edit.php?post_type=site&%s=%s', $column_name, $tm->slug );
+								$content[] = '<a href="' . $tlink . '">' . $tm->name . '</a>';
+							}
+						} else {
+							$tlink = sprintf( 'edit.php?post_type=site&%s=%s', $column_name, $tm->slug );
+							$content[] = '<a href="' . $tlink . '">' . $tm->name . '</a>';
+                            // if($i < $max){ echo ', '; }
+						}
+						$i++;
+					}
+					
+					echo implode(', ', $content);
+				} else {
+					echo '—';
+				}
 				break;
 			
 			case 'taxonomy-site-category':
@@ -366,7 +454,7 @@ class Sites_CPT{
 		
 		add_meta_box(
             __('site_manage_evaluate'),
-            __( 'Site Evaluator', 'awp' ),
+            __( 'WordPress Authority Tools', 'awp' ),
             array('Sites_CPT', 'metabox_evaluate'),
 			'site',
 			'side',
@@ -375,10 +463,43 @@ class Sites_CPT{
 	}
 	
 	function metabox_evaluate(){
-		?><p>Click "<tt>Audit This Site</tt>" to get all the data of this site</p>
-        <input name="awp-evaluate" type="button" class="button button-primary button-large" id="awp-evaluate" accesskey="p" value="Audit this Site">
-        <img src="<?php echo PLUGINURL; ?>/images/preload.gif" class="preloader" align="preload" style="display:none;" />
-		<?php
+		global $post;
+		
+		$content = sprintf('<p>%s</p>', __('Click on "<tt>Audit</tt>" link to grab all the metrics of this site', 'wpas'));
+		
+		if( $audit = get_post_meta($post->ID, '_wpa_last_audit', true) ){
+			$audit = sprintf('<small>(Last run %s)</small>', date('y.m.d;H:i', strtotime($audit)) );
+		} else {
+			$audit = '<small>(Never ran)</small>';
+		}
+		
+		if( $check4wp = get_post_meta($post->ID, '_wpa_last_wpcheck', true) ){
+			$check4wp = sprintf('<small>(Last run %s)</small>', date('y.m.d;H:i', strtotime($audit)) );;
+		} else {
+			$check4wp = '<small>(Never ran)</small>';
+		}
+		
+		$content .= '<ul>';
+			$content .= sprintf(
+				'<li><a class="wpa-post-tools" id="awp-evaluate" href="javascript:void(0);">%s</a> %s</li>',
+				'Run Auditor',
+				$audit
+			);
+			$content .= sprintf(
+				'<li><a class="wpa-post-tools" id="awp-wp-checker" id="" href="javascript:void(0);">%s</a> %s</li>',
+				'Check for Wordpress',
+				$check4wp
+			);
+			$content .= sprintf(
+				'<li><a class="wpa-post-tools" id="awp-authority-checker" id="" href="javascript:void(0);">%s</a> %s</li>',
+				'Check for Authority',
+				$check4Au
+			);
+		$content .= '</ul>';
+		
+        $content .= sprintf('<img src="%s" class="preloader" align="preload" style="display:none;" />', PLUGINURL . '/images/preload.gif');
+		
+		echo $content;
 	}
 	
 	function add_filter_boxes(){
@@ -386,8 +507,6 @@ class Sites_CPT{
 		global $wp_query;
 		
 		$screen = get_current_screen();
-		
-		/*?><pre><?php print_r($screen); ?></pre><?php wp_die();*/
 		
 		if ($typenow == 'site') {
 			
@@ -477,24 +596,6 @@ class Sites_CPT{
 						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
                             <div class="wp-menu-arrow"><div></div></div></li><?php
 					}
-				
-				/*$i = 0;
-				foreach( $fields as $head ){
-					if( ($head['type'] == 'heading') || ($head['type'] == 'separator') ){
-						if( $head['type'] == 'heading' ){
-							?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
-                            <div class="wp-menu-arrow"><div></div></div></li><?php
-						}
-						if( $head['type'] == 'separator' ){
-							if($i >= 1){
-								?><li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li><?php
-							}
-							?><li class="awp-tab not-tab"><a href="javascript:void(0);"><?php echo $head['name']; ?></a></li><?php
-							$disabled[] = $i;
-						}
-						$i++;
-					}
-				}*/
 			?></ul>
             
             <div class="awp-panels"><?php
@@ -548,27 +649,7 @@ class Sites_CPT{
             });
 		</script>
         
-        <div class="clear"></div>
-		<?php
-		
-		/*$exclude = get_post_meta($post_id, 'exclude_from_lists', true);
-		$rank = get_post_meta($post_id, 'rating', true);
-		
-		?><table class="form-table">
-        	<tr>
-            	<th scope="row"><label for="exclude_from_lists"><strong>Exclude on Lists</strong></label></th>
-                <td>
-                	<input type="checkbox" name="exclude_from_lists" id="exclude_from_lists" value="true" <?php checked($exclude, 'true'); ?> />
-                    <label for="exclude_from_lists">Exclude</label>
-                </td>
-            </tr>
-        	<tr>
-            	<th scope="row"><label for="rating"><strong>Rank:</strong></label></th>
-                <td>
-                	<input type="text" name="rating" id="rating" value="<?php echo ($rank) ? $rank : ''; ?>" />
-                </td>
-            </tr>
-        </table><?php*/
+        <div class="clear"></div><?php
 	}
 	
 	function site_manager_meta_fields( $controls ){
@@ -699,17 +780,17 @@ class Sites_CPT{
 	function site_manager_bulk_action_item(){
 		global $post;
 		
-		if($post->post_type == 'site') {
+		if($post->post_type == 'site' && $post->post_status != 'trash') {
 			?><script type="text/javascript">
 				jQuery(document).ready(function($) {
-					jQuery('<option>').val('wp_checker').text('Check for Wordpress').prependTo("select[name='action']");
-					jQuery('<option>').val('wp_checker').text('Check for Wordpress').prependTo("select[name='action2']");
+					jQuery('<option>').val('evaluate').text('Audit').appendTo("select[name='action']");
+					jQuery('<option>').val('evaluate').text('Audit').appendTo("select[name='action2']");
 					
-					jQuery('<option>').val('auth_checker').text('Check for Authority').prependTo("select[name='action']");
-					jQuery('<option>').val('auth_checker').text('Check for Authority').prependTo("select[name='action2']");
+					jQuery('<option>').val('auth_checker').text('Check for Authority').appendTo("select[name='action']");
+					jQuery('<option>').val('auth_checker').text('Check for Authority').appendTo("select[name='action2']");
 					
-					jQuery('<option>').val('evaluate').text('Audit').prependTo("select[name='action']");
-					jQuery('<option>').val('evaluate').text('Audit').prependTo("select[name='action2']");
+					jQuery('<option>').val('wp_checker').text('Check for Wordpress').appendTo("select[name='action']");
+					jQuery('<option>').val('wp_checker').text('Check for Wordpress').appendTo("select[name='action2']");
 					
 					<?php if( isset($_REQUEST['audited']) ){ ?>
 						<?php if(!empty($_REQUEST['audited'])){ ?>
@@ -720,6 +801,18 @@ class Sites_CPT{
 				});
 			</script><?
 		}
+	}
+	
+	function site_bulk_post_updated_messages_filter( $bulk_messages, $bulk_counts ) {
+		$bulk_messages['site'] = array(
+			'updated'   => _n( '%s site updated.', '%s sites updated.', $bulk_counts['updated'] ),
+			'locked'    => _n( '%s site not updated, somebody is editing it.', '%s sites not updated, somebody is editing them.', $bulk_counts['locked'] ),
+			'deleted'   => _n( '%s site permanently deleted.', '%s sites permanently deleted.', $bulk_counts['deleted'] ),
+			'trashed'   => _n( '%s site moved to the Trash.', '%s sites moved to the Trash.', $bulk_counts['trashed'] ),
+			'untrashed' => _n( '%s site restored from the Trash.', '%s sites restored from the Trash.', $bulk_counts['untrashed'] )
+		);
+	
+		return $bulk_messages;
 	}
 	
 	function site_manager_bulk_action_handle(){
@@ -742,8 +835,6 @@ class Sites_CPT{
 			}
 			
 			return;
-			
-			/*?><pre><?php print_r( $_REQUEST ); ?></pre><?php wp_die();*/
 		}
 	}
 	
@@ -756,26 +847,6 @@ class Sites_CPT{
 	}
 }
 
-function awp_add_view_links($views){
-	
-	$views[] = '<a href="javascript:void(0)" data-column="site" class="wpa-views">Site</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="project" class="wpa-views">Team</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="links" class="wpa-views">Links</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="social" class="wpa-views">Social</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="buzz" class="wpa-views">Buzz</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="framework" class="wpa-views">Framework</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="community" class="wpa-views">Community</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="authors" class="wpa-views">Authors</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="content" class="wpa-views">Content</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="products" class="wpa-views">Products</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="systems" class="wpa-views">Systems</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="valuation" class="wpa-views">Valuation</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="scores" class="wpa-views">Scores</a>';
-	$views[] = '<a href="javascript:void(0)" data-column="action" class="wpa-views">Action</a>';
-	
-	return $views;
-}
-
 global $fields;
 $fields = wpa_default_metrics();
 
@@ -786,8 +857,7 @@ $custom_post_site->set_fields($fields);
 function site_manager_remove_meta_box(){
 	remove_meta_box( 'op_seo_meta_box', 'site', 'advanced' );
 	remove_meta_box( 'su-main-setting', 'site', 'advanced' );
-	remove_meta_box( 'woothemes-settings' , 'site' , 'normal' );
+	// remove_meta_box( 'woothemes-settings' , 'site' , 'normal' );
 }
 
 add_action( 'add_meta_boxes', 'site_manager_remove_meta_box', 40 );
-add_filter( 'views_edit-site', 'awp_add_view_links' );

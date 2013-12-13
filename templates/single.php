@@ -36,7 +36,7 @@ wpa_content_before();
 		if( ($settings['single_sidebar'] != '0' || $settings['single_sidebar'] != '') || is_singular('survey') )
 			load_template( trailingslashit( PLUGINPATH ) . '/templates/sidebar-'. $post->post_type .'.php' );
     
-    ?><div class="clear"></div>
+    	?><div class="clear"></div>
     </div><!-- /#main-sidebar-container --><?php
     
     get_sidebar('alt');

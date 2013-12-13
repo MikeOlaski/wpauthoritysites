@@ -2,7 +2,13 @@ jQuery(document).ready(function($){
 	jQuery( "#bb_dept_templates" ).sortable({
 		placeholder: "ui-state-highlight",
 		forcePlaceholderSize: true,
-		connectWith: "ul"
+		connectWith: "ul",
+		stop: function(event, ui) {
+    		console.log( ui.item );
+			ui.item.find('input').each(function(i,e){
+				$(this).attr('name',$(this).attr('rel')).removeAttr('rel');
+			});
+    	}
 	});
 	
 	jQuery( "#bb_sortable" ).sortable({
@@ -311,67 +317,40 @@ jQuery(document).ready(function($){
 	updateAvgScale(false);
 	
 	$('input[name=survey_taker_btn').click(function(e){
-		$('#wpa_help_popup').fadeIn(100, '', function(e){
-			$(this).center();
-		});
+		$.colorbox({inline:true, href:'#wpa_help_popup', width: 430, height: 125});
+		/*$('#wpa_help_popup')
+			.parents('.wpa_popup_wrapper')
+			.css({
+				'position': 'fixed',
+				'height': $('body').height(),
+				'width': $('body').width()
+			}).fadeIn(100, '', function(e){
+				$('#wpa_help_popup').center();
+		});*/
 		
 		e.preventDefault();
 	});
 	
-	$('a#cancel_submit').click(function(e) {
-        $('#wpa_help_popup').fadeOut(100, '', function(e){
-			$(this).center();
-		});
+	$('#cancel_submit').click(function(e) {
+		$.colorbox.close();
+        /*$('#wpa_help_popup')
+			.parents('.wpa_popup_wrapper')
+			.fadeOut(100, '', function(e){
+				$(this).center();
+		});*/
 		
 		e.preventDefault();
     });
 	
-	$('a#submit_survey').click(function(e){
-		
-		// STEP 1: Watch the video
-		
-		// STEP 2: Create the people/user CPT
-		/*var data = {
-			action: 'submit_people',
-			first_name: $('#survey_fname').val(),
-			last_name: $('#survey_lname').val(),
-			email: $('#survey_email').val(),
-			role: $('#survey_role').val()
-		};
-		
-		$.post(wpaObj.ajaxurl, data, function(response) {
-			if( response == 'true' ){
-				$('#survey_fname').val('');
-				$('#survey_lname').val('');
-				$('#survey_email').val('');
-				$('#survey_role').val('');
-			} else {
-				alert( response );
-			}
-		});*/
-		
-		// STEP 3: Get the survey data and scores
-		var survey = {
-			action: 'submit_departments',
-			departments: $('form[name=bb_builder_form]').serialize()
-		};
-		
+	$('#submit_survey').click(function(e){
+		$.colorbox.close();
 		$('form[name=bb_builder_form]').submit();
-		
-		$('#wpa_help_popup').center();
-		$('#wpa_help_popup').fadeOut(100, '', function(e){
-			$(this).center();
-		});
 		
 		e.preventDefault();
 	});
-	
-	jQuery(window).scroll(function() {
-		jQuery('#wpa_help_popup').center();
-	});
 });
 
-(function($){
+/*(function($){
 	$.fn.extend({
 		center: function () {
 			return this.each(function() {
@@ -382,11 +361,11 @@ jQuery(document).ready(function($){
 				$(this).css({
 					position: 'absolute',
 					'margin-top': 0 - ($(this).height() / 2),
-					'margin-left': 0 - ($(this).width() / 2),
+					//'margin-left': 0 - ($(this).width() / 2),
 					top: (top > 0 ? top : 0)+'px',
 					left: (left > 0 ? left : 0)+'px'
 				});
 			});
 		}
 	}); 
-})(jQuery);
+})(jQuery);*/

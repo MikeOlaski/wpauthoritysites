@@ -40,9 +40,11 @@ if(isset($_REQUEST['meta_key'])){
 	$wp_query->set("meta_key", $meta);
 }
 
-$wp_query->get_posts();
+$wp_query->set("tax_query", apply_filters('wpa_archive_wp_query', $wp_query ) );
 
-//wp_die( '<pre>' . print_r( $wp_query, true ) . '</pre>' );
+$wp_query->get_posts( $wp_query );
+
+// wp_die( '<pre>' . print_r($wp_query->tax_query, true) . '</pre>' );
 
 $columns = array();
 

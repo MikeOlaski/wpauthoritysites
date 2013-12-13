@@ -21,7 +21,6 @@ load_template( trailingslashit( PLUGINPATH ) . 'functions.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/simple_html_dom.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/admin-ajax.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/posts.class.php' );
-load_template( trailingslashit( PLUGINPATH ) . 'classes/base.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/cron.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/integration.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/bb_builder.class.php' );
@@ -52,6 +51,22 @@ function awp_set_options() {
 	add_option('awp_requests', array());
 	add_option('awp_settings', array());
 	add_option('wpa_metrics', array());
+	
+	// Default Authority Business Builder departments
+	add_option('bb_builder_depts', array(
+		'management' => 'Management',
+		'production' => 'Production',
+		'project-business' => 'Project Business',
+		'discovery' => 'Discovery',
+		'operation' => 'Operation',
+		'technology' => 'Technology',
+		'content' => 'Content',
+		'marketing' => 'Marketing',
+		'sales' => 'Sales',
+		'service' => 'Service',
+		'system' => 'System',
+		'information' => 'Information'
+	));
 }
 
 function awp_deactivate(){
@@ -79,11 +94,32 @@ function awp_sidebars(){
 	) );
 }
 
-add_action('template_redirect', 'awp_archive_tax_query');
-function awp_archive_tax_query(){
+add_filter('nav_menu_css_class', 'wpa_clean_nav_menu');
+function wpa_clean_nav_menu($classes){
+	switch (get_post_type()){
+		case 'site':
+		case 'survey':
+			$classes = array_filter($classes, "remove_parent_classes");
+			break;
+	}
+	return $classes;
+}
+
+if(!function_exists('remove_parent_classes')){
+	function remove_parent_classes($var){
+		if( $var == 'current_page_parent' ){
+			return false;
+		}
+		return true;
+	}
+}
+
+// add_action('template_redirect', 'awp_archive_tax_query');
+add_filter('wpa_archive_wp_query', 'awp_archive_tax_query');
+function awp_archive_tax_query( $tax_query ){
 	global $post, $wp_query;
 	$settings = get_option('awp_settings');
-	$query = array('relation' => 'OR');
+	$query = array('relation' => 'AND');
 	
 	if( !$settings['xtype'] )
 		$settings['xtype'] = array();
@@ -91,59 +127,63 @@ function awp_archive_tax_query(){
 	if( !$settings['xStatus'] )
 		$settings['xStatus'] = array();
 	
-	$operator = ($settings['action_taxonomy'] == 'include') ? 'IN' : 'NOT IN';
-	
-	$types = array();
-	if( $typeObj = get_terms('site-type', array(
-			'orderby'       => 'name', 
-			'order'         => 'ASC',
-			'hide_empty'    => false
-		)) ){
-		
-		foreach($typeObj as $type){
-			if( in_array($type->slug, $settings['xtype']) ){
-				$types[] = $type->slug;
+	$type_operator = $settings['action_taxonomy_type'];
+	if( $type_operator ){
+		$types = array();
+		if( $typeObj = get_terms('site-type', array(
+				'orderby'       => 'name', 
+				'order'         => 'ASC',
+				'hide_empty'    => false
+			)) ){
+			
+			foreach($typeObj as $type){
+				if( in_array($type->slug, $settings['xtype']) ){
+					$types[] = $type->slug;
+				}
 			}
-		}
-		
-		if( !empty($types) ){
-			$query[] = array(
-				'taxonomy' => 'site-type',
-				'field' => 'slug',
-				'terms' => $types,
-				'operator' => $operator
-			);
+			
+			if( !empty($types) ){
+				$query[] = array(
+					'taxonomy' => 'site-type',
+					'field' => 'slug',
+					'terms' => $types,
+					'operator' => $type_operator
+				);
+			}
 		}
 	}
 	
-	$statuses = array();
-	if( $statusObj = get_terms('site-status', array(
-			'orderby'       => 'name', 
-			'order'         => 'ASC',
-			'hide_empty'    => false
-		)) ){
-		
-		foreach($statusObj as $status){
-			if( in_array($status->slug, $settings['xStatus']) ) {
-				$statuses[] = $status->slug;
+	$status_operator = $settings['action_taxonomy_status'];
+	if( $status_operator ){
+		$statuses = array();
+		if( $statusObj = get_terms('site-status', array(
+				'orderby'       => 'name', 
+				'order'         => 'ASC',
+				'hide_empty'    => false
+			)) ){
+			
+			foreach($statusObj as $status){
+				if( in_array($status->slug, $settings['xStatus']) ) {
+					$statuses[] = $status->slug;
+				}
 			}
-		}
-		
-		if( !empty($statuses) ){
-			$query[] = array(
-				'taxonomy' => 'site-status',
-				'field' => 'slug',
-				'terms' => $statuses,
-				'operator' => $operator
-			);
+			
+			if( !empty($statuses) ){
+				$query[] = array(
+					'taxonomy' => 'site-status',
+					'field' => 'slug',
+					'terms' => $statuses,
+					'operator' => $status_operator
+				);
+			}
 		}
 	}
 	
 	if ( is_post_type_archive( array('site') ) ){
-		$wp_query->set("tax_query", $query);
+		$wp_query->tax_query = $query;
 	}
 	
-	$wp_query->get_posts();
+	return $wp_query->tax_query;
 }
 
 add_action( 'wp_loaded', 'awp_options_handle' );
@@ -161,7 +201,7 @@ function awp_options_handle(){
 		if( ( isset( $_REQUEST['action'] ) && 'wp_checker' == $_REQUEST['action'] ) || ( isset( $_REQUEST['action2'] ) && 'wp_checker' == $_REQUEST['action2'] ) ){
 			$links = array();
 			foreach($_REQUEST['post'] as $pID){
-				$links[$pID] = get_the_title($pID);
+				$links[$pID] = strtolower(get_the_title($pID));
 			}
 			
 			$scrape = new scrapeWordpress();
@@ -180,8 +220,10 @@ function awp_options_handle(){
 					update_post_meta( $wp['ID'], 'awp-domain', wpa_get_host($wp['name']) );
 					update_post_meta( $wp['ID'], 'awp-tld', wpa_get_tld($wp['name']) );
 					update_post_meta( $wp['ID'], 'awp-url', wpa_add_url_scheme($wp['name']) );
+					update_post_meta( $wp['ID'], '_wpa_last_wpcheck', date('c') );
 					
 					wp_set_object_terms( $wp['ID'], '$Wordpress', 'site-type', true );
+					wp_remove_object_terms( $wp['ID'], '$NotWordpress', 'site-type' );
 				}
 			}
 			
@@ -193,6 +235,10 @@ function awp_options_handle(){
 							'post_status' => 'publish'
 						)
 					);
+					update_post_meta( $not_wp['ID'], '_wpa_last_wpcheck', date('c') );
+					
+					wp_set_object_terms( $not_wp['ID'], '$NotWordpress', 'site-type', true );
+					wp_remove_object_terms( $not_wp['ID'], '$Wordpress', 'site-type' );
 				}
 			}
 			
@@ -246,6 +292,9 @@ function awp_options_handle(){
 						
 						// Create a new entry of site CPT
 						foreach($websites as $site){
+							$site['taxonomies']['site-type'][] = '$NotWordpress';
+							$site['taxonomies']['site-status'][] = '!NotAudited';
+							
 							if( !get_page_by_title($site['name'], OBJECT, 'site') ){
 								$pID = wp_insert_post(
 									array(
@@ -315,10 +364,10 @@ function awp_options_handle(){
 						
 						// Open the uploaded CSV file
 						if (($handle = fopen( PLUGINPATH . "uploads/" . $filename, "r")) !== FALSE) {
-							$row = ($rank_start) ? $rank_start : 1; // Set rank start
+							$row = ($csv_start_row) ? $csv_start_row : 1; // Set rank start
+							$limit = ($csv_limit_row) ? $csv_limit_row : 50; // Set limit
 							$i = 1;
 							
-							$limit = ($request_limit) ? $request_limit : 5000;
 							// pre-saved each site into an array
 							while ( ($data = fgetcsv($handle, 1000, ",")) !== FALSE && $i <= $limit ) {
 								if($row == $i){
@@ -351,10 +400,11 @@ function awp_options_handle(){
 					}
 				}
 				
-				// wp_die( '<pre>' . print_r($websites, true) . '</pre>' );
-				
 				foreach($websites as $site){
 					if( !get_page_by_title($site['name'], OBJECT, 'site') ){
+						$site['taxonomies']['site-type'][] = '$NotWordpress';
+						$site['taxonomies']['site-status'][] = '!NotAudited';
+						
 						$pID = wp_insert_post(
 							array(
 								'post_type' => 'site',
@@ -404,16 +454,42 @@ function awp_options_handle(){
 			
 			$websites = explode(PHP_EOL, $awp_domain );
 			
+			$taxonomies = array(
+				'site-status' => array(
+					'!imported',
+					'!NotAudited',
+					'!imported by Bulk Add',
+					'!Imported – ' . date('y.m.d;H:i')
+				),
+				'site-type' => array(
+					'$NotWordpress'
+				)
+			);
+			
 			if($awp_domain_tags != ''){
-				$terms = explode(',', $awp_domain_tags);
-				$taxonomies = array(
-					'site-tag' => $terms,
-					'site-status' => array(
-						'!imported',
-						'!imported by Bulk Add',
-						'!Imported – ' . date('y.m.d;H:i')
-					)
+				$str = $awp_domain_tags;
+				
+				$actionTags = array(
+					'site-action' => '~',
+					'site-status' => '!',
+					'site-include' => '@',
+					'site-topic' => '#',
+					'site-type' => '$',
+					'site-location' => '%',
+					'site-assignment' => '^'
 				);
+				$terms = explode(',', $str);
+				
+				foreach( $terms as $i=>$e ){
+					$taxObj = substr(trim($e), 0, 1);
+					$term = substr(trim($e), 1, strlen(trim($e)));
+					
+					if( $key = array_search($taxObj, $actionTags) ){
+						$taxonomies[$key][] = trim($e); // $term;
+					} else {
+						$taxonomies['site-tag'][] = trim($e);
+					}
+				}
 			}
 			
 			// Keep record of the manual upload and website links
@@ -431,8 +507,6 @@ function awp_options_handle(){
 					foreach( $taxonomies as $tax=>$terms ){
 						wp_set_object_terms( $pID, $terms, $tax, true );
 					}
-					
-					update_post_meta($pID, 'awp-alexa-rank', $site['rank']);
 				}
 			}
 			
@@ -449,7 +523,6 @@ function awp_options_handle(){
 		
 		// Update Settings
 		if(isset($_POST['awp_submit']) && '' != $_POST['awp_submit']){
-			
 			$fields = array(
 				// Evaluation Settings
 				'evaluation',
@@ -500,14 +573,35 @@ function awp_options_handle(){
 				'bb_builder_page',
 				
 				// Action Tags
-				'action_taxonomy',
+				'action_taxonomy_type',
+				'action_taxonomy_status',
 				'xtype',
 				'xStatus',
 				'hide_timestamp'
 			);
 			
 			foreach( $fields as $fl ){
-				( isset($awp_settings[$fl]) || $awp_settings[$fl] != $settings[$fl]) ? $settings[$fl] = $awp_settings[$fl] : null;
+				if(isset($awp_settings[$fl]) && $awp_settings[$fl] != $settings[$fl]){
+					$settings[$fl] = $awp_settings[$fl];
+				} else {
+					$settings[$fl] = $settings[$fl];
+				}
+			}
+			
+			if(isset($_POST['wpas_tab_identifier']) && $_POST['wpas_tab_identifier'] == 'action'){
+				if( !isset($awp_settings['xtype']) || $awp_settings['xtype'] == '' ){
+					$settings['xtype'] = 0;
+				}
+				
+				if( !isset($awp_settings['xStatus']) || $awp_settings['xStatus'] == '' ){
+					$settings['xStatus'] = 0;
+				}
+				
+				if( isset($awp_settings['hide_timestamp']) && $awp_settings['hide_timestamp'] == 'true' ){
+					$settings['hide_timestamp'] = 'true';
+				} else {
+					$settings['hide_timestamp'] = 0;
+				}
 			}
 			
 			$return = update_option('awp_settings', $settings);
@@ -527,7 +621,7 @@ function awp_options_handle(){
 	if( ( isset($_GET['action']) || isset($_GET['post'])) && 'wp_checker' == $_GET['action'] ){
 		$links = array();
 		foreach($_REQUEST['post'] as $pID){
-			$links[$pID] = get_the_title($pID);
+			$links[$pID] = strtolower(get_the_title($pID));
 		}
 		
 		$scrape = new scrapeWordpress();
@@ -546,8 +640,10 @@ function awp_options_handle(){
 				update_post_meta( $wp['ID'], 'awp-domain', wpa_get_host($wp['name']) );
 				update_post_meta( $wp['ID'], 'awp-tld', wpa_get_tld($wp['name']) );
 				update_post_meta( $wp['ID'], 'awp-url', wpa_add_url_scheme($wp['name']) );
+				update_post_meta( $wp['ID'], '_wpa_last_wpcheck', date('c') );
 				
 				wp_set_object_terms( $wp['ID'], '$Wordpress', 'site-type', true );
+				wp_remove_object_terms( $wp['ID'], '$NotWordpress', 'site-type' );
 			}
 		}
 		
@@ -559,6 +655,10 @@ function awp_options_handle(){
 						'post_status' => 'publish'
 					)
 				);
+				update_post_meta( $not_wp['ID'], '_wpa_last_wpcheck', date('c') );
+				
+				wp_set_object_terms( $not_wp['ID'], '$NotWordpress', 'site-type', true );
+				wp_remove_object_terms( $not_wp['ID'], '$Wordpress', 'site-type' );
 			}
 		}
 		
@@ -571,8 +671,6 @@ function awp_options_handle(){
 		foreach($_POST as $key=>$val){
 			$$key = $val;
 		}
-		
-		/*?><pre><?php print_r($_POST); ?></pre><?php wp_die();*/
 		
 		$fields = wpa_default_metrics();
 		
@@ -686,7 +784,6 @@ function awp_register_pages(){
 	add_submenu_page( 'edit.php?post_type=site', 'Import', 'Import', 'manage_options', 'wpa_import', 'wpa_import_callback' );
 	add_submenu_page( 'edit.php?post_type=site', 'Settings', 'Settings', 'manage_options', 'wpauthority', 'awp_admin_pages' );
 	
-	add_action( "load-$ofpage", 'base_screen_options' ); // Custom table screen options
 	add_action( "admin_print_scripts", 'awp_admin_scripts' );
 }
 
@@ -763,8 +860,25 @@ function wpa_import_callback(){
             <p><input type="submit" value="Make Request" class="button-primary" id="submit" name="awp_request" /></p>
             
             <h3>Import a CSV</h3>
+            
             <table class="form-table">
-                <tr>
+            	<tr valign="top" style="display:none;">
+                	<th scope="row" colspan="2"><label>
+                    	<input type="checkbox" id="has_custom_row" value="1" /> <?php _e('Start on a custom row'); ?>
+                    </label></th>
+                </tr>
+                
+                <tr valign="top" class="csv_cutom_row" style="display:none;">
+                	<th scope="row"><label for="row_start"><strong><?php _e('Starting row'); ?></strong></label></th>
+                    <td><input type="text" name="csv_start_row" id="row_start" value="" /></td>
+                </tr>
+                
+                <tr valign="top" class="csv_cutom_row" style="display:none;">
+                	<th scope="row"><label for="row_end"><strong><?php _e('End row'); ?></strong></label></th>
+                    <td><input type="text" name="csv_limit_row" id="row_end" value="" /></td>
+                </tr>
+                
+                <tr valign="top">
                     <th scope="row">
                     	<label for="awp_file"><strong>Upload CSV</strong></label><br>
                         <small class="description"><a href="<?php echo PLUGINURL; ?>/uploads/cron.csv" target="_blank">Click here</a> to download a sample CSV file format.</small>
@@ -815,153 +929,6 @@ function wpa_import_callback(){
         </form>
 	</div><?php
 }
-
-/*function awp_overview_page(){
-	global $websites;
-	$websites = get_option('awp_websites');
-	
-	?><div class="wrap">
-    	<div id="icon-ows" class="icon32"><img src="<?php echo PLUGINURL; ?>images/icon32.jpg" alt="WP Sites" /></div>
-        <h2 class="nav-tab-wrapper supt-nav-tab-wrapper"><?php
-            // _e('WP Sites');
-            ?><a href="<?php echo admin_url('admin.php?page=wpauthority&tab=upload'); ?>" class="nav-tab">Import</a>
-            <a href="<?php echo admin_url('admin.php?page=wpauthority'); ?>" class="nav-tab">Connect</a>
-            <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=cron'); ?>" class="nav-tab">Cron</a>
-            <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="nav-tab">Metrics</a>
-            <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo'); ?>" class="nav-tab">Content & SEO</a>
-            <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=action'); ?>" class="nav-tab">Action Tags</a>
-            <!-- <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=checker'); ?>" class="nav-tab">WP Checker</a> --->
-        </h2><div>&nbsp;</div><?php
-        
-        if( isset( $_REQUEST['settings-updated'] ) ){
-            if( $_REQUEST['settings-updated'] == 'true' ){
-                ?><div id="setting-error" class="updated settings-error">
-                    <p><strong><?php
-                    	switch($_REQUEST['message']){
-							case '1':
-								_e('Website link entry deleted suceesfully.');
-								break;
-							case '2':
-							default:
-								_e('Settings saved.');
-								break;
-						}
-					?></strong></p>
-                </div><?php
-            } else {
-                ?><div id="setting-error" class="error settings-error">
-                    <p><strong><?php
-						switch($_REQUEST['message']){
-							case '1':
-								_e('Website link cannot be deleted.');
-								break;
-							case '2':
-								_e('Settings not saved');
-								break;
-						}
-					?></strong></p>
-                </div><?php
-            }
-        }
-        
-        ?><form name="awp_settings" method="post" action="<?php admin_url('edit.php?post_type=site&page=wpauthority'); ?>"><?php
-            
-			if( isset($_REQUEST['action']) && ('edit' == $_REQUEST['action']) ){
-				$item = $websites[$_REQUEST['link']];
-				if($item){
-					?><div class="editForm">
-						<h3>Edit Item</h3>
-						<label for="website_name">Name</label>
-						<input type="text" name="website[name]" id="website_name" value="<?php echo $item['name']; ?>" />
-						&nbsp;
-						<input type="checkbox" name="website[check]" id="website_scanned" value="true" <?php checked($item['check'], 'true'); ?> />
-						<label for="website_scanned">Scanned</label>
-						&nbsp;
-						<label for="website_rank">Rank</label>
-						<input type="text" name="website[rank]" id="website_rank" value="<?php echo $item['rank']; ?>" />
-                        
-                        <input type="hidden" name="link" value="<?php echo $item['name']; ?>" />
-                        <input class="button-primary" type="submit" name="awp_update_link" value="Update" />
-					</div><?php
-				}
-			}
-			
-			$base = new Base_Table();
-			
-			$freshlinks = array();
-			if( isset($_REQUEST['checked']) && ('' != $_REQUEST['checked']) ){
-				
-				if('true' == $_REQUEST['checked']){
-					foreach($websites as $fl){
-						if($fl['check'] == true){
-							$freshlinks[] = $fl;
-						}
-					}
-				} elseif( ($fl['check'] == false) && ('false' == $_REQUEST['checked']) ){
-					foreach($websites as $fl){
-						if($fl['check'] == false){
-							$freshlinks[] = $fl;
-						}
-					}
-				} else {
-					$freshlinks = $websites;
-				}
-				
-			} else {
-				$freshlinks = $websites;
-			}
-			
-			if(isset($_POST['s']) and '' != $_POST['s']){
-				$items = array();
-				if( isset( $freshlinks[$_POST['s']] ) ){
-					$items[] = $freshlinks[$_POST['s']];
-				}
-				
-				$base->set_data($items);
-			} else {
-				$base->set_data($freshlinks);
-			}
-			
-            $base->prepare_items();
-			
-			?><div class="alignleft actions">
-                <select name="checked" id="awp-checked">
-                    <option value="0" <?php selected($_REQUEST['checked'], 0); ?>>Show All</option>
-                    <option value="true" <?php selected($_REQUEST['checked'], 'true'); ?>>Show all scanned</option>
-                    <option value="false" <?php selected($_REQUEST['checked'], 'false'); ?>>Show all not scanned</option>
-                </select>
-                <script type="text/javascript">
-					jQuery(document).ready(function($) {
-                        $('#awp-checked').change(function(e) {
-                            e.preventDefault();
-							window.location.href = "<?php echo admin_url('admin.php?page=wpauthorities&checked='); ?>" + $(this).val();
-                        });
-                    });
-				</script>
-			</div><?php
-			
-            $base->search_box('search', 'search_cpt');
-            $base->display();
-            
-        	?><h3>Cron Statistics</h3><?php
-			
-            $count_posts = wp_count_posts( 'site' );
-			
-			// Count all scanned websites
-			$checked = 0;
-			foreach( $websites as $wb ){
-				if($wb['check']){
-					$checked++;
-				}
-			}
-            
-            ?><p><strong><?php _e('Number of websites recorded:'); ?></strong> <?php echo count($websites); ?></p>
-            <p><strong><?php _e('Number of websites already scanned:'); ?></strong> <?php echo $checked; ?></p>
-			<p><strong><?php _e('Number of websites detected as wordpress:'); ?></strong> <?php echo ($count_posts->publish) ? $count_posts->publish : 0; ?></p>
-        
-        </form>
-	</div><?php
-}*/
 
 function awp_admin_pages(){
 	global $options;
@@ -1028,7 +995,7 @@ function awp_admin_pages(){
                     </table>
                     
                     <p>
-                    	<input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=cron&settings-updated=true'); ?>" />
+                    	<input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=cron&settings-updated='); ?>" />
                     	<input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" />
                     </p>
                     
@@ -1210,7 +1177,7 @@ function awp_admin_pages(){
 							if(!$editable){
 								?><input type="hidden" name="readonly" value="1" /><?php
 							}
-							?><input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics&settings-updated=true'); ?>" /><?php
+							?><input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics&settings-updated='); ?>" /><?php
 							
 							if($field){
 								?><input type="hidden" name="metric_id" value="<?php echo $field['id']; ?>" />
@@ -1446,7 +1413,7 @@ function awp_admin_pages(){
                     </table>
                     
                     <p>
-                    	<input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo&settings-updated=true'); ?>" />
+                    	<input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo&settings-updated='); ?>" />
                     	<input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" />
                     </p>
                     
@@ -1472,17 +1439,18 @@ function awp_admin_pages(){
                     
                     <table class="form-table">
                     	<tr>
-                        	<th scope="row"><label for="action_taxonomy">Exclude or Include</label></th>
+                        	<th scope="row"><label for="action_taxonomy_type">Exclude or Include Types</label></th>
                             <td>
-                            	<select name="awp_settings[action_taxonomy]" id="action_taxonomy">
-                                	<option value="exclude" <?php selected($settings['action_taxonomy'], 'exclude'); ?>>Exclude</option>
-                                	<option value="include" <?php selected($settings['action_taxonomy'], 'include'); ?>>Include</option>
+                            	<select name="awp_settings[action_taxonomy_type]" id="action_taxonomy_type">
+                                	<option value="0" <?php selected($settings['action_taxonomy_type'], 0); ?>>None</option>
+                                	<option value="NOT IN" <?php selected($settings['action_taxonomy_type'], 'NOT IN'); ?>>Exclude</option>
+                                	<option value="IN" <?php selected($settings['action_taxonomy_type'], 'IN'); ?>>Include</option>
                                 </select>
                             </td>
                         </tr>
                     	<tr>
                         	<th scope="row"><label for="">$Types to Omit from Sites Archive:</label><br>
-                            <small class="description">Check terms not to include.</small></th>
+                            <small class="description">Chosse terms to include or exclude.</small></th>
                             <td><?php
 								$types = get_terms('site-type', array(
 									'orderby'       => 'name', 
@@ -1500,8 +1468,18 @@ function awp_admin_pages(){
                             ?></td>
                         </tr>
                         <tr>
+                        	<th scope="row"><label for="action_taxonomy_status">Exclude or Include Statuses</label></th>
+                            <td>
+                            	<select name="awp_settings[action_taxonomy_status]" id="action_taxonomy_status">
+                                	<option value="0" <?php selected($settings['action_taxonomy_status'], 0); ?>>None</option>
+                                	<option value="NOT IN" <?php selected($settings['action_taxonomy_status'], 'NOT IN'); ?>>Exclude</option>
+                                	<option value="IN" <?php selected($settings['action_taxonomy_status'], 'IN'); ?>>Include</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
                         	<th scope="row"><label for="">!Statuses to Omit from Sites Archive:</label><br>
-                            <small class="description">Check terms not to include.</small></th>
+                            <small class="description">Choose terms to include or exclude.</small></th>
                             <td><?php
 								$types = get_terms('site-status', array(
 									'orderby'       => 'name', 
@@ -1520,10 +1498,25 @@ function awp_admin_pages(){
                         </tr>
                     </table>
                     
+                    <h3><?php _e('Business Builder Template', 'wpa'); ?></h3>
+                    
+                    <table class="form-table">
+                    	<tr valign="top">
+                        	<th scope="row"><label for="bb_builder_page">Business Builder Page</label></th>
+                            <td><select name="awp_settings[bb_builder_page]" id="bb_builder_page">
+                            	<option value="0" <?php selected($settings['bb_builder_page'], 0) ?>>None</option><?php
+								$pages = get_pages();
+								foreach ( $pages as $page ) {
+									?><option value="<?php echo $page->ID; ?>" <?php selected($settings['bb_builder_page'], $page->ID); ?>><?php echo $page->post_title; ?></option><?php
+								}
+                            ?></select></td>
+                        </tr>
+                    </table>
+                    
                     <h3><?php _e('Sites Managed Display', 'wpa'); ?></h3>
                     
                     <table class="form-table">
-                    	<tr>
+                    	<tr valign="top">
                         	<th scope="row">
                             	<label for="wpa_hide_timestamp"><?php _e('Display Settings', 'wpa'); ?></label>
                             </th>
@@ -1544,6 +1537,7 @@ function awp_admin_pages(){
                     </table>
                     
                     <p>
+                    	<input type="hidden" name="wpas_tab_identifier" value="<?php echo $tab; ?>" />
                     	<input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" />
                     </p>
                 </form><?php
@@ -1631,6 +1625,7 @@ function awp_admin_pages(){
                     </table>
                     
                     <h3>GrabzIT</h3>
+                    <p>You can get you app API credentials from <a href="http://grabz.it/" target="_blank">grabz.it</a></p>
                     
                     <table class="form-table">
                     	<tr>
@@ -1643,7 +1638,8 @@ function awp_admin_pages(){
                         </tr>
                     </table>
                     
-                    <p><input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" /></p>
+                    <p><input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=connect&settings-updated='); ?>" />
+                    <input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" /></p>
 				</form><?php
 				
 				break;
@@ -1674,18 +1670,6 @@ function wpa_admin_nav_tabs(){
     ?></h2>
 	
 	<div>&nbsp;</div><?php
-}
-
-function base_screen_options(){
-	$option = 'per_page';
-	$args = array(
-		'label' => 'Websites per page',
-		'default' => 10,
-		'option' => 'sites_per_page'
-	);
-	add_screen_option( $option, $args );
-	
-	$base = new Base_Table();
 }
 
 function wp_authority_update(){

@@ -1527,7 +1527,7 @@ span.displayOptionshead{
 	color: #fff;
 	font-size: 24px;
 	text-align: left;
-	display: none;
+	/*display: none;*/
 	z-index: 10;
 	width: 400px;
 	
