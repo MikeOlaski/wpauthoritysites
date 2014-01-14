@@ -43,6 +43,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-domain',
 			'type' => 'text',
 			'group' => $shortname.'-general',
+			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
@@ -51,6 +52,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-tld',
 			'type' => 'text',
 			'group' => $shortname.'-general',
+			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
@@ -59,6 +61,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-url',
 			'type' => 'text',
 			'group' => $shortname.'-general',
+			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
@@ -67,6 +70,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-date',
 			'type' => 'text',
 			'group' => $shortname.'-general',
+			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
@@ -75,6 +79,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-networked',
 			'type' => 'text',
 			'group' => $shortname.'-general',
+			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
@@ -83,6 +88,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-location',
 			'type' => 'text',
 			'group' => $shortname.'-general',
+			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
@@ -91,6 +97,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-language',
 			'type' => 'text',
 			'group' => $shortname.'-general',
+			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
@@ -196,6 +203,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-google',
 			'type' => 'text',
 			'group' => $shortname.'-links',
+			'desc' => 'by Google',
+			'unit' => 'backlinks',
 			'readonly' => true
 		);
 		
@@ -204,6 +213,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-alexa',
 			'type' => 'text',
 			'group' => $shortname.'-links',
+			'desc' => 'by Alexa',
+			'unit' => 'backlinks',
 			'readonly' => true
 		);
 		
@@ -212,6 +223,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-yahoo',
 			'type' => 'text',
 			'group' => $shortname.'-links',
+			'desc' => 'by Yahoo',
+			'unit' => 'backlinks',
 			'readonly' => true
 		);
 		
@@ -220,6 +233,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-majestic',
 			'type' => 'text',
 			'group' => $shortname.'-links',
+			'desc' => 'by Majestic SEO',
+			'unit' => 'backlinks',
 			'readonly' => true
 		);
 		
@@ -301,6 +316,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-googleplus-followers',
 			'type' => 'text',
 			'group' => $shortname.'-social',
+			'desc' => 'on Google+',
+			'unit' => 'pluses',
 			'readonly' => true
 		);
 		
@@ -317,6 +334,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-facebook-followers',
 			'type' => 'text',
 			'group' => $shortname.'-social',
+			'desc' => 'on Facebook',
+			'unit' => 'likes',
 			'readonly' => true
 		);
 		
@@ -333,6 +352,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-twitter-followers',
 			'type' => 'text',
 			'group' => $shortname.'-social',
+			'desc' => 'on Twitter',
+			'unit' => 'tweets',
 			'readonly' => true
 		);
 		
@@ -349,6 +370,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-youtube-followers',
 			'type' => 'text',
 			'group' => $shortname.'-social',
+			'desc' => 'on Youtube',
+			'unit' => 'subscriber',
 			'readonly' => true
 		);
 		
@@ -365,6 +388,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-pinterest-followers',
 			'type' => 'text',
 			'group' => $shortname.'-social',
+			'desc' => 'on Pinterest',
+			'unit' => 'pin',
 			'readonly' => true
 		);
 		
@@ -381,6 +406,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-linkedin-followers',
 			'type' => 'text',
 			'group' => $shortname.'-social',
+			'desc' => 'on LinkedIn',
+			'unit' => 'linked',
 			'readonly' => true
 		);
 		
@@ -397,6 +424,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-klout-followers',
 			'type' => 'text',
 			'group' => $shortname.'-social',
+			'desc' => 'on Klout',
+			'unit' => 'klout score',
 			'readonly' => true
 		);
 		
@@ -605,6 +634,14 @@ function wpa_default_metrics(){
 		$fields[$shortname.'-semrush-rank'] = array(
 			'name' => 'SEM Rush Rank',
 			'id' => $shortname.'-semrush-rank',
+			'type' => 'text',
+			'group' => $shortname.'-ranks',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-authority-rank'] = array(
+			'name' => 'Authority Rank',
+			'id' => $shortname.'-authority-rank',
 			'type' => 'text',
 			'group' => $shortname.'-ranks',
 			'readonly' => true

@@ -126,10 +126,16 @@ function wpa_post_meta_filter(){
 	global $post;
 	
 	if( is_single() && 'site' == $post->post_type ){
-		$tags_list = get_terms('site-tag', array(
-			'orderby' 		=> 'count',
-			'hide_empty'	=> 0
-		));
+		$tags_list = get_terms(
+			array(
+				'site-category',
+				'site-topic'
+			),
+			array(
+				'orderby' 		=> 'count',
+				'hide_empty'	=> 0
+			)
+		);
 		
 		if(sizeof($tags_list)!=0){
 			foreach($tags_list as $tag) if($tag->count > $max_count) $max_count = $tag->count;
@@ -153,13 +159,13 @@ function wpa_post_meta_filter(){
 				$j = jQuery.noConflict();
 				$j(document).ready(function() {
 					if(!$j('#myCanvas').tagcanvas({
-						textColour: '#333333',
-						outlineColour: '#ffffff',
-						outlineThickness: false,
-						reverse: true,
-						depth: 1,
+						textFont: 'Impact, "Arial", sans-serif',
+						outlineColour: '#D04121',
+						outlineMethod: 'block',
+						textColour: '#0E1E38',
 						weight: true,
-						maxSpeed: 0.05
+						wheelZoom: false,
+						depth: 0.99
 					},'tags')) {
 						$j('#myCanvasContainer').hide();
 					}
@@ -292,12 +298,28 @@ function wpa_site_footer(){
 	}
 }
 
-add_action('wpa_post_inside_after', 'wpa_site_coveraged');
-function wpa_site_coveraged(){
+add_action('wpa_post_inside_after', 'wpas_site_coveraged');
+function wpas_site_coveraged(){
 	global $post;
 	
 	if( is_single() && 'site' == $post->post_type ){
 		wp_enqueue_script('flexslider');
+		
+		$directs = array();
+		if( $coveraged = get_the_terms($post->ID, array('site-include')) ){
+			foreach( $coveraged as $coverage ):
+				$page_title = str_replace('@', '', $coverage->name);
+				if( $post = get_page_by_title($page_title, OBJECT, 'show') )
+					$directs[] = $post;
+				if( $post = get_page_by_title($page_title, OBJECT, 'interviews') )
+					$directs[] = $post;
+				if( $post = get_page_by_title($page_title, OBJECT, 'reviews') )
+					$directs[] = $post;
+			endforeach;
+		}
+		
+		$generals = get_sites_generally_related_posts();
+		$shows = array_merge($generals, $directs);
 		
 		?><div class="wpa-sgl-coverage">
 			<ul class="wpa-coverage-filter alignright">
@@ -308,36 +330,42 @@ function wpa_site_coveraged(){
 				<li class="last"><a href="#">Hangouts</a></li>
 			</ul>
 			
-			<h3><?php _e('WPA Coveraged', 'wpa'); ?></h3>
+			<h3><?php _e('WPA Coveraged', 'wpa'); ?></h3><?php
 			
-			<div id="wpa-coverage-flexslider" class="wpa-flexslider flexslider">
-				<ul class="wpa-coverage-slides slides">
-					<li><a href="#"><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></a></li>
-					<li><a href="#"><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></a></li>
-					<li><a href="#"><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></a></li>
-					<li><a href="#"><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></a></li>
-					<li><a href="#"><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></a></li>
-					<li><a href="#"><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></a></li>
-					<li><a href="#"><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></a></li>
-					<li><a href="#"><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></a></li>
-					<li><a href="#"><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></a></li>
-				</ul>
-			</div>
-			
-			<script type="text/javascript">
-				jQuery(window).load(function() {
-					jQuery('#wpa-coverage-flexslider').flexslider({
-						animation: "slide",
-						animationLoop: false,
-						itemWidth: 175,
-						maxItems: 5,
-						itemMargin: 42,
-						slideshow: false,
-						controlNav: false
-					});
-				});
-			</script>
-		</div><?php
+            if( $shows ){
+				?><div id="wpa-coverage-flexslider" class="wpa-flexslider flexslider">
+                    <ul class="wpa-coverage-slides slides"><?php
+						foreach( $shows as $show ):
+							?><li><a href="<?php echo get_permalink($show->ID); ?>" title="<?php echo get_the_title($show->ID); ?>"><?php
+                            	if( has_post_thumbnail($show->ID) ){
+									echo get_the_post_thumbnail($show->ID, 'medium');
+								} else {
+									?><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /><?php
+								}
+                            ?></a></li><?php
+						endforeach;
+                    ?></ul>
+                </div>
+                
+                <script type="text/javascript">
+                    jQuery(window).load(function() {
+                        jQuery('#wpa-coverage-flexslider').flexslider({
+                            animation: "slide",
+                            animationLoop: false,
+                            itemWidth: 175,
+                            maxItems: 5,
+                            itemMargin: 42,
+                            slideshow: false,
+                            controlNav: false
+                        });
+                    });
+                </script><?php
+            } else {
+                _e('', 'wpas');
+            }
+            wp_reset_query();
+            
+		?></div><?php
 	}
 }
 
@@ -490,85 +518,71 @@ function wpa_audit_site_score(){
 }
 
 add_action('wpa_post_inside_after', 'wpa_metrics_table');
-function wpa_metrics_table(){
-	global $post;
+function wpa_metrics_table( $post_id = '' ){
+	global $post, $fields;
+	$post_id = empty($post_id) ? $post->ID : $post_id;
+	$fields = wpa_default_metrics();
 	
 	if( is_single() && 'site' == $post->post_type ){
+		$site = array('domain', 'tld', 'url', 'date', 'networked', 'location', 'language');
+		$links = array('google', 'alexa', 'yahoo', 'majestic');
+		$socials = array(
+			'googleplus' => 'googleplus-followers',
+			'facebook' => 'facebook-followers',
+			'twitter' => 'twitter-followers',
+			'youtube' => 'youtube-followers',
+			'pinterest' => 'pinterest-followers',
+			'linkedin' => 'linkedin-followers',
+			'klout' => 'klout-followers'
+		);
+		
 		?><div class="wpa-sgl-metrics">
 			<h3><?php _e('Site', 'wpa'); ?></h3>
-			
-			<table class="wpa-metrics-table">
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Load Time'); ?></strong>
-						<span class="description">by Site Auditor</span>
-					</th>
-					<td><em>1.14</em><span class="description">seconds</span></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Page Speed'); ?></strong>
-						<span class="description">by Google</span>
-					</th>
-					<td><em>70</em><span class="description">overall score</span></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Preparedness'); ?></strong>
-						<span class="description">by Site Auditor</span>
-					</th>
-					<td><ul>
-						<li>www Direct Detected</li>
-						<li>robots.txt Detected</li>
-						<li>Google Analytics Integration Detected</li>
-						<li>Crawlable</li>
-						<li>No Malware Detected</li>
-					</ul></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Domain Registration'); ?></strong>
-						<span class="description">by Site Auditor</span>
-					</th>
-					<td><em>457</em><span class="description">days until expiration</span></td>
-					<td></td>
-				</tr>
-			</table>
+			<table class="wpa-metrics-table"><?php
+				foreach( $site as $row ){
+					$data = $fields['awp-'.$row];
+					
+					if( $value = get_post_meta($post_id, $data['id'], true) ){
+						?><tr valign="top">
+							<th scope="row"><?php
+								echo sprintf('<i title="%s">%s</i>', $data['details'], $data['details']);
+								echo sprintf('<strong>%s</strong>', $data['name']);
+								echo sprintf('<span class="description">%s</span>', $data['desc']);
+							?></th>
+							<td><?php
+								echo sprintf('<em>%s</em> <span class="description">%s</span>', $value, $data['unit']);
+							?></td>
+							<td></td>
+						</tr><?php
+					}
+				}
+			?></table>
 			
 			<h3><?php _e('Links', 'wpa'); ?></h3>
-			
-			<table class="wpa-metrics-table">
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('External Backlinks'); ?></strong>
-						<span class="description">by Majestic SEO</span>
-					</th>
-					<td><em>21,750</em><span class="description">backlinks</span></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('External Backlinks'); ?></strong>
-						<span class="description">by MOZ</span>
-					</th>
-					<td><em>5,015</em><span class="description">backlinks</span></td>
-					<td></td>
-				</tr>
-			</table>
+			<table class="wpa-metrics-table"><?php
+				foreach( $links as $row ){
+					$data = $fields['awp-'.$row];
+					
+					if( $value = get_post_meta($post_id, $data['id'], true) ){
+						?><tr valign="top">
+							<th scope="row"><?php
+								echo sprintf('<i title="%s">%s</i>', $data['details'], $data['details']);
+								echo sprintf('<strong>%s</strong>', __('External Backlinks', 'wpas'));
+								echo sprintf('<span class="description">%s</span>', $data['desc']);
+							?></th>
+							<td><?php
+								echo sprintf('<em>%s</em> <span class="description">%s</span>', $value, $data['unit']);
+							?></td>
+							<td></td>
+						</tr><?php
+					}
+				}
+			?></table>
 			
 			<h3><?php _e('Social', 'wpa'); ?></h3>
 			
-			<table class="wpa-metrics-table">
-				<tr>
+			<table class="wpa-metrics-table"><?php
+				/*<tr valign="top">
 					<th scope="row">
 						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
 						<strong><?php _e('Social Integration'); ?></strong>
@@ -581,71 +595,31 @@ function wpa_metrics_table(){
 						<li>LinkedIn</li>
 					</ul></td>
 					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Tweets'); ?></strong>
-						<span class="description">on Twitter</span>
-					</th>
-					<td><em>1</em><span class="description">Tweet</span></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Likes'); ?></strong>
-						<span class="description">on Facebbok</span>
-					</th>
-					<td><em>4,343</em><span class="description">likes</span></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Shares'); ?></strong>
-						<span class="description">on Facebook</span>
-					</th>
-					<td><em>6,828</em><span class="description">shares</span></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Comments'); ?></strong>
-						<span class="description">on Facebook</span>
-					</th>
-					<td><em>13,661</em><span class="description">comments</span></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Like Button'); ?></strong>
-						<span class="description">on Facebook</span>
-					</th>
-					<td><em>24,832</em><span class="description">likes</span></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('+1\'s'); ?></strong>
-						<span class="description">on Google+</span>
-					</th>
-					<td><em>220</em><span class="description">pluses</span></td>
-					<td></td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Klout Score'); ?></strong>
-						<span class="description">by Klout</span>
-					</th>
-					<td><em>53</em><span class="description">overall klout score</span></td>
-					<td></td>
-				</tr>
-			</table>
+				</tr>*/
+				
+				foreach($socials as $social=>$row){
+					$media = $fields['awp-'.$social];
+					$data = $fields['awp-'.$row];
+					$value = get_post_meta($post_id, $data['id'], true);
+					$externaLink = get_post_meta($post_id, $media['id'], true);
+					
+					if( ($value > 0 && $externaLink != '') || $externaLink != '' ){
+						?><tr>
+							<th scope="row"><?php
+								echo sprintf('<i title="%s">%s</i>', $data['details'], $data['details']);
+								echo sprintf('<span class="external-links"><a target="_blank" href="%s">%s</a></span>', $externaLink, $media['name']);
+								echo sprintf('<strong>%s</strong>', $data['name']);
+								echo sprintf('<span class="description">%s</span>', $data['desc']);
+							?></th>
+							<td><?php
+								echo sprintf('<em>%s</em> <span class="description">%s</span>', $value, $data['unit']);
+							?></td>
+							<td></td>
+						</tr><?php
+					}
+				}
+					
+			?></table>
 		</div><?php
 	}
 }

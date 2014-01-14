@@ -26,20 +26,21 @@ load_template( trailingslashit( PLUGINPATH ) . 'classes/integration.class.php' )
 load_template( trailingslashit( PLUGINPATH ) . 'classes/bb_builder.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/scrapewp.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/topSites.class.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/template-functions.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/template-loader.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/template-hooks.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/shortcodes.class.php' );
 
-register_activation_hook( __FILE__, 'awp_activate' );
-register_deactivation_hook( __FILE__, 'awp_deactivate' );
+register_activation_hook( __FILE__, 'wpas_activate' );
+register_deactivation_hook( __FILE__, 'wpas_deactivate' );
 
-add_action('admin_menu', 'awp_register_pages');
+add_action('admin_menu', 'wpas_register_pages');
 
-function awp_activate(){
-	awp_set_options();
+function wpas_activate(){
+	wpas_set_options();
 }
 
-function awp_set_options() {
+function wpas_set_options() {
 	$option = array();
 	
 	// Build our option
@@ -69,7 +70,7 @@ function awp_set_options() {
 	));
 }
 
-function awp_deactivate(){
+function wpas_deactivate(){
 	delete_option('awp_options');
 	delete_option('awp_websites');
 	delete_option('awp_requests');
@@ -81,11 +82,11 @@ function awp_deactivate(){
 	wp_clear_scheduled_hook( 'wp_authority_update' );
 }
 
-add_action( 'init', 'awp_sidebars' );
+add_action( 'init', 'wpas_sidebars' );
 
-function awp_sidebars(){
+function wpas_sidebars(){
 	register_sidebar( array(
-		'name' => __( 'AWP Site Sidebar', 'awp' ),
+		'name' => __( 'WPAS Sidebar', 'wpas' ),
 		'id' => 'sidebar-site',
 		'before_widget' => '<aside id="%1$s" class="widget %2$s">',
 		'after_widget' => "</aside>",
@@ -94,8 +95,8 @@ function awp_sidebars(){
 	) );
 }
 
-add_filter('nav_menu_css_class', 'wpa_clean_nav_menu');
-function wpa_clean_nav_menu($classes){
+add_filter('nav_menu_css_class', 'wpas_clean_nav_menu');
+function wpas_clean_nav_menu($classes){
 	switch (get_post_type()){
 		case 'site':
 		case 'survey':
@@ -114,9 +115,8 @@ if(!function_exists('remove_parent_classes')){
 	}
 }
 
-// add_action('template_redirect', 'awp_archive_tax_query');
-add_filter('wpa_archive_wp_query', 'awp_archive_tax_query');
-function awp_archive_tax_query( $tax_query ){
+add_filter('wpa_archive_wp_query', 'wpas_archive_tax_query');
+function wpas_archive_tax_query( $tax_query ){
 	global $post, $wp_query;
 	$settings = get_option('awp_settings');
 	$query = array('relation' => 'AND');
@@ -186,8 +186,8 @@ function awp_archive_tax_query( $tax_query ){
 	return $wp_query->tax_query;
 }
 
-add_action( 'wp_loaded', 'awp_options_handle' );
-function awp_options_handle(){
+add_action( 'wp_loaded', 'wpas_options_handle' );
+function wpas_options_handle(){
 	$requests = get_option('awp_requests');
 	$settings = get_option('awp_settings');
 	
@@ -573,6 +573,8 @@ function awp_options_handle(){
 				'bb_builder_page',
 				
 				// Action Tags
+				'sites_default_order',
+				'sites_default_orderby',
 				'action_taxonomy_type',
 				'action_taxonomy_status',
 				'xtype',
@@ -768,7 +770,7 @@ function awp_options_handle(){
 	return;
 }
 
-function awp_register_pages(){
+function wpas_register_pages(){
 	remove_submenu_page('edit.php?post_type=site', 'post-new.php?post_type=site');
 	remove_submenu_page('edit.php?post_type=site', 'edit-tags.php?taxonomy=site-category&post_type=site');
 	remove_submenu_page('edit.php?post_type=site', 'edit-tags.php?taxonomy=site-tag&post_type=site');
@@ -780,19 +782,20 @@ function awp_register_pages(){
 	remove_submenu_page('edit.php?post_type=site', 'edit-tags.php?taxonomy=site-location&post_type=site');
 	remove_submenu_page('edit.php?post_type=site', 'edit-tags.php?taxonomy=site-assigment&post_type=site');
 	
+	add_submenu_page( 'edit.php?post_type=site', 'Add New Site', 'Add New', 'manage_options', 'post-new.php?post_type=site' );
 	add_submenu_page( 'edit.php?post_type=site', 'Action Tags', 'Action Tags', 'manage_options', 'javascript:void(0);' );
-	add_submenu_page( 'edit.php?post_type=site', 'Import', 'Import', 'manage_options', 'wpa_import', 'wpa_import_callback' );
-	add_submenu_page( 'edit.php?post_type=site', 'Settings', 'Settings', 'manage_options', 'wpauthority', 'awp_admin_pages' );
+	add_submenu_page( 'edit.php?post_type=site', 'Import', 'Import', 'manage_options', 'wpa_import', 'wpas_import_callback' );
+	add_submenu_page( 'edit.php?post_type=site', 'Settings', 'Settings', 'manage_options', 'wpauthority', 'wpas_admin_pages' );
 	
-	add_action( "admin_print_scripts", 'awp_admin_scripts' );
+	add_action( "admin_print_scripts", 'wpas_admin_scripts' );
 }
 
-function awp_admin_scripts(){
+function wpas_admin_scripts(){
 	wp_enqueue_script('wpadminjs', PLUGINURL . '/js/admin.js', array('jquery'));
 	wp_enqueue_style( 'awpstyles', PLUGINURL . '/css/admin.css' );
 }
 
-function wpa_import_callback(){
+function wpas_import_callback(){
 	
 	?><div class="wrap">
         <div id="icon-ows" class="icon32"><img src="<?php echo PLUGINURL; ?>images/icon32.jpg" alt="WP Sites" /></div>
@@ -930,7 +933,7 @@ function wpa_import_callback(){
 	</div><?php
 }
 
-function awp_admin_pages(){
+function wpas_admin_pages(){
 	global $options;
 	$options = get_option('awp_options');
 	$settings = get_option('awp_settings');
@@ -943,608 +946,47 @@ function awp_admin_pages(){
 		wpa_admin_nav_tabs();
 		
 		switch($tab){
+			case 'action':
+			default:
+				load_template( trailingslashit( PLUGINPATH ) . 'admin/general.php' );
+				break;
+			
+			case 'connect':
+				load_template( trailingslashit( PLUGINPATH ) . 'admin/connect.php' );
+				break;
+			
+			case 'bots':
+				//load_template( trailingslashit( PLUGINPATH ) . 'admin/bots.php' );
+				break;
+			
 			case 'cron':
-				
-				if( isset( $_REQUEST['settings-updated'] ) ){
-					if( $_REQUEST['settings-updated'] == 'true' ){
-						?><div id="setting-error" class="updated settings-error">
-                        	<p><strong><?php _e('Settings saved.'); ?></strong></p>
-                        </div><?php
-					} else {
-						?><div id="setting-error" class="error settings-error">
-                        	<p><strong><?php _e('Settings not saved.'); ?></strong></p>
-                        </div><?php
-					}
-				}
-				
-				?><form name="awp_settings" method="post" action="<?php admin_url('edit.php?post_type=site&page=wpauthority'); ?>">
-                	
-                    <h3>Cron Settings</h3>
-                    <table class="form-table">
-                        <tr>
-                        	<th scope="row"><label for="cronjob">Cronjob</label></th>
-                            <td>
-                            	<input type="checkbox" name="awp_settings[cronjob]" id="cronjob" value="true" <?php checked($settings['cronjob'], 'true'); ?> />
-                                <label for="cronjob">Enable Cronjob</label>
-                            </td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="rank_page">Link to get page ranking</label></th>
-                            <td>
-                            	<input type="text" name="awp_settings[rank_page]" id="rank_page" value="<?php echo $settings['rank_page'] ?>" class="regular-text" />
-                            </td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="request_limit">Page ranking request limit</label></th>
-                            <td>
-                            	<input type="text" name="awp_settings[request_limit]" id="request_limit" value="<?php echo $settings['request_limit'] ?>" class="regular-text" />
-                            </td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="scrape_link">Link for wordpress scraping</label></th>
-                            <td>
-                            	<input type="text" name="awp_settings[scrape_link]" id="scrape_link" value="<?php echo $settings['scrape_link'] ?>" class="regular-text" />
-                            </td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="scrape_limit">Scraping limit per request</label></th>
-                            <td>
-                            	<input type="text" name="awp_settings[scrape_limit]" id="scrape_limit" value="<?php echo $settings['scrape_limit'] ?>" class="regular-text" />
-                            </td>
-                        </tr>
-                    </table>
-                    
-                    <p>
-                    	<input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=cron&settings-updated='); ?>" />
-                    	<input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" />
-                    </p>
-                    
-				</form><?php
-				break;
-			
-			case 'addgroup':
-			case 'editgroup':
-			
-				if( isset( $_REQUEST['settings-updated'] ) ){
-					if( $_REQUEST['settings-updated'] == 'true' ){
-						?><div id="setting-error" class="updated settings-error">
-                        	<p><strong><?php _e('Settings saved.'); ?></strong></p>
-                        </div><?php
-					} else {
-						?><div id="setting-error" class="error settings-error">
-                        	<p><strong><?php _e('Settings not saved.'); ?></strong></p>
-                        </div><?php
-					}
-				}
-				
-				$group = false;
-				if( isset($_REQUEST['id']) && '' != $_REQUEST['id'] ){
-					$group = wpa_get_metrics_group_by_id($_REQUEST['id']);
-				}
-				
-				$editable = ($group['readonly']) ? true : false;
-				
-				?><form name="awp_settings" method="post" action="<?php echo admin_url('edit.php?post_type=site&page=wpauthority'); ?>">
-                	<div class="new-metric-wrapper">
-                        <table class="form-table">
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_label">Group Label</label></th>
-                                <td><input type="text" name="wpa_metrics[name]" id="wpa_metrics_label" value="<?php echo ($group['name']) ? $group['name'] : ''; ?>" <?php echo ($editable) ? 'readonly="readonly"' : '' ?> class="regular-text" /><br>
-                                <span class="description"></span></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_name">Group Name</label></th>
-                                <td><input type="text" name="wpa_metrics[id]" id="wpa_metrics_name" value="<?php echo ($group['id']) ? $group['id'] : ''; ?>" <?php echo ($editable) ? 'readonly="readonly"' : '' ?> class="regular-text" /><br>
-                                <span class="description"></span></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_cat">Group Category</label></th>
-                                <td><select name="wpa_metrics[category]" id="wpa_metrics_cat">
-                                    <option value="departments" <?php selected($group['category'], 'departments'); ?>>Departments</option>
-                                    <option value="signals" <?php selected($group['category'], 'signals'); ?>>Signals</option>
-                                    <option value="valuation" <?php selected($group['category'], 'valuation'); ?>>Valuation</option>
-                                </select><br>
-                                <span class="description"></span></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_desc">Meta Description</label></th>
-                                <td><textarea name="wpa_metrics[desc]" id="wpa_metrics_desc" class="regular-textarea"><?php echo ($group['desc']) ? $group['desc'] : ''; ?></textarea><br>
-                                <span class="description"></span></td>
-                            </tr>
-                        </table>
-                        <p><?php
-                        	if($editable){
-								?><input type="hidden" name="readonly" value="1" /><?php
-							}
-							
-                        	?><input type="hidden" name="type" value="heading" />
-                            <input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=groups&settings-updated=true'); ?>" /><?php
-							
-							if($group){
-                            	?><input type="hidden" name="group_id" value="<?php echo $group['id'] ?>" />
-                                <input type="submit" value="Save Group" class="button-primary" id="submit" name="wpa_save_group" /><?php
-							} else {
-								?><input type="submit" value="+ Add Group" class="button-primary" id="submit" name="wpa_save_group" /><?php
-							}
-							
-                        ?></p>
-                    </div><!-- /new-metric-wrapper -->
-                </form><?php
-				break;
-			
-			case 'addmetric':
-			case 'editmetric':
-			
-				if( isset( $_REQUEST['settings-updated'] ) ){
-					if( $_REQUEST['settings-updated'] == 'true' ){
-						?><div id="setting-error" class="updated settings-error">
-                        	<p><strong><?php _e('Settings saved.'); ?></strong></p>
-                        </div><?php
-					} else {
-						?><div id="setting-error" class="error settings-error">
-                        	<p><strong><?php _e('Settings not saved.'); ?></strong></p>
-                        </div><?php
-					}
-				}
-				
-				$field = false;
-				if( isset($_REQUEST['id']) && '' != $_REQUEST['id'] ){
-					$field = wpa_get_metrics_by_id($_REQUEST['id']);
-				}
-				
-				$editable = ($field['readonly']) ? false : true;
-				
-				?><form name="awp_settings" method="post" action="<?php echo admin_url('edit.php?post_type=site&page=wpauthority'); ?>">
-                	<div class="new-metric-wrapper">
-                        <table class="form-table">
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_label">Field Label</label></th>
-                                <td><input type="text" name="wpa_metrics[name]" id="wpa_metrics_label" value="<?php echo ($field['name']) ? $field['name'] : ''; ?>" <?php echo (!$editable) ? 'readonly="readonly"' : '' ?> class="regular-text" /><br>
-                                <span class="description"></span></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_name">Field Name</label></th>
-                                <td><input type="text" name="wpa_metrics[id]" id="wpa_metrics_name" value="<?php echo ($field['id']) ? $field['id'] : ''; ?>" <?php echo (!$editable) ? 'readonly="readonly"' : '' ?> class="regular-text" /><br>
-                                <span class="description"></span></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_type">Field Type</label></th>
-                                <td><?php
-                                	if(!$editable){
-										?><input type="text" name="wpa_metrics[type]" id="wpa_metrics_type" class="regular-text" value="<?php echo ($field['type']) ? $field['type'] : ''; ?>" readonly /><?php
-									} else {
-										?><select name="wpa_metrics[type]" id="wpa_metrics_type" <?php echo (!$editable) ? 'disabled="disabled"' : '' ?>>
-                                            <option value="text" <?php selected($field['type'], 'text'); ?>>Text</option>
-                                            <option value="textarea" <?php selected($field['type'], 'textarea'); ?>>Texarea</option>
-                                            <option value="checkbox2" <?php selected($field['type'], 'checkbox2'); ?>>Checkbox</option>
-                                            <option value="radio" <?php selected($field['type'], 'radio'); ?>>Radio</option>
-                                            <option value="select" <?php selected($field['type'], 'select'); ?>>Select</option>
-                                        </select><?php
-                                	}
-                                    ?><br><span class="description"></span>
-                                </td>
-                            </tr>
-							
-                            <tr id="wpa-options-row" style="display:<?php echo ($field['options']) ? 'table-row' : 'none'; ?>;">
-                            	<th scope="row"><label for="wpa_metrics_options">Field Options</label></th>
-                                <td><textarea name="wpa_metrics[options]" id="wpa_metrics_options" class="regular-textarea" <?php echo (!$editable) ? 'readonly="readonly"' : '' ?>><?php
-                                	echo ($field['options']) ? implode('|', $field['options']) : '';
-                                ?></textarea><br>
-                                <span class="description"><?php _e('Separate each option using a pipe "|" without spaces.', 'wpa'); ?></span></td>
-                            </tr>
-                            
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_group">Field Group</label></th>
-                                <td><?php
-									if(!$editable){
-										?><input type="text" name="wpa_metrics[group]" id="wpa_metrics_group" class="regular-text" value="<?php echo ($field['group']) ? $field['group'] : ''; ?>" readonly /><?php
-									} else {
-										?><select name="wpa_metrics[group]" id="wpa_metrics_group" <?php echo (!$editable) ? 'disabled="disabled"' : '' ?>><?php
-											$metricsGroup = wpa_get_metrics_groups();
-											foreach($metricsGroup as $group){
-												?><option value="<?php echo $group['id']; ?>" <?php selected($field['group'], $group['id']); ?>><?php echo $group['name']; ?></option><?php
-											}
-										?></select><?php
-									}
-									?><br><span class="description"></span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_tip">Field Instructions</label></th>
-                                <td><textarea name="wpa_metrics[tip]" id="wpa_metrics_tip" class="regular-textarea"><?php echo ($field['tip']) ? $field['tip'] : ''; ?></textarea><br>
-                                <span class="description"></span></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_desc">Meta Description</label></th>
-                                <td><textarea name="wpa_metrics[desc]" id="wpa_metrics_desc" class="regular-textarea"><?php echo ($field['desc']) ? $field['desc'] : ''; ?></textarea><br>
-                                <span class="description"></span></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_required">Required</label></th>
-                                <td>
-                                <label><input type="radio" name="wpa_metrics[required]" id="wpa_metrics_required" value="true" <?php checked($field['required'], 'true'); ?> /> Yes</label>
-                                <label><input type="radio" name="wpa_metrics[required]" id="wpa_metrics_required" value="false" <?php checked($field['required'], 'false'); ?> /> No</label>
-                                <br>
-                                <span class="description"></span></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wpa_metrics_std">Default Value</label></th>
-                                <td><input type="text" name="wpa_metrics[value]" id="wpa_metrics_std" value="<?php echo ($field['std']) ? $field['std'] : ''; ?>" class="regular-text" /><br>
-                                <span class="description"></span></td>
-                            </tr>
-                        </table>
-                        <p><?php
-							if(!$editable){
-								?><input type="hidden" name="readonly" value="1" /><?php
-							}
-							?><input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics&settings-updated='); ?>" /><?php
-							
-							if($field){
-								?><input type="hidden" name="metric_id" value="<?php echo $field['id']; ?>" />
-                                <input type="submit" value="Save Field" class="button-primary" id="submit" name="wpa_save_metric" /><?php
-							} else {
-								?><input type="submit" value="+ Add Field" class="button-primary" id="submit" name="wpa_save_metric" /><?php
-							}
-                        ?></p>
-                    </div><!-- /new-metric-wrapper -->
-                </form><?php
+				load_template( trailingslashit( PLUGINPATH ) . 'admin/cron.php' );
 				break;
 			
 			case 'metrics':
 			case 'groups':
+				load_template( trailingslashit( PLUGINPATH ) . 'admin/metrics.php' );
+				break;
 			
-				?><ul class="subsubsub">
-                    <li><a href="<?php echo admin_url('admin.php?page=wpauthority&tab=metrics'); ?>" class="<?php echo ('metrics' == $tab) ? 'current' : ''; ?>">Metrics</a> |</li>
-                    <li><a href="<?php echo admin_url('admin.php?page=wpauthority&tab=groups'); ?>" class="<?php echo ('groups' == $tab) ? 'current' : ''; ?>">Groups</a></li><?php
-                    
-					if('metrics' == $tab){
-						?><li><a href="<?php echo admin_url('admin.php?page=wpauthority&tab=addmetric'); ?>" class="add-new-h2"><?php
-                        	_e('Add Metric', 'wpa');
-                        ?></a></li><?php
-					} else {
-						?><li><a href="<?php echo admin_url('admin.php?page=wpauthority&tab=addgroup'); ?>" class="add-new-h2"><?php
-                        	_e('Add Group', 'wpa');
-                        ?></a></li><?php
-					}
-					
-                ?></ul><?php
-				
-				if( isset( $_REQUEST['settings-updated'] ) ){
-					if( $_REQUEST['settings-updated'] == 'true' ){
-						?><div id="setting-error" class="updated settings-error clear">
-                        	<p><strong><?php _e('Settings saved.'); ?></strong></p>
-                        </div><?php
-					} else {
-						?><div id="setting-error" class="error settings-error clear">
-                        	<p><strong><?php _e('Settings not saved.'); ?></strong></p>
-                        </div><?php
-					}
-				}
-				
-				?><form name="awp_settings" method="post" action="<?php admin_url('edit.php?post_type=site&page=wpauthority'); ?>"><?php
-                	
-					if('metrics' == $tab){
-						
-						$metrics = wpa_default_metrics();
-						
-						?><table class="wp-list-table widefat fixed posts" cellpadding="0">
-							<thead>
-								<tr>
-                                	<th scope="col" class="manage-column check-column">
-										<label class="screen-reader-text" for="cb-select-all-1">Select All</label>
-                                        <input id="cb-select-all-1" type="checkbox">
-                                    </th>
-									<th scope="col" class="manage-column name-column"><?php _e('Name', 'wpa'); ?></th>
-									<th scope="col" class="manage-column description-column"><?php _e('Description', 'wpa'); ?></th>
-									<th scope="col" class="manage-column id-column"><?php _e('ID', 'wpa'); ?></th>
-									<th scope="col" class="manage-column type-column"><?php _e('Type', 'wpa'); ?></th>
-									<th scope="col" class="manage-column group-column"><?php _e('Group', 'wpa'); ?></th>
-								</tr>
-							</thead>
-							
-							<tfoot>
-								<tr>
-                                	<th scope="col" class="manage-column check-column">
-										<label class="screen-reader-text" for="cb-select-all-2">Select All</label>
-                                        <input id="cb-select-all-2" type="checkbox">
-                                    </th>
-									<th scope="col" class="manage-column name-column"><?php _e('Name', 'wpa'); ?></th>
-									<th scope="col" class="manage-column description-column"><?php _e('Description', 'wpa'); ?></th>
-									<th scope="col" class="manage-column id-column"><?php _e('ID', 'wpa'); ?></th>
-									<th scope="col" class="manage-column type-column"><?php _e('Type', 'wpa'); ?></th>
-									<th scope="col" class="manage-column group-column"><?php _e('Group', 'wpa'); ?></th>
-								</tr>
-							</tfoot>
-							
-							<tbody><?php
-                            	foreach($metrics as $cfields){
-									if('heading' == $cfields['type'] || 'separator' == $cfields['type']){
-										continue;
-									} else {
-										?><tr>
-											<th scope="col" class="manage-column check-column">
-												<label class="screen-reader-text" for="cb-select-1">Select this Item</label>
-												<input name="custom_metrics" id="cb-select-1" type="checkbox" value="<?php echo $cfields['id']; ?>" />
-											</th>
-											<td>
-												<a href="<?php echo admin_url('admin.php?page=wpauthority&tab=editmetric&id=' . $cfields['id']); ?>"><strong><?php echo $cfields['name']; ?></strong></a>
-												<div class="row-actions">
-													<span class="edit"><a href="<?php echo admin_url('admin.php?page=wpauthority&tab=editmetric&id=' . $cfields['id']); ?>" title="Edit this item">Edit</a><?php
-													
-													if($cfields['readonly'] == false){
-														?> | </span><span class="trash">
-                                                        	<a class="submitdelete" title="Delete Item" href="<?php echo admin_url('admin.php?page=wpauthority&metric_action=delete&id='.$cfields['id']); ?>">Delete</a>
-                                                        </span><?php
-													} else {
-														?></span><?php
-													}
-													
-												?></div>
-											</td>
-											<td><?php echo $cfields['description']; ?></td>
-											<td><?php echo $cfields['id']; ?></td>
-											<td><?php echo $cfields['type']; ?></td>
-											<td><?php echo $cfields['group']; ?></td>
-										</tr><?php
-									}
-								}
-							?></tbody>
-						</table><?php
-					} else {
-						?><table class="wp-list-table widefat fixed posts" cellpadding="0">
-							<thead>
-								<tr>
-									<th scope="col" class="manage-column name-column"><?php _e('Name', 'wpa'); ?></th>
-									<th scope="col" class="manage-column description-column"><?php _e('Description', 'wpa'); ?></th>
-								</tr>
-							</thead>
-							
-							<tfoot>
-								<tr>
-									<th scope="col" class="manage-column name-column"><?php _e('Name', 'wpa'); ?></th>
-									<th scope="col" class="manage-column description-column"><?php _e('Description', 'wpa'); ?></th>
-								</tr>
-							</tfoot>
-							
-							<tbody><?php
-								$groups = wpa_get_metrics_groups();
-								foreach($groups as $headings){
-									?><tr>
-                                        <td>
-                                            <a href="<?php echo admin_url('admin.php?page=wpauthority&tab=editgroup&id=' . $headings['id']); ?>"><strong><?php echo $headings['name']; ?></strong></a>
-                                            <div class="row-actions">
-                                                <span class="edit"><a href="<?php echo admin_url('admin.php?page=wpauthority&tab=editgroup&id=' . $headings['id']); ?>" title="Edit this item">Edit</a><?php
-												
-												if($headings['readonly'] == false){
-													?> | </span>
-                                                	<span class="trash">
-                                                		<a class="submitdelete" title="Delete Item" href="<?php echo admin_url('admin.php?page=wpauthority&metric_action=delete&id='.$headings['id']); ?>">Delete</a>
-                                                    </span><?php
-												} else {
-													?></span><?php
-												}
-												
-                                            ?></div>
-                                        </td>
-                                        <td><?php echo $headings['desc']; ?></td>
-                                    </tr><?
-								}
-							?></tbody>
-						</table>
-						
-						</table><?php
-					}
-                    
-				?></form><?php
+			case 'addgroup':
+			case 'editgroup':
+				load_template( trailingslashit( PLUGINPATH ) . 'admin/editgroup.php' );
+				break;
+			
+			case 'addmetric':
+			case 'editmetric':
+				load_template( trailingslashit( PLUGINPATH ) . 'admin/addgroup.php' );
 				break;
 			
 			case 'content-seo':
-				
-				if( isset( $_REQUEST['settings-updated'] ) ){
-					if( $_REQUEST['settings-updated'] == 'true' ){
-						?><div id="setting-error" class="updated settings-error">
-                        	<p><strong><?php _e('Settings saved.'); ?></strong></p>
-                        </div><?php
-					} else {
-						?><div id="setting-error" class="error settings-error">
-                        	<p><strong><?php _e('Settings not saved.'); ?></strong></p>
-                        </div><?php
-					}
-				}
-				
-				?><form name="awp_settings" method="post" action="<?php admin_url('edit.php?post_type=site&page=wpauthority'); ?>">
-                
-                	<h3><?php _e('Archive', 'wpa'); ?></h3>
-                    
-                    <table class="form-table">
-                    	<tr>
-                        	<th scope="row"><label for="archive_meta_title">Meta Title</label></th>
-                            <td><input type="text" class="regular-text" name="awp_settings[archive_meta_title]" id="archive_meta_title" value="<?php echo $settings['archive_meta_title']; ?>" /></td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="archive_meta_desc">Meta Description</label></th>
-                            <td><input type="text" class="regular-text" name="awp_settings[archive_meta_desc]" id="archive_meta_desc" value="<?php echo $settings['archive_meta_desc']; ?>" /></td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="archive_meta_keywords">Meta Keywords</label></th>
-                            <td><input type="text" class="regular-text" name="awp_settings[archive_meta_keywords]" id="archive_meta_keywords" value="<?php echo $settings['archive_meta_keywords']; ?>" /></td>
-                        </tr>
-                        
-                        <tr>
-                        	<th scope="row"><label for="archive_page_title">Archive Page Title</label></th>
-                            <td><input type="text" class="regular-text" name="awp_settings[archive_page_title]" id="archive_page_title" value="<?php echo $settings['archive_page_title']; ?>" /></td>
-                        </tr>
-                        
-                        <tr>
-                        	<th scope="row"><label for="archive_content_before">Content After Title</label></th>
-                            <td><?php
-                            	wp_editor( $settings['archive_content_before'], 'archive_content_before', array(
-									'textarea_name' => 'awp_settings[archive_content_before]'
-								));
-							?></td>
-                        </tr>
-                        
-                        <tr>
-                        	<th scope="row"><label for="archive_content_after">Content After Site Lists</label></th>
-                            <td><?php
-                            	wp_editor( $settings['archive_content_after'], 'archive_content_after', array(
-									'textarea_name' => 'awp_settings[archive_content_after]'
-								));
-							?></td>
-                        </tr>
-                    </table>
-                    
-                    <h3><?php _e('Single Site', 'wpa'); ?></h3>
-                    
-                    <table class="form-table">
-                    	<tr>
-                        	<th scope="row"><label for="wpa_single_sidebar"><?php _e('Single Sidebar', ''); ?></label></th>
-                            <td><select name="awp_settings[single_sidebar]" id="wpa_single_sidebar">
-								<option value="0" <?php selected($settings['single_sidebar'], 0); ?>>None</option><?php
-								
-								global $wp_registered_sidebars;
-								foreach($wp_registered_sidebars as $id=>$args){
-									?><option value="<?php echo $id; ?>" <?php selected($settings['single_sidebar'], $id); ?>><?php echo $args['name'] ?></option><?php
-								}
-								
-                            ?></select>
-							</td>
-                        </tr>
-                    </table>
-                    
-                    <p>
-                    	<input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=content-seo&settings-updated='); ?>" />
-                    	<input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" />
-                    </p>
-                    
-				</form><?php
+				load_template( trailingslashit( PLUGINPATH ) . 'admin/content-seo.php' );
 				break;
 			
-			case 'action':
-				
-				if( isset( $_REQUEST['settings-updated'] ) ){
-					if( $_REQUEST['settings-updated'] == 'true' ){
-						?><div id="setting-error" class="updated settings-error">
-                        	<p><strong><?php _e('Settings saved.'); ?></strong></p>
-                        </div><?php
-					} else {
-						?><div id="setting-error" class="error settings-error">
-                        	<p><strong><?php _e('Settings not saved.'); ?></strong></p>
-                        </div><?php
-					}
-				}
-				
-				?><form name="awp_settings" method="post" action="<?php admin_url('edit.php?post_type=site&page=wpauthority'); ?>">
-                	<h3><?php _e('Sites Archive Display', 'wpa'); ?></h3>
-                    
-                    <table class="form-table">
-                    	<tr>
-                        	<th scope="row"><label for="action_taxonomy_type">Exclude or Include Types</label></th>
-                            <td>
-                            	<select name="awp_settings[action_taxonomy_type]" id="action_taxonomy_type">
-                                	<option value="0" <?php selected($settings['action_taxonomy_type'], 0); ?>>None</option>
-                                	<option value="NOT IN" <?php selected($settings['action_taxonomy_type'], 'NOT IN'); ?>>Exclude</option>
-                                	<option value="IN" <?php selected($settings['action_taxonomy_type'], 'IN'); ?>>Include</option>
-                                </select>
-                            </td>
-                        </tr>
-                    	<tr>
-                        	<th scope="row"><label for="">$Types to Omit from Sites Archive:</label><br>
-                            <small class="description">Chosse terms to include or exclude.</small></th>
-                            <td><?php
-								$types = get_terms('site-type', array(
-									'orderby'       => 'name', 
-									'order'         => 'ASC',
-									'hide_empty'    => false
-								));
-								
-								if(!$settings['xtype'])
-									$settings['xtype'] = array();
-								
-								foreach($types as $tm){
-									$checked = in_array($tm->slug, $settings['xtype']) ? 'checked="checked"' : '';
-									?><label><input type="checkbox" name="awp_settings[xtype][]" value="<?php echo $tm->slug ?>" <?php echo $checked; ?> /> <?php echo $tm->name; ?> </label><br><?php
-								}
-                            ?></td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="action_taxonomy_status">Exclude or Include Statuses</label></th>
-                            <td>
-                            	<select name="awp_settings[action_taxonomy_status]" id="action_taxonomy_status">
-                                	<option value="0" <?php selected($settings['action_taxonomy_status'], 0); ?>>None</option>
-                                	<option value="NOT IN" <?php selected($settings['action_taxonomy_status'], 'NOT IN'); ?>>Exclude</option>
-                                	<option value="IN" <?php selected($settings['action_taxonomy_status'], 'IN'); ?>>Include</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="">!Statuses to Omit from Sites Archive:</label><br>
-                            <small class="description">Choose terms to include or exclude.</small></th>
-                            <td><?php
-								$types = get_terms('site-status', array(
-									'orderby'       => 'name', 
-									'order'         => 'ASC',
-									'hide_empty'    => false
-								));
-								
-								if(!$settings['xStatus'])
-									$settings['xStatus'] = array();
-								
-								foreach($types as $tm){
-									$checked = in_array($tm->slug, $settings['xStatus']) ? 'checked="checked"' : '';
-									?><label><input type="checkbox" name="awp_settings[xStatus][]" value="<?php echo $tm->slug ?>" <?php echo $checked; ?> /> <?php echo $tm->name; ?> </label><br><?php
-								}
-                            ?></td>
-                        </tr>
-                    </table>
-                    
-                    <h3><?php _e('Business Builder Template', 'wpa'); ?></h3>
-                    
-                    <table class="form-table">
-                    	<tr valign="top">
-                        	<th scope="row"><label for="bb_builder_page">Business Builder Page</label></th>
-                            <td><select name="awp_settings[bb_builder_page]" id="bb_builder_page">
-                            	<option value="0" <?php selected($settings['bb_builder_page'], 0) ?>>None</option><?php
-								$pages = get_pages();
-								foreach ( $pages as $page ) {
-									?><option value="<?php echo $page->ID; ?>" <?php selected($settings['bb_builder_page'], $page->ID); ?>><?php echo $page->post_title; ?></option><?php
-								}
-                            ?></select></td>
-                        </tr>
-                    </table>
-                    
-                    <h3><?php _e('Sites Managed Display', 'wpa'); ?></h3>
-                    
-                    <table class="form-table">
-                    	<tr valign="top">
-                        	<th scope="row">
-                            	<label for="wpa_hide_timestamp"><?php _e('Display Settings', 'wpa'); ?></label>
-                            </th>
-                            <td>
-                            	<label><input type="checkbox" name="awp_settings[hide_timestamp]" id="wpa_hide_timestamp" value="true" <?php checked($settings['hide_timestamp'], 'true'); ?> class="regular-check" />
-                                <?php _e('Hide Timestamp !Status tags from the admin sites table.'); ?></label>
-                            </td>
-                        </tr>
-                    </table>
-                    
-                    <h3><?php _e('WordPress Authority Qualification Settings', 'wpa'); ?></h3>
-                    
-                    <table class="form-table">
-                    	<tr>
-                        	<th scope="row">
-                            </th>
-                        </tr>
-                    </table>
-                    
-                    <p>
-                    	<input type="hidden" name="wpas_tab_identifier" value="<?php echo $tab; ?>" />
-                    	<input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" />
-                    </p>
-                </form><?php
+			case 'templates':
+				load_template( trailingslashit( PLUGINPATH ) . 'admin/templates.php' );
 				break;
 			
 			case 'checker':
-			
 				?><h3>Running WP Checker</h3>
 				<p>Checking each sites manually to check if they are built by WordPress...</p><?php
 				
@@ -1552,99 +994,36 @@ function awp_admin_pages(){
 				$cron->wp_authority_update_list();
 				
 				?><p>WP Check finished successfully!</p><?php
-				
-				break;
-			
-			case 'bots':
-				
-				?><?php
-				break;
-			
-			default:
-				
-				if( isset( $_REQUEST['settings-updated'] ) ){
-					if( $_REQUEST['settings-updated'] == 'true' ){
-						?><div id="setting-error" class="updated settings-error">
-                        	<p><strong><?php _e('Settings saved.'); ?></strong></p>
-                        </div><?php
-					} else {
-						?><div id="setting-error" class="error settings-error">
-                        	<p><strong><?php _e('Settings not saved.'); ?></strong></p>
-                        </div><?php
-					}
-				}
-				
-				?><form name="awp_settings" method="post" action="<?php admin_url('edit.php?post_type=site&page=wpauthority'); ?>">
-					<h3>Compete</h3>
-                    
-                    <table class="form-table">
-                    	<tr>
-                        	<th scope="row"><label for="compete_api_key">API Key</label></th>
-                            <td><input type="text" name="awp_settings[compete_api_key]" id="compete_api_key" value="<?php echo $settings['compete_api_key']; ?>" class="regular-text" /><br />
-                            <span class="description">You can get your api service <a href="https://developer.compete.com/" target="_blank">here.</a></td>
-                        </tr>
-                    </table>
-					
-                    <h3>Majestic</h3>
-                    
-                    <table class="form-table">
-                    	<tr>
-                        	<th scope="row"><label for="majestic_api_key">API Key</label></th>
-                            <td><input type="text" name="awp_settings[majestic_api_key]" id="majestic_api_key" value="<?php echo $settings['majestic_api_key']; ?>" class="regular-text" /><br />
-                            <span class="description">You can get your api service <a href="https://www.majesticseo.com/account/api/" target="_blank">here</a></td>
-                        </tr>
-                    </table>
-                    
-                	<h3>Alexa</h3>
-                    
-					<table class="form-table">
-                    	<tr>
-                        	<th scope="row"><label for="access_id">Access ID Key:</label></th>
-                            <td>
-                            	<input type="text" name="awp_settings[access_id]" id="access_id" value="<?php echo $settings['access_id']; ?>" class="regular-text" />
-                            </td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="access_secret">Secret Access Key</label></th>
-                            <td>
-                            	<input type="text" name="awp_settings[access_secret]" id="access_secret" value="<?php echo $settings['access_secret'] ?>" class="regular-text" />
-                            </td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="StartNum">Default Starting Rank:</label></th>
-                            <td>
-                            	<input type="text" name="awp_settings[StartNum]" id="StartNum" value="<?php echo $settings['StartNum'] ?>" class="regular-text" />
-                            </td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="cronLimit">Default Number of Site Rank Request</label></th>
-                            <td>
-                            	<input type="text" name="awp_settings[cronLimit]" id="cronLimit" value="<?php echo $settings['cronLimit'] ?>" class="regular-text" />
-                            </td>
-                        </tr>
-                    </table>
-                    
-                    <h3>GrabzIT</h3>
-                    <p>You can get you app API credentials from <a href="http://grabz.it/" target="_blank">grabz.it</a></p>
-                    
-                    <table class="form-table">
-                    	<tr>
-                        	<th scope="row"><label for="grabzit_api_key">API Key</label></th>
-                            <td><input class="regular-text" type="text" name="awp_settings[grabzit_api_key]" id="grabzit_api_key" value="<?php echo $settings['grabzit_api_key'] ?>" /></td>
-                        </tr>
-                        <tr>
-                        	<th scope="row"><label for="grabzit_api_secret">API Secret</label></th>
-                            <td><input class="regular-text" type="text" name="awp_settings[grabzit_api_secret]" id="grabzit_api_secret" value="<?php echo $settings['grabzit_api_secret'] ?>" /></td>
-                        </tr>
-                    </table>
-                    
-                    <p><input type="hidden" name="redirect" value="<?php echo admin_url('admin.php?page=wpauthority&tab=connect&settings-updated='); ?>" />
-                    <input type="submit" value="Update option" class="button-primary" id="submit" name="awp_submit" /></p>
-				</form><?php
-				
 				break;
 		}
 	?></div><?php
+}
+
+function wpas_metrics_subnav(){
+	$navs = array(
+		'metrics' => 'Metrics',
+		'groups' => 'Groups',
+		'addmetric' => 'Add Metric',
+		'addgroup' => 'Add Group'
+	);
+	
+	$tab = $_REQUEST['tab'] ? $_REQUEST['tab'] : 'action';
+	$i = 1;
+	
+	echo '<ul class="subsubsub">';
+		foreach($navs as $link=>$label){
+			$class = ($link == $tab) ? 'current' : '';
+			$separator = ($i < count($navs)) ? '|' : '';
+			echo sprintf(
+				'<li><a href="%s" class="%s">%s</a> %s </li>',
+				admin_url('edit.php?post_type=site&page=wpauthority&tab='.$link),
+				$class,
+				$label,
+				$separator
+			);
+			$i++;
+		}
+	echo '</ul>';
 }
 
 function wpa_admin_nav_tabs(){
@@ -1654,7 +1033,8 @@ function wpa_admin_nav_tabs(){
 		'bots' => 'Bots',
 		'cron' => 'Cron',
 		'metrics' => 'Metrics',
-		'content-seo' => 'Content & SEO'
+		'content-seo' => 'Content & SEO',
+		'templates' => 'Templates'
 	);
 	
 	?><div id="icon-ows" class="icon32"><img src="<?php echo PLUGINURL; ?>images/icon32.jpg" alt="WP Sites" /></div>

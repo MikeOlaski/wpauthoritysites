@@ -175,7 +175,8 @@ jQuery(document).ready(function($) {
 			
 			if( $(this).parent().hasClass('current') ){
 			} else {
-				$(this).parent().addClass('current').siblings().removeClass('current');
+				$('.wpa-group-column li').not($(this).parent()).removeClass('current');
+				$(this).parent().addClass('current'); // .siblings().removeClass('current');
 				$(selector).removeClass('hide');
 				$(toggler).attr('checked', 'checked');
 			}

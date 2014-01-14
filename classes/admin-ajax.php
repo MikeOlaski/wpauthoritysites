@@ -268,8 +268,8 @@ function evaluate_js_callback( $args = null ){
 		}
 		
 		// Create thumbnail
-		$grabApiKey = ($settings['grabzit_api_key']) ? $settings['grabzit_api_key'] : 'MTFjOWYzYmQ3MGMxNDQ5OTgyNTc3MWY5ODU3YWRmMGE=';
-		$grabApiSecret = ($settings['grabzit_api_secret']) ? $settings['grabzit_api_secret'] : 'bT8/IGFXP1w/Pz8/PwM/PwBHHz8LPz8uPzoXRz8/HD8=';
+		$grabApiKey = 'OTcwZTYzOTBmZDEyNDdhZWE3NjFhOTRlNzdmZTRhMmI=';
+		$grabApiSecret = 'Nz9HTT9yMhk/SVRAPzM5IklgPwhFPz8/HT8/GT83Pwo=';
 		$grabzIt = new GrabzItClient($grabApiKey, $grabApiSecret);
 		
 		// Take a screenshot
@@ -278,7 +278,8 @@ function evaluate_js_callback( $args = null ){
 		 * $grabzIt->SetImageOptions( $url, null, null, null, '720', '480' );
 		 * The maximum size your current package allows is 200.
 		 */
-		$grabzIt->SetImageOptions( $url );
+		$grabzIt->SetImageOptions( $url, null, null, null, '500', '500' );
+		// $grabzIt->SetImageOptions( $url );
 		
 		$file = $name;
 		$filepath = PLUGINPATH . "uploads/$file.jpg";

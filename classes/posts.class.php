@@ -33,6 +33,7 @@ class Sites_CPT{
 		add_action( 'manage_site_posts_custom_column', array($this, 'site_columns_content'), 10, 2);
 		
 		add_action( 'pre_get_posts', array($this, 'site_orderby_rank') );
+		add_action( 'pre_get_posts', array($this, 'admin_quicklinks_callback') );
 		
 		// Add meta boxes
 		add_action( 'add_meta_boxes', array($this, 'add_meta_boxes') );
@@ -49,14 +50,17 @@ class Sites_CPT{
 	}
 	
 	function wpas_view_groups(){
+		$settings = get_option('awp_settings');
 		global $post;
 		
 		if( $post->post_type == 'site' ){
 			?><div rel="wpas-view-groups" style="display:none;">
 				<ul class="subsubsub clear">
+                	<li><span><strong>Workflow:</strong></span></li>
 					<li><a href="javascript:void(0);" data-column="action" class="wpa-views">Action</a></li>
 				</ul>
 				<ul class="subsubsub clear">
+                	<li><span><strong>Departments:</strong></span></li>
 					<li><a href="javascript:void(0);" data-column="site" class="wpa-views">Site</a> |</li>
 					<li><a href="javascript:void(0);" data-column="project" class="wpa-views">Team</a> |</li>
 					<li><a href="javascript:void(0);" data-column="framework" class="wpa-views">Framework</a> |</li>
@@ -67,6 +71,7 @@ class Sites_CPT{
 					<li><a href="javascript:void(0);" data-column="valuation" class="wpa-views">Valuation</a></li>
 				</ul>
 				<ul class="subsubsub clear">
+                	<li><span><strong>Metrics:</strong></span></li>
 					<li><a href="javascript:void(0);" data-column="links" class="wpa-views">Links</a> |</li>
 					<li><a href="javascript:void(0);" data-column="social" class="wpa-views">Social</a> |</li>
 					<li><a href="javascript:void(0);" data-column="buzz" class="wpa-views">Buzz</a> |</li>
@@ -74,12 +79,15 @@ class Sites_CPT{
 					<li><a href="javascript:void(0);" data-column="scores" class="wpa-views">Scores</a></li>
 				</ul>
 				<ul class="subsubsub clear">
+                	<li><span><strong>Quicklinks:</strong></span></li>
 					<li><a href="<?php echo admin_url('edit.php?post_type=site&site-type=wordpress'); ?>"><?php _e('WordPress Sites', 'wpas'); ?></a> |</li>
 					<li><a href="<?php echo admin_url('edit.php?site-type=authority+NotWordpress&post_type=site'); ?>"><?php _e('Authority Sites', 'wpas'); ?></a> |</li>
 					<li><a href="<?php echo admin_url('edit.php?post_type=site&site-type=authority+wordpress'); ?>"><?php _e('WordPress Authority Sites', 'wpas'); ?></a> |</li>
+                    <li><a href="<?php echo admin_url('edit.php?post_type=site&site-type=featured'); ?>"><?php _e('Featured Sites', 'wpas'); ?></a> |</li>
 					<li><a href="<?php echo admin_url('edit.php?post_type=site'); ?>"><?php _e('Sites', 'wpas'); ?></a> |</li>
 					<li><a href="<?php echo admin_url('edit.php?post_status=uncheck&post_type=site'); ?>"><?php _e('UnChecked', 'wpas'); ?></a> |</li>
-					<li><a href="<?php echo admin_url('edit.php?post_type=site&site-status=NotAudited'); ?>"><?php _e('UnAudited Sites', 'wpas'); ?></a></li>
+					<li><a href="<?php echo admin_url('edit.php?post_type=site&site-status=NotAudited'); ?>"><?php _e('UnAudited Sites', 'wpas'); ?></a> |</li>
+                    <li><a href="<?php echo admin_url('edit.php?post_type=site&quicklinks=archive'); ?>"><?php _e('Front End Archives', 'wpas'); ?></a></li>
 				</ul>
 				<div class="clear"></div>
 			</div>
@@ -94,6 +102,35 @@ class Sites_CPT{
 				});
 			</script><?php
 		}
+	}
+	
+	function admin_quicklinks_callback( $query ){
+		$settings = get_option('awp_settings');
+		global $post;
+		
+		if ( is_admin() && $query->is_main_query() ) {
+			if( isset($_REQUEST['quicklinks']) ){
+				global $paged; $paged = 1; // Fix for the WordPress 3.0 "paged" bug.
+				if ( get_query_var( 'paged' ) && ( get_query_var( 'paged' ) != '' ) ) { $paged = get_query_var( 'paged' ); }
+				if ( get_query_var( 'page' ) && ( get_query_var( 'page' ) != '' ) ) { $paged = get_query_var( 'page' ); }
+				$query->set("paged", $paged);
+				
+				if($wpa_settings['sites_default_orderby'] != 'title'){
+					$orderby = 'meta_value_num';
+					$query->set("meta_key", $wpa_settings['sites_default_orderby']);
+				} else {
+					$orderby = (isset($wpa_settings['sites_default_orderby']) ? $wpa_settings['sites_default_orderby'] : 'ID');
+				}
+				$query->set("orderby", $orderby);
+				
+				$order = (isset($wpa_settings['sites_default_order']) ? $wpa_settings['sites_default_order'] : 'asc');
+				$query->set("order", $order);
+				
+				$query->set("tax_query", apply_filters('wpa_archive_wp_query', $query ) );
+			}
+		}
+		
+		return $query;
 	}
 	
 	function filter_restrict_manage_posts_site(){

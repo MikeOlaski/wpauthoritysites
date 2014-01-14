@@ -1488,6 +1488,21 @@ span.displayOptionshead{
 	color: #BEC3BC;
 }
 
+.wpa-metrics-table th span.external-links{
+	margin: 0 3px 0 0;
+	float: left;
+}
+
+.wpa-metrics-table th span.external-links a{
+	background: url(../images/link-icon.png) no-repeat top left;
+	display: inline-block;
+	height: 12px; width: 12px;
+	
+	text-indent: -9999px;
+	color: transparent;
+	font-size: 0;
+}
+
 .wpa-metrics-table th i{
 	background: url(../images/wpa-info-icon.png) no-repeat;
 	height: 16px; width: 16px;

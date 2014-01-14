@@ -25,8 +25,27 @@ if ( get_query_var( 'page' ) && ( get_query_var( 'page' ) != '' ) ) { $paged = g
 $wp_query->set("paged", $paged);
 
 $archivePage = get_post_type_archive_link('site') . '?';
-$orderby = isset($wp_query->query['orderby']) ? $wp_query->query['orderby'] : 'id';
-$order = (isset($wp_query->query['order']) && 'asc' == $wp_query->query['order']) ? 'desc' : 'asc';
+
+if(isset($wp_query->query['orderby'])){
+	$orderby = $wp_query->query['orderby'];
+} else {
+	if($wpa_settings['sites_default_orderby'] != 'title'){
+		$orderby = 'meta_value_num';
+		$wp_query->set("meta_key", $wpa_settings['sites_default_orderby']);
+	} else {
+		$orderby = $wpa_settings['sites_default_orderby'];
+	}
+}
+$wp_query->set("orderby", $orderby);
+
+if( isset($_REQUEST['order']) ){
+	$order = $_REQUEST['order'];
+} elseif( isset($wp_query->query['order']) ){
+	$order = $wp_query->query['order'];
+} else {
+	$order = $wpa_settings['sites_default_order'];
+}
+$wp_query->set("order", $order);
 
 $number = 10;
 if(isset($_REQUEST['posts_per_page'])){
@@ -41,15 +60,71 @@ if(isset($_REQUEST['meta_key'])){
 }
 
 $wp_query->set("tax_query", apply_filters('wpa_archive_wp_query', $wp_query ) );
-
 $wp_query->get_posts( $wp_query );
 
-// wp_die( '<pre>' . print_r($wp_query->tax_query, true) . '</pre>' );
+// wp_die( '<pre>' . print_r($wp_query, true) . '</pre>' );
 
 $columns = array();
 
+/* [RANKS] $columns['wpa-col-ranks'] = array( array( 'name' => 'Alexa Rank', 'header' => 'wpa-th-alexa-rank', 'body' => 'wpa-td-alexa-rank', 'meta_key' => 'awp-alexa-rank', 'sortable' => true ), array( 'name' => 'Google Rank', 'header' => 'wpa-th-google-rank', 'body' => 'wpa-td-google-rank', 'meta_key' => 'awp-google-rank', 'sortable' => true ), array( 'name' => 'Compete Rank', 'header' => 'wpa-th-compete-rank', 'body' => 'wpa-td-compete-rank', 'meta_key' => 'awp-compete-rank', 'sortable' => true ), array( 'name' => 'SEMRUSH Rank', 'header' => 'wpa-th-semrush-rank', 'body' => 'wpa-td-semrush-rank', 'meta_key' => 'awp-semrush-rank', 'sortable' => true ), array( 'name' => 'ONE Rank', 'header' => 'wpa-th-one-rank', 'body' => 'wpa-td-one-rank', 'meta_key' => 'awp-one-rank', 'sortable' => true ) );*/
+
+// [ACTION]
+$columns['wpa-col-action'] = array(
+	array(
+		'name' => 'Action',
+		'header' => 'wpa-th-site-action',
+		'body' => 'wpa-td-site-action',
+		'taxonomy' => 'site-action'
+	),
+	array(
+		'name' => 'Status',
+		'header' => 'wpa-th-site-status',
+		'body' => 'wpa-td-site-status',
+		'taxonomy' => 'site-status'
+	),
+	array(
+		'name' => 'Include',
+		'header' => 'wpa-th-site-include',
+		'body' => 'wpa-td-site-include',
+		'taxonomy' => 'site-include'
+	),
+	array(
+		'name' => 'Topic',
+		'header' => 'wpa-th-site-topic',
+		'body' => 'wpa-td-site-topic',
+		'taxonomy' => 'site-topic'
+	),
+	array(
+		'name' => 'Type',
+		'header' => 'wpa-th-site-type',
+		'body' => 'wpa-td-site-type',
+		'taxonomy' => 'site-type'
+	),
+	array(
+		'name' => 'Location',
+		'header' => 'wpa-th-site-location',
+		'body' => 'wpa-td-site-location',
+		'taxonomy' => 'site-location'
+	),
+	array(
+		'name' => 'Assignment',
+		'header' => 'wpa-th-site-assignment',
+		'body' => 'wpa-td-site-assignment',
+		'taxonomy' => 'site-assignment'
+	),
+	array(
+		'name' => 'Date',
+		'header' => 'wpa-th-date',
+		'body' => 'wpa-td-date',
+		'post' => 'post_date',
+		'format' => 'date',
+		'sortable' => true
+	)
+);
+
+$departmentColumns = array();
 // [SITE]
-$columns['wpa-col-site'] = array(
+$departmentColumns['wpa-col-site'] = array(
 	array(
 		'name' => 'Thumbnail',
 		'header' => 'wpa-th-thumbnail',
@@ -103,8 +178,8 @@ $columns['wpa-col-site'] = array(
 	)
 );
 
-// [PROJECT]
-$columns['wpa-col-project'] = array(
+// [TEAM]
+$departmentColumns['wpa-col-team'] = array(
 	array(
 		'name' => 'Founder',
 		'header' => 'wpa-th-founder',
@@ -163,118 +238,8 @@ $columns['wpa-col-project'] = array(
 	)
 );
 
-// [LINKS]
-$columns['wpa-col-links'] = array(
-	array(
-		'name' => 'Goolge',
-		'header' => 'wpa-th-goolge',
-		'body' => 'wpa-td-goolge',
-		'meta_key' => 'awp-goolge',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Alexa',
-		'header' => 'wpa-th-alexa',
-		'body' => 'wpa-td-alexa',
-		'meta_key' => 'awp-alexa',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Yahoo',
-		'header' => 'wpa-th-yahoo',
-		'body' => 'wpa-td-yahoo',
-		'meta_key' => 'awp-yahoo',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Majestic',
-		'header' => 'wpa-th-majestic',
-		'body' => 'wpa-td-majestic',
-		'meta_key' => 'awp-majestic',
-		'sortable' => true
-	)
-);
-
-// [SOCIAL]
-$columns['wpa-col-social'] = array(
-	array(
-		'name' => 'Google+',
-		'header' => 'wpa-th-googleplus',
-		'body' => 'wpa-td-googleplus',
-		'meta_key' => 'awp-shares-goolgeplus',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Facebook Shares',
-		'header' => 'wpa-th-fbshares',
-		'body' => 'wpa-td-fbshares',
-		'meta_key' => 'awp-shares-facebook',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Facebook Likes',
-		'header' => 'wpa-th-fblikes',
-		'body' => 'wpa-td-fblikes',
-		'meta_key' => 'awp-likes-facebook',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Twitter',
-		'header' => 'wpa-th-buzz-twitter',
-		'body' => 'wpa-td-buzz-twitter',
-		'meta_key' => 'awp-shares-twitter',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Pinterest',
-		'header' => 'wpa-th-pinterest',
-		'body' => 'wpa-td-pinterest',
-		'meta_key' => 'awp-shares-pinterest',
-		'sortable' => true
-	),
-	array(
-		'name' => 'LinkedIn',
-		'header' => 'wpa-th-shares-linkedin',
-		'body' => 'wpa-td-shares-linkedin',
-		'meta_key' => 'awp-shares-linkedin',
-		'sortable' => true
-	)
-);
-
-// [BUZZ]
-$columns['wpa-col-buzz'] = array(
-	array(
-		'name' => 'Recent Comments',
-		'header' => 'wpa-th-recent-comments',
-		'body' => 'wpa-td-recent-comments',
-		'meta_key' => 'awp-recent-comments',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Recent Post',
-		'header' => 'wpa-th-recent-post',
-		'body' => 'wpa-td-recent-post',
-		'meta_key' => 'awp-recent-post',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Recent Shares',
-		'header' => 'wpa-th-recent-shares',
-		'body' => 'wpa-td-recent-shares',
-		'meta_key' => 'awp-recent-shares',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Klout Score',
-		'header' => 'wpa-th-klout-score',
-		'body' => 'wpa-td-klout-score',
-		'meta_key' => 'awp-klout-score',
-		'sortable' => true
-	)
-);
-
 // [FRAMEWORK]
-$columns['wpa-col-framework'] = array(
+$departmentColumns['wpa-col-framework'] = array(
 	array(
 		'name' => 'Plugins (Paid)',
 		'header' => 'wpa-th-plugins-paid',
@@ -347,8 +312,321 @@ $columns['wpa-col-framework'] = array(
 	)
 );
 
+// [AUTHOR]
+$departmentColumns['wpa-col-authors'] = array(
+	array(
+		'name' => 'Number of Authors',
+		'header' => 'wpa-th-authors-number',
+		'body' => 'wpa-td-authors-number',
+		'meta_key' => 'awp-authors-number',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Bio Type',
+		'header' => 'wpa-th-bio-type',
+		'body' => 'wpa-td-bio-type',
+		'meta_key' => 'awp-bio-type',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Byline Type',
+		'header' => 'wpa-th-byline-type',
+		'body' => 'wpa-td-byline-type',
+		'meta_key' => 'awp-byline-type',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Author Page Type',
+		'header' => 'wpa-th-author-page-type',
+		'body' => 'wpa-td-author-page-type',
+		'meta_key' => 'awp-author-page-type',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Paid',
+		'header' => 'wpa-th-author-paid',
+		'body' => 'wpa-td-author-paid',
+		'meta_key' => 'awp-author-paid',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Free',
+		'header' => 'wpa-th-author-free',
+		'body' => 'wpa-td-author-free',
+		'meta_key' => 'awp-author-free',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Revenue Share',
+		'header' => 'wpa-th-revenue-share',
+		'body' => 'wpa-td-revenue-share',
+		'meta_key' => 'awp-revenue-share',
+		'sortable' => true
+	),
+	array(
+		'name' => 'No. of Connected Profiles',
+		'header' => 'wpa-th-profiles-number',
+		'body' => 'wpa-td-profiles-number',
+		'meta_key' => 'awp-profiles-number',
+		'sortable' => true
+	)
+);
+
+// [CONTENT]
+$departmentColumns['wpa-col-content'] = array(
+	array(
+		'name' => 'Pillars - Silos',
+		'header' => 'wpa-th-silos-number',
+		'body' => 'wpa-td-silos-number',
+		'meta_key' => 'awp-silos-number',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Number of Rich Snippet Types',
+		'header' => 'wpa-th-rich-snippet-types',
+		'body' => 'wpa-td-rich-snippet-types',
+		'meta_key' => 'awp-rich-snippet-types',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Number of Rich Snippet Posts',
+		'header' => 'wpa-th-rich-snippets',
+		'body' => 'wpa-td-rich-snippets',
+		'meta_key' => 'awp-rich-snippets',
+		'sortable' => true
+	)
+);
+
+// [PRODUCTS]
+$departmentColumns['wpa-col-products'] = array(
+	array(
+		'name' => 'Number',
+		'header' => 'wpa-th-brand-number',
+		'body' => 'wpa-td-brand-number',
+		'meta_key' => 'awp-brand-number',
+		'sortable' => true
+	)
+);
+
+// [SYSTEMS]
+$departmentColumns['wpa-col-systems'] = array(
+	array(
+		'name' => 'Content',
+		'header' => 'wpa-th-system-content',
+		'body' => 'wpa-td-system-content',
+		'meta_key' => 'awp-system-content',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Marketing',
+		'header' => 'wpa-th-system-marketing',
+		'body' => 'wpa-td-system-marketing',
+		'meta_key' => 'awp-system-marketing',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Sales',
+		'header' => 'wpa-th-system-sales',
+		'body' => 'wpa-td-system-sales',
+		'meta_key' => 'awp-system-sales',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Fulfillment',
+		'header' => 'wpa-th-system-fulfilment',
+		'body' => 'wpa-td-system-fulfilment',
+		'meta_key' => 'awp-system-fulfilment',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Management (Staff)',
+		'header' => 'wpa-th-system-management',
+		'body' => 'wpa-td-system-management',
+		'meta_key' => 'awp-system-management',
+		'sortable' => true
+	)
+);
+
+// [VALUATION]
+$departmentColumns['wpa-col-valuation'] = array(
+	array(
+		'name' => 'Replacement - Content',
+		'header' => 'wpa-th-replacement-content',
+		'body' => 'wpa-td-replacement-content',
+		'meta_key' => 'awp-replacement-content',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Replacement - Technology',
+		'header' => 'wpa-th-replacement-technology',
+		'body' => 'wpa-td-replacement-technology',
+		'meta_key' => 'awp-replacement-technology',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Replacement - Community',
+		'header' => 'wpa-th-replacement-community',
+		'body' => 'wpa-td-replacement-community',
+		'meta_key' => 'awp-replacement-community',
+		'sortable' => true
+	),
+	array(
+		'name' => 'TTM - Trailing Twelve Months',
+		'header' => 'wpa-th-trailing-12-months',
+		'body' => 'wpa-td-trailing-12-months',
+		'meta_key' => 'awp-trailing-12-months',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Income',
+		'header' => 'wpa-th-net-income',
+		'body' => 'wpa-td-net-income',
+		'meta_key' => 'awp-net-income',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Expenses',
+		'header' => 'wpa-th-cost-expense',
+		'body' => 'wpa-td-cost-expense',
+		'meta_key' => 'awp-cost-expense',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Last Value',
+		'header' => 'wpa-th-last-valuation',
+		'body' => 'wpa-td-last-valuation',
+		'meta_key' => 'awp-last-valuation',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Multiplier - Revenue',
+		'header' => 'wpa-th-revenue-multiplier',
+		'body' => 'wpa-td-revenue-multiplier',
+		'meta_key' => 'awp-revenue-multiplier',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Multiplier - Income',
+		'header' => 'wpa-th-income-multiplier',
+		'body' => 'wpa-td-income-multiplier',
+		'meta_key' => 'awp-income-multiplier',
+		'sortable' => true
+	)
+);
+
+$metricsColumns = array();
+// [LINKS]
+$metricsColumns['wpa-col-links'] = array(
+	array(
+		'name' => 'Goolge',
+		'header' => 'wpa-th-goolge',
+		'body' => 'wpa-td-goolge',
+		'meta_key' => 'awp-goolge',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Alexa',
+		'header' => 'wpa-th-alexa',
+		'body' => 'wpa-td-alexa',
+		'meta_key' => 'awp-alexa',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Yahoo',
+		'header' => 'wpa-th-yahoo',
+		'body' => 'wpa-td-yahoo',
+		'meta_key' => 'awp-yahoo',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Majestic',
+		'header' => 'wpa-th-majestic',
+		'body' => 'wpa-td-majestic',
+		'meta_key' => 'awp-majestic',
+		'sortable' => true
+	)
+);
+
+// [SOCIAL]
+$metricsColumns['wpa-col-social'] = array(
+	array(
+		'name' => 'Google+',
+		'header' => 'wpa-th-googleplus',
+		'body' => 'wpa-td-googleplus',
+		'meta_key' => 'awp-shares-goolgeplus',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Facebook Shares',
+		'header' => 'wpa-th-fbshares',
+		'body' => 'wpa-td-fbshares',
+		'meta_key' => 'awp-shares-facebook',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Facebook Likes',
+		'header' => 'wpa-th-fblikes',
+		'body' => 'wpa-td-fblikes',
+		'meta_key' => 'awp-likes-facebook',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Twitter',
+		'header' => 'wpa-th-buzz-twitter',
+		'body' => 'wpa-td-buzz-twitter',
+		'meta_key' => 'awp-shares-twitter',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Pinterest',
+		'header' => 'wpa-th-pinterest',
+		'body' => 'wpa-td-pinterest',
+		'meta_key' => 'awp-shares-pinterest',
+		'sortable' => true
+	),
+	array(
+		'name' => 'LinkedIn',
+		'header' => 'wpa-th-shares-linkedin',
+		'body' => 'wpa-td-shares-linkedin',
+		'meta_key' => 'awp-shares-linkedin',
+		'sortable' => true
+	)
+);
+
+// [BUZZ]
+$metricsColumns['wpa-col-buzz'] = array(
+	array(
+		'name' => 'Recent Comments',
+		'header' => 'wpa-th-recent-comments',
+		'body' => 'wpa-td-recent-comments',
+		'meta_key' => 'awp-recent-comments',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Recent Post',
+		'header' => 'wpa-th-recent-post',
+		'body' => 'wpa-td-recent-post',
+		'meta_key' => 'awp-recent-post',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Recent Shares',
+		'header' => 'wpa-th-recent-shares',
+		'body' => 'wpa-td-recent-shares',
+		'meta_key' => 'awp-recent-shares',
+		'sortable' => true
+	),
+	array(
+		'name' => 'Klout Score',
+		'header' => 'wpa-th-klout-score',
+		'body' => 'wpa-td-klout-score',
+		'meta_key' => 'awp-klout-score',
+		'sortable' => true
+	)
+);
+
 // [COMMUNITY]
-$columns['wpa-col-community'] = array(
+$metricsColumns['wpa-col-community'] = array(
 	array(
 		'name' => 'Facebook',
 		'header' => 'wpa-th-facebook-followers',
@@ -415,249 +693,8 @@ $columns['wpa-col-community'] = array(
 	)
 );
 
-// [AUTHOR]
-$columns['wpa-col-authors'] = array(
-	array(
-		'name' => 'Number of Authors',
-		'header' => 'wpa-th-authors-number',
-		'body' => 'wpa-td-authors-number',
-		'meta_key' => 'awp-authors-number',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Bio Type',
-		'header' => 'wpa-th-bio-type',
-		'body' => 'wpa-td-bio-type',
-		'meta_key' => 'awp-bio-type',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Byline Type',
-		'header' => 'wpa-th-byline-type',
-		'body' => 'wpa-td-byline-type',
-		'meta_key' => 'awp-byline-type',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Author Page Type',
-		'header' => 'wpa-th-author-page-type',
-		'body' => 'wpa-td-author-page-type',
-		'meta_key' => 'awp-author-page-type',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Paid',
-		'header' => 'wpa-th-author-paid',
-		'body' => 'wpa-td-author-paid',
-		'meta_key' => 'awp-author-paid',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Free',
-		'header' => 'wpa-th-author-free',
-		'body' => 'wpa-td-author-free',
-		'meta_key' => 'awp-author-free',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Revenue Share',
-		'header' => 'wpa-th-revenue-share',
-		'body' => 'wpa-td-revenue-share',
-		'meta_key' => 'awp-revenue-share',
-		'sortable' => true
-	),
-	array(
-		'name' => 'No. of Connected Profiles',
-		'header' => 'wpa-th-profiles-number',
-		'body' => 'wpa-td-profiles-number',
-		'meta_key' => 'awp-profiles-number',
-		'sortable' => true
-	)
-);
-
-// [CONTENT]
-$columns['wpa-col-content'] = array(
-	array(
-		'name' => 'Pillars - Silos',
-		'header' => 'wpa-th-silos-number',
-		'body' => 'wpa-td-silos-number',
-		'meta_key' => 'awp-silos-number',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Number of Rich Snippet Types',
-		'header' => 'wpa-th-rich-snippet-types',
-		'body' => 'wpa-td-rich-snippet-types',
-		'meta_key' => 'awp-rich-snippet-types',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Number of Rich Snippet Posts',
-		'header' => 'wpa-th-rich-snippets',
-		'body' => 'wpa-td-rich-snippets',
-		'meta_key' => 'awp-rich-snippets',
-		'sortable' => true
-	)
-);
-
-// [PRODUCTS]
-$columns['wpa-col-products'] = array(
-	array(
-		'name' => 'Number',
-		'header' => 'wpa-th-brand-number',
-		'body' => 'wpa-td-brand-number',
-		'meta_key' => 'awp-brand-number',
-		'sortable' => true
-	)
-);
-
-// [SYSTEMS]
-$columns['wpa-col-systems'] = array(
-	array(
-		'name' => 'Content',
-		'header' => 'wpa-th-system-content',
-		'body' => 'wpa-td-system-content',
-		'meta_key' => 'awp-system-content',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Marketing',
-		'header' => 'wpa-th-system-marketing',
-		'body' => 'wpa-td-system-marketing',
-		'meta_key' => 'awp-system-marketing',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Sales',
-		'header' => 'wpa-th-system-sales',
-		'body' => 'wpa-td-system-sales',
-		'meta_key' => 'awp-system-sales',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Fulfillment',
-		'header' => 'wpa-th-system-fulfilment',
-		'body' => 'wpa-td-system-fulfilment',
-		'meta_key' => 'awp-system-fulfilment',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Management (Staff)',
-		'header' => 'wpa-th-system-management',
-		'body' => 'wpa-td-system-management',
-		'meta_key' => 'awp-system-management',
-		'sortable' => true
-	)
-);
-
-// [RANKS]
-$columns['wpa-col-ranks'] = array(
-	array(
-		'name' => 'Alexa Rank',
-		'header' => 'wpa-th-alexa-rank',
-		'body' => 'wpa-td-alexa-rank',
-		'meta_key' => 'awp-alexa-rank',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Google Rank',
-		'header' => 'wpa-th-google-rank',
-		'body' => 'wpa-td-google-rank',
-		'meta_key' => 'awp-google-rank',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Compete Rank',
-		'header' => 'wpa-th-compete-rank',
-		'body' => 'wpa-td-compete-rank',
-		'meta_key' => 'awp-compete-rank',
-		'sortable' => true
-	),
-	array(
-		'name' => 'SEMRUSH Rank',
-		'header' => 'wpa-th-semrush-rank',
-		'body' => 'wpa-td-semrush-rank',
-		'meta_key' => 'awp-semrush-rank',
-		'sortable' => true
-	),
-	array(
-		'name' => 'ONE Rank',
-		'header' => 'wpa-th-one-rank',
-		'body' => 'wpa-td-one-rank',
-		'meta_key' => 'awp-one-rank',
-		'sortable' => true
-	)
-);
-
-// [VALUATION]
-$columns['wpa-col-valuation'] = array(
-	array(
-		'name' => 'Replacement - Content',
-		'header' => 'wpa-th-replacement-content',
-		'body' => 'wpa-td-replacement-content',
-		'meta_key' => 'awp-replacement-content',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Replacement - Technology',
-		'header' => 'wpa-th-replacement-technology',
-		'body' => 'wpa-td-replacement-technology',
-		'meta_key' => 'awp-replacement-technology',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Replacement - Community',
-		'header' => 'wpa-th-replacement-community',
-		'body' => 'wpa-td-replacement-community',
-		'meta_key' => 'awp-replacement-community',
-		'sortable' => true
-	),
-	array(
-		'name' => 'TTM - Trailing Twelve Months',
-		'header' => 'wpa-th-trailing-12-months',
-		'body' => 'wpa-td-trailing-12-months',
-		'meta_key' => 'awp-trailing-12-months',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Income',
-		'header' => 'wpa-th-net-income',
-		'body' => 'wpa-td-net-income',
-		'meta_key' => 'awp-net-income',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Expenses',
-		'header' => 'wpa-th-cost-expense',
-		'body' => 'wpa-td-cost-expense',
-		'meta_key' => 'awp-cost-expense',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Last Value',
-		'header' => 'wpa-th-last-valuation',
-		'body' => 'wpa-td-last-valuation',
-		'meta_key' => 'awp-last-valuation',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Multiplier - Revenue',
-		'header' => 'wpa-th-revenue-multiplier',
-		'body' => 'wpa-td-revenue-multiplier',
-		'meta_key' => 'awp-revenue-multiplier',
-		'sortable' => true
-	),
-	array(
-		'name' => 'Multiplier - Income',
-		'header' => 'wpa-th-income-multiplier',
-		'body' => 'wpa-td-income-multiplier',
-		'meta_key' => 'awp-income-multiplier',
-		'sortable' => true
-	)
-);
-
 // [SCORES]
-$columns['wpa-col-scores'] = array(
+$metricsColumns['wpa-col-scores'] = array(
 	array(
 		'name' => 'Site',
 		'header' => 'wpa-th-site-score',
@@ -740,60 +777,6 @@ $columns['wpa-col-scores'] = array(
 		'header' => 'wpa-th-valuation-score',
 		'body' => 'wpa-td-valuation-score',
 		'meta_key' => 'awp-valuation-score',
-		'sortable' => true
-	)
-);
-
-// [ACTION]
-$columns['wpa-col-action'] = array(
-	array(
-		'name' => 'Action',
-		'header' => 'wpa-th-site-action',
-		'body' => 'wpa-td-site-action',
-		'taxonomy' => 'site-action'
-	),
-	array(
-		'name' => 'Status',
-		'header' => 'wpa-th-site-status',
-		'body' => 'wpa-td-site-status',
-		'taxonomy' => 'site-status'
-	),
-	array(
-		'name' => 'Include',
-		'header' => 'wpa-th-site-include',
-		'body' => 'wpa-td-site-include',
-		'taxonomy' => 'site-include'
-	),
-	array(
-		'name' => 'Topic',
-		'header' => 'wpa-th-site-topic',
-		'body' => 'wpa-td-site-topic',
-		'taxonomy' => 'site-topic'
-	),
-	array(
-		'name' => 'Type',
-		'header' => 'wpa-th-site-type',
-		'body' => 'wpa-td-site-type',
-		'taxonomy' => 'site-type'
-	),
-	array(
-		'name' => 'Location',
-		'header' => 'wpa-th-site-location',
-		'body' => 'wpa-td-site-location',
-		'taxonomy' => 'site-location'
-	),
-	array(
-		'name' => 'Assignment',
-		'header' => 'wpa-th-site-assignment',
-		'body' => 'wpa-td-site-assignment',
-		'taxonomy' => 'site-assignment'
-	),
-	array(
-		'name' => 'Date',
-		'header' => 'wpa-th-date',
-		'body' => 'wpa-td-date',
-		'post' => 'post_date',
-		'format' => 'date',
 		'sortable' => true
 	)
 );
@@ -881,7 +864,9 @@ get_header();
             <li class="openSearch"><a href="#openSearch" class="wpa-control search" title="Screen Options">Open Search</a>
             	<div class="wpa-screen-options hide">
 					<span class="displayOptionshead"><?php _e('DISPLAY OPTIONS'); ?></span><?php
-					foreach($columns as $name=>$group){
+					
+					$checkboxes = array_merge($columns, $departmentColumns, $metricsColumns);
+					foreach($checkboxes as $name=>$group){
 						?><h4> <strong><?php echo ucwords(str_replace('wpa-col-', '', $name)); ?></strong> <p><?php
 						
 						foreach($group as $col){
@@ -935,28 +920,53 @@ get_header();
 		
 		<div class="wpa-group-column alignleft">
             <ul>
+                <li class="first"><span><strong><?php _e('Workflow:', 'wpas'); ?></strong></span></li>
                 <li class="first current"><a href=".wpa-col">All</a></li>
-                <li class="first"><a href=".wpa-default">Summary</a></li><?php
+                <li><a href=".wpa-default">Summary</a></li><?php
+				$i = 1;
                 foreach($columns as $name=>$group){
                     $classes = array();
-                    if($name == 'wpa-col-action'){
-                        $classes[] = 'last';
-                    }
+					if( $i >= count($columns) )
+						$classes[] = 'last';
                     ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('wpa-col-', '', $name) ); ?></a></li><?php
+					$i++;
                 }
             ?></ul>
+            <ul>
+            	<li class="first"><span><strong><?php _e('Departments:', 'wpas'); ?></strong></span></li>
+                <?php $i = 1;
+				foreach($departmentColumns as $name=>$group){
+                    $classes = array();
+                    if( $i >= count($departmentColumns) )
+						$classes[] = 'last';
+                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('wpa-col-', '', $name) ); ?></a></li><?php
+					$i++;
+                } ?>
+            </ul>
+            <ul>
+            	<li class="first"><span><strong><?php _e('Metrics:', 'wpas'); ?></strong></span></li>
+                <?php $i = 1;
+				foreach($metricsColumns as $name=>$group){
+                    $classes = array();
+                    if( $i >= count($metricsColumns) )
+						$classes[] = 'last';
+                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('wpa-col-', '', $name) ); ?></a></li><?php
+					$i++;
+                } ?>
+            </ul>
         </div><?php
 		
-		$sortbytitle = $archivePage . 'orderby=title&order='. $order;
-		$sortbyPR = $archivePage . 'meta_key=awp-google-rank&orderby=meta_value_num&order=' . $order;
-		$sortbyalexa = $archivePage . 'meta_key=awp-alexa-rank&orderby=meta_value_num&order=' . $order;
+		$replaceOrder = ($order == 'asc') ? 'desc' : 'asc';
+		$sortbytitle = $archivePage . 'orderby=title&order='. $replaceOrder;
+		$sortbyAR = $archivePage . 'meta_key=awp-authority-rank&orderby=meta_value_num&order=' . $replaceOrder;
+		$sortbyalexa = $archivePage . 'meta_key=awp-alexa-rank&orderby=meta_value_num&order=' . $replaceOrder;
 		
 		/* Sort Header */
 		?><div class="wpa-sort-wrapper alignright">
 			<p>Sort by:
 			<a href="<?php echo $sortbytitle; ?>" class="wpa-sortable <?php echo $order; echo ($orderby == 'title') ? ' current' : ''; ?>" >Title</a> |
-			<a href="<?php echo $sortbyPR; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-google-rank') ? ' current' : ''; ?>">Google Rank</a> |
-			<a href="<?php echo $sortbyalexa; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-alexa-rank') ? ' current' : ''; ?>">Alexa Rank</a>
+			<a href="<?php echo $sortbyalexa; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-alexa-rank') ? ' current' : ''; ?>">Alexa Rank</a> |
+			<a href="<?php echo $sortbyAR; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-authority-rank') ? ' current' : ''; ?>">Authority Rank</a>
 			</p>
 		</div>
 		
@@ -1025,7 +1035,8 @@ get_header();
                     	<a href="<?php echo $sortbytitle; ?>" class="wpa-sortable <?php echo $order; echo ($orderby == 'title') ? ' current' : ''; ?>">Blog</a>
                     </div><?php
                     
-					foreach($columns as $name=>$group){
+					$checkboxes = array_merge($columns, $departmentColumns, $metricsColumns);
+					foreach($checkboxes as $name=>$group){
 						foreach($group as $col){
 							$oby = 'meta_value';
 							
@@ -1142,7 +1153,8 @@ get_header();
                                 <?php edit_post_link('Edit'); ?>
                             </div><?php
 							
-							foreach($columns as $class=>$group){
+							$checkboxes = array_merge($columns, $departmentColumns, $metricsColumns);
+							foreach($checkboxes as $class=>$group){
 								foreach($group as $col){
 									
 									$classes = array('wpa-td', 'wpa-col', 'hide');
@@ -1308,7 +1320,8 @@ get_header();
 								
 								the_excerpt();
 								
-								foreach($columns as $name=>$group){
+								$checkboxes = array_merge($columns, $departmentColumns, $metricsColumns);
+								foreach($checkboxes as $name=>$group){
 									?><p><?php
 									foreach($group as $col){
 										?><span class="meta metrics-<?php echo $col['meta_key']; ?>"> <?php echo $col['name']; ?>: <span class="metaval"><?php echo $metrics[$col['meta_key']][0]; ?></span></span><?php
