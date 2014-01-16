@@ -235,60 +235,79 @@ function wpa_site_footer(){
 			<div class="wpa-sgl-teams">
 				<h3><?php _e('Team', 'wpa'); ?></h3><?php
 				
-				$include_list = get_the_terms( $post->ID, 'site-include' );
-				if($include_list){
+				$teams = array();
+				if( $include_list = get_the_terms( $post->ID, 'site-include' ) ) {
 					foreach($include_list as $inc){
-						$clean_name = str_replace('@', '', $inc->name);
-						$people = get_post_by_title($clean_name, 'people');
-						
-						if($people){
-							$tag_list = get_the_terms( $people, 'people-include' );
-							foreach($tag_list as $tag){
-								$clean_site = str_replace('@', '', $tag->name);
-								if($clean_site == get_the_title($post->ID)){
-									$user = get_user_by_display_name( $clean_name );
-									?><a href="<?php echo get_author_posts_url($user->ID); ?>"><?php
-										echo get_avatar( $user->ID, 32 );
-									?></a><?php
-								}
+						$tagName = str_replace('@', '', $inc->name);
+						$people = get_page_by_title($tagName, 'OBJECT', 'people');
+						if( $people ){
+							if( $tag_list = get_the_terms( $people, 'people-include' ) ){
+								foreach($tag_list as $tag):
+									$peopleTagName = str_replace('@', '', $tag->name);
+									if($peopleTagName == get_the_title($post->ID)){
+										if( $user = get_user_by_display_name( $tagName ) ) {
+											$teams[] = sprintf(
+												'<a href="%1$s" title="%2$s">%2$s</a>',
+												get_author_posts_url($user->ID),
+												$clean_name,
+												get_avatar( $user->ID, 32 )
+											);
+										} else {
+											$email = get_post_meta($people->ID, '_base_people_email', true);
+											$teams[] = sprintf(
+												'<a href="%1$s" title="%2$s">%3$s</a>',
+												get_permalink($people->ID),
+												get_the_title($people->ID),
+												get_avatar( $email, 32 )
+											);
+										}
+									}
+								endforeach;
 							}
 						}
 					}
 				}
+				
+				if( $teams ){
+					echo implode(' ', $teams);
+				} else {
+					echo sprintf( '<p>%s</p>', __('No one is set as member of this team', 'wpas') );
+				}
 			?></div>
 			
 			<div class="wpa-sgl-socials">
-				<h3><?php _e('Follow', 'wpa'); ?></h3><?php
-				
-				$socials = array(
-					'awp-twitter' => 'Twitter',
-					'awp-youtube' => 'Youtube',
-					'awp-facebook' => 'Facebook',
-					'awp-linkedin' => 'LinkedIn',
-					'awp-pinterest' => 'Pinterest',
-					'awp-flickr' => 'FlickR',
-					'awp-googleplus' => 'Google+',
-					'awp-rss' => 'RSS'
-				);
-				
-				foreach($socials as $meta_key=>$media){
-					$title = get_post_meta($post->ID, $meta_key.'-followers', true);
-					$link = get_post_meta($post->ID, $meta_key, true);
+				<h3><?php _e('Follow', 'wpa'); ?></h3>
+				<ul><?php
+					$socials = array(
+						'awp-twitter' => 'Twitter',
+						'awp-youtube' => 'Youtube',
+						'awp-facebook' => 'Facebook',
+						'awp-linkedin' => 'LinkedIn',
+						'awp-pinterest' => 'Pinterest',
+						'awp-flickr' => 'FlickR',
+						'awp-googleplus' => 'Google+',
+						'awp-rss' => 'RSS'
+					);
 					
-					if(!$title) {
-						$title = $media;
-					} else {
-						$title = $media .' '. number_format((int)$title);
+					foreach($socials as $meta_key=>$media){
+						$count = get_post_meta($post->ID, $meta_key.'-followers', true);
+						$link = get_post_meta($post->ID, $meta_key, true);
+						
+						if(!$count) {
+							$title = $media;
+						} else {
+							$title = $media .' '. number_format((int)$count);
+						}
+						
+						if($link){
+							?><li><a href="<?php echo $link; ?>" target="_blank" title="<?php echo $title; ?>" class="wpa-sgl-icon <?php echo $meta_key; ?>-icon"><?php
+								echo $media;
+							?></a>
+							<span class="count"><?php echo number_format((int)$count); ?></span></li><?php
+						}
 					}
-					
-					if($link){
-						?><a href="<?php echo $link; ?>" target="_blank" title="<?php echo $title; ?>" class="wpa-sgl-icon <?php echo $meta_key; ?>-icon"><?php
-							echo $media;
-						?></a><?php
-					}
-				}
-				
-			?></div>
+				?></ul>
+            </div>
 			<a href="<?php echo site_url('/'); ?>" class="wpa-watch-button"><?php _e('Watch This', 'wpa'); ?></a>
 			
 			<div class="fix"></div>
@@ -361,7 +380,7 @@ function wpas_site_coveraged(){
                     });
                 </script><?php
             } else {
-                _e('', 'wpas');
+                echo sprintf( '<p>%s</p>', __('No coveraged found', 'wpas') );
             }
             wp_reset_query();
             
@@ -420,6 +439,95 @@ function wpa_site_most_shared(){
 add_action('wpa_post_inside_after', 'wpa_audit_site_score');
 function wpa_audit_site_score(){
 	global $post;
+	
+	$columns = array();
+	
+	// [ACTION]
+	$columns['wpa-col-action'] = array(
+		array(
+			'name' => 'Action',
+			'header' => 'wpa-th-site-action',
+			'body' => 'wpa-td-site-action',
+			'taxonomy' => 'site-action'
+		),
+		array(
+			'name' => 'Status',
+			'header' => 'wpa-th-site-status',
+			'body' => 'wpa-td-site-status',
+			'taxonomy' => 'site-status'
+		),
+		array(
+			'name' => 'Include',
+			'header' => 'wpa-th-site-include',
+			'body' => 'wpa-td-site-include',
+			'taxonomy' => 'site-include'
+		),
+		array(
+			'name' => 'Topic',
+			'header' => 'wpa-th-site-topic',
+			'body' => 'wpa-td-site-topic',
+			'taxonomy' => 'site-topic'
+		),
+		array(
+			'name' => 'Type',
+			'header' => 'wpa-th-site-type',
+			'body' => 'wpa-td-site-type',
+			'taxonomy' => 'site-type'
+		),
+		array(
+			'name' => 'Location',
+			'header' => 'wpa-th-site-location',
+			'body' => 'wpa-td-site-location',
+			'taxonomy' => 'site-location'
+		),
+		array(
+			'name' => 'Assignment',
+			'header' => 'wpa-th-site-assignment',
+			'body' => 'wpa-td-site-assignment',
+			'taxonomy' => 'site-assignment'
+		),
+		array(
+			'name' => 'Date',
+			'header' => 'wpa-th-date',
+			'body' => 'wpa-td-date',
+			'post' => 'post_date',
+			'format' => 'date',
+			'sortable' => true
+		)
+	);
+	
+	$fields = wpa_default_metrics();
+	$departmentColumns = array();
+	$metricsColumns = array();
+	foreach( $fields as $field ){
+		if( $field['type'] == 'heading' ) {
+			if($field['category'] == 'departments'){
+				$departmentColumns[$field['id']] = array();
+			} else {
+				$metricsColumns[$field['id']] = array();
+			}
+		} elseif( $field['type'] == 'separator' ) {
+			// continue;
+		} else {
+			if($fields[$field['group']]['category'] == 'departments'){
+				$departmentColumns[$field['group']][] = array(
+					'name' => $field['name'],
+					'header' => 'wpa-th-' . $field['id'],
+					'body' => 'wpa-td-' . $field['id'],
+					'meta_key' => $field['id'],
+					'sortable' => $field['sortable']
+				);
+			} else {
+				$metricsColumns[$field['group']][] = array(
+					'name' => $field['name'],
+					'header' => 'wpa-th-' . $field['id'],
+					'body' => 'wpa-td-' . $field['id'],
+					'meta_key' => $field['id'],
+					'sortable' => $field['sortable']
+				);
+			}
+		}
+	}
 	
 	if( is_single() && 'site' == $post->post_type ){
 		?><div class="wpa-sgl-audits">
@@ -484,20 +592,40 @@ function wpa_audit_site_score(){
 		
 		<div class="wpa-group-column alignleft">
 			<ul>
-				<li class="first current"><a href="#">Summary</a></li>
-				<li><a href="#">Scores</a></li>
-				<li><a href="#">Site</a></li>
-				<li><a href="#">Project</a></li>
-				<li><a href="#">Links</a></li>
-				<li><a href="#">Social</a></li>
-				<li><a href="#">Community</a></li>
-				<li><a href="#">Buzz</a></li>
-				<li><a href="#">Traffic</a></li>
-				<li><a href="#">Engagement</a></li>
-				<li><a href="#">Content</a></li>
-				<li><a href="#">Authors</a></li>
-				<li><a href="#">Valuation</a></li>
-			</ul>
+                <li class="first"><span><strong><?php _e('Workflow:', 'wpas'); ?></strong></span></li>
+                <li class="first current"><a href=".wpa-col">All</a></li>
+                <li><a href=".wpa-default">Summary</a></li><?php
+				$i = 1;
+                foreach($columns as $name=>$group){
+                    $classes = array();
+					if( $i >= count($columns) )
+						$classes[] = 'last';
+                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('wpa-col-', '', $name) ); ?></a></li><?php
+					$i++;
+                }
+            ?></ul>
+            <ul>
+            	<li class="first"><span><strong><?php _e('Departments:', 'wpas'); ?></strong></span></li>
+                <?php $i = 1;
+				foreach($departmentColumns as $name=>$group){
+                    $classes = array();
+                    if( $i >= count($departmentColumns) )
+						$classes[] = 'last';
+                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('-', ' ', str_replace('awp-', '', $name)) ); ?></a></li><?php
+					$i++;
+                } ?>
+            </ul>
+            <ul>
+            	<li class="first"><span><strong><?php _e('Metrics:', 'wpas'); ?></strong></span></li>
+                <?php $i = 1;
+				foreach($metricsColumns as $name=>$group){
+                    $classes = array();
+                    if( $i >= count($metricsColumns) )
+						$classes[] = 'last';
+                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('-', ' ', str_replace('awp-', '', $name)) ); ?></a></li><?php
+					$i++;
+                } ?>
+            </ul>
 		</div>
 		
 		<a href="#" class="wpa-sgl-compare-button alignright">+ Compare Site</a>

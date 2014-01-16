@@ -2,8 +2,12 @@
 	background-image: none;
 }
 
+#adminmenu #menu-posts-site .menu-icon-site div.wp-menu-image:before{
+	content: none !important;
+}
+
 #adminmenu li#menu-posts-site .base-menu-site{
-	background: #fff url(../images/menu-shadow.png) top right repeat-y;
+	background: #333 url(../images/menu-shadow.png) top right repeat-y;
 	z-index: 21;
 }
 
@@ -27,12 +31,16 @@
 #adminmenu li#menu-posts-site li.menu-tags-site a{
 	position: relative;
 	font-weight: normal;
-	color: #21759b;
+	color: #bbb; /*#21759b;*/
+}
+
+#adminmenu li#menu-posts-site li.menu-tags-site a:hover{
+	color: #2ea2cc;
 }
 
 #adminmenu li#menu-posts-site li.menu-tags-site a.current{
 	font-weight: bold;
-	color: #333;
+	color: #fff; /*#333;*/
 }
 
 #adminmenu li#menu-posts-site li.menu-tags-site:hover #menu-tags-site{

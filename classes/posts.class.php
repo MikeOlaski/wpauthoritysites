@@ -53,6 +53,19 @@ class Sites_CPT{
 		$settings = get_option('awp_settings');
 		global $post;
 		
+		$fields = wpa_default_metrics();
+		$departmentColumns = array();
+		$metricsColumns = array();
+		foreach( $fields as $field ){
+			if( $field['type'] == 'heading' ) {
+				if($field['category'] == 'departments'){
+					$departmentColumns[$field['id']] = $field['name'];
+				} else {
+					$metricsColumns[$field['id']] = $field['name'];
+				}
+			}
+		}
+		
 		if( $post->post_type == 'site' ){
 			?><div rel="wpas-view-groups" style="display:none;">
 				<ul class="subsubsub clear">
@@ -60,24 +73,31 @@ class Sites_CPT{
 					<li><a href="javascript:void(0);" data-column="action" class="wpa-views">Action</a></li>
 				</ul>
 				<ul class="subsubsub clear">
-                	<li><span><strong>Departments:</strong></span></li>
-					<li><a href="javascript:void(0);" data-column="site" class="wpa-views">Site</a> |</li>
-					<li><a href="javascript:void(0);" data-column="project" class="wpa-views">Team</a> |</li>
-					<li><a href="javascript:void(0);" data-column="framework" class="wpa-views">Framework</a> |</li>
-					<li><a href="javascript:void(0);" data-column="authors" class="wpa-views">Authors</a> |</li>
-					<li><a href="javascript:void(0);" data-column="content" class="wpa-views">Content</a> |</li>
-					<li><a href="javascript:void(0);" data-column="products" class="wpa-views">Products</a> |</li>
-					<li><a href="javascript:void(0);" data-column="systems" class="wpa-views">Systems</a> |</li>
-					<li><a href="javascript:void(0);" data-column="valuation" class="wpa-views">Valuation</a></li>
-				</ul>
+                	<li><span><strong>Departments:</strong></span></li><?php
+					$i = 1;
+					foreach( $departmentColumns as $id=>$name ){
+						?><li>
+							<a href="javascript:void(0);" data-column="<?php echo $id; ?>" class="wpa-views"><?php
+                            echo $name;
+							?></a><?php
+							if( $i < count($departmentColumns) ){ echo '|'; }
+							$i++;
+						?></li><?php
+					}
+				?></ul>
 				<ul class="subsubsub clear">
-                	<li><span><strong>Metrics:</strong></span></li>
-					<li><a href="javascript:void(0);" data-column="links" class="wpa-views">Links</a> |</li>
-					<li><a href="javascript:void(0);" data-column="social" class="wpa-views">Social</a> |</li>
-					<li><a href="javascript:void(0);" data-column="buzz" class="wpa-views">Buzz</a> |</li>
-					<li><a href="javascript:void(0);" data-column="community" class="wpa-views">Community</a> |</li>
-					<li><a href="javascript:void(0);" data-column="scores" class="wpa-views">Scores</a></li>
-				</ul>
+                	<li><span><strong>Metrics:</strong></span></li><?php
+					$i = 1;
+					foreach( $metricsColumns as $id=>$name ){
+						?><li>
+							<a href="javascript:void(0);" data-column="<?php echo $id; ?>" class="wpa-views"><?php
+                            echo $name;
+							?></a><?php
+							if( $i < count($metricsColumns) ){ echo '|'; }
+							$i++;
+						?></li><?php
+					}
+				?></ul>
 				<ul class="subsubsub clear">
                 	<li><span><strong>Quicklinks:</strong></span></li>
 					<li><a href="<?php echo admin_url('edit.php?post_type=site&site-type=wordpress'); ?>"><?php _e('WordPress Sites', 'wpas'); ?></a> |</li>
@@ -620,19 +640,19 @@ class Sites_CPT{
                             <div class="wp-menu-arrow"><div></div></div></li><?php
 					}
 				?><li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li>
-                <li class="awp-tab not-tab ui-state-disabled"><a href="javascript:void(0);">Signals</a></li><?php
-                	$depts = wpa_get_metrics_group_by_category('signals');
+                <li class="awp-tab not-tab ui-state-disabled"><a href="javascript:void(0);">Metrics</a></li><?php
+                	$depts = wpa_get_metrics_group_by_category('metrics');
 					foreach($depts as $head){
 						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
                             <div class="wp-menu-arrow"><div></div></div></li><?php
 					}
-				?><li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li>
+				/*?><li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li>
 				<li class="awp-tab not-tab ui-state-disabled"><a href="javascript:void(0);">Valuation</a></li><?php
 					$depts = wpa_get_metrics_group_by_category('valuation');
 					foreach($depts as $head){
 						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
                             <div class="wp-menu-arrow"><div></div></div></li><?php
-					}
+					}*/
 			?></ul>
             
             <div class="awp-panels"><?php
@@ -706,8 +726,12 @@ class Sites_CPT{
 			$metaID = 'awp-'.$control['id'];
 			$metavalue = get_post_meta( $post_id, $metaname, true );
 			
-			?><div class="awp-control-group">
-                <label for="<?php echo $metaID; ?>"><?php echo $control['name'] ?></label>
+			?><div class="awp-control-group"><?php
+			if($control['type'] == 'subheading'){
+				?><h2 class="awp-settins-subtitle" id="<?php echo $metaID; ?>"><?php echo $control['name'] ?></h2><?php
+			} else {
+				
+				?><label for="<?php echo $metaID; ?>"><?php echo $control['name'] ?></label>
                 <div class="awp-controls"><?php
 					
 					switch( $control['type'] ){
@@ -764,10 +788,27 @@ class Sites_CPT{
 							}
 							?><span class="button image_upload_button" id="<?php echo $metaID; ?>_button">Upload Image</span><?php
 					}
-					
-				?></div>
-                <div class="clear"></div>
-            </div><?php
+				?></div><?php
+				
+				if($control['followers']){
+					?><label for="<?php echo $metaID.'-followers'; ?>"><?php echo $control['name'].' followers' ?></label>
+					<div class="awp-controls">
+                    	<input type="text" class="regular-text small" name="<?php echo $metaname.'-followers'; ?>" id="<?php echo $metaID.'-followers'; ?>" value="<?php echo get_post_meta($post_id, $metaname.'-followers', true); ?>" />
+                        <span class="button manual_update_button">Update</span>
+                        <span class="button run_audit_button">Audit</span>
+                        
+                        <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader" style="display:none;">
+                        
+                        <br /><span class="description">Last updated: <?php
+						echo get_post_meta($post, $metaname.'-updated', true); ?> by <?php
+						echo get_post_meta($post, $metaname.'-updater', true);
+						?></span>
+					</div><?php
+				}
+				
+                ?><div class="clear"></div><?php
+			}
+            ?></div><?php
 		}
 	}
 	
@@ -803,12 +844,25 @@ class Sites_CPT{
 			
 			$view = get_user_meta($user_ID, 'user_defined_view', true);
 			
+			$fields = wpa_default_metrics();
+			$columns = array();
+			foreach( $fields as $field ){
+				if( $field['type'] == 'heading' ) {
+					// continue
+				} elseif( $field['type'] == 'separator' ) {
+					// continue;
+				} else {
+					$columns[$field['group']][] = $field['id'];
+				}
+			}
+			
 			wp_localize_script( 'awpeditor', 'WPAJAX_OBJ',
 				array(
 					'ajax_url' => admin_url( 'admin-ajax.php' ),
 					'post_url' => admin_url('post.php'),
 					'manage_Screen' => admin_url('edit.php?post_type=site'),
-					'defined_view' => $view
+					'defined_view' => $view,
+					'fields' => $columns
 				)
 			);
 		}

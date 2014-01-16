@@ -175,6 +175,12 @@ select[name=seo_filter]{
 	margin-top: 0;
 }
 
+#poststuff .awp-panels .panel .awp-settins-subtitle{
+	margin-bottom: 0;
+	margin-top: 0;
+	padding: 0;
+}
+
 .panel .awp-control-group{
 	border-top: solid 1px #fff;
 	border-bottom: solid 1px #d5d5d5;
@@ -214,6 +220,10 @@ select[name=seo_filter]{
 	margin: 0 0 10px;
 	padding: 5px;
 	width: 90%;
+}
+
+.awp-controls .regular-text.small{
+	width: 56%;
 }
 
 .awp-controls .regular-checkbox{

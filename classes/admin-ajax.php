@@ -17,7 +17,27 @@ add_action('wp_ajax_submit_departments', 'submit_departments_callback');
 add_action('wp_ajax_nopriv_submit_departments', 'submit_departments_callback');
 // (/Dormant)
 
+// Update single metric field
+add_action('wp_ajax_update_metric', 'update_metric_callback');
+add_action('wp_ajax_audit_metric', 'audit_metric_callback');
+
 define('GOOGLE_MAGIC', 0xE6359A60);
+
+function audit_metric_callback(){
+	if(isset($_POST['field']) && $_POST['field'] != ''){
+		$return = awp_evaluate($_POST['url'], $_POST['field'], $_POST['id']);
+		
+		wp_die( $return );
+	}
+	die();
+}
+
+function update_metric_callback(){
+	if(isset($_POST['field']) && $_POST['field'] != ''){
+		
+	}
+	die();
+}
 
 function submit_departments_callback(){
 	if( isset($_POST) && '' != $_POST['departments'] ){
@@ -222,6 +242,7 @@ function evaluate_js_callback( $args = null ){
 		
 		// Ranks
 		'alexa-rank' => 'awp-alexa-rank',
+		'moz-rank' => 'awp-moz-rank',
 		'google-rank' => 'awp-google-rank',
 		'compete-rank' => 'awp-compete-rank',
 		'semrush-rank' => 'awp-semrush-rank',
@@ -437,6 +458,9 @@ function awp_evaluate($url, $for, $pID = ''){
 		// Ranks
 		case 'awp-alexa-rank':
 			return awp_sharecounts($url, 'alexaRank');
+		
+		case 'awp-moz-rank':
+			return awp_sharecounts($url, 'mozRank');
 		
 		case 'awp-google-rank':
 			return awp_sharecounts($url, 'googleRank');
@@ -720,6 +744,51 @@ function awp_sharecounts($url, $type, $pID = ''){
 				} else {
 					$result = new WP_Error(__('Broke'), __('Error: Alexa Rank error'));
 				}
+				break;
+			
+			case 'mozRank':
+				// you can obtain you access id and secret key here: http://www.seomoz.org/api/keys
+				$accessID = "member-cd00818de2";
+				$secretKey = "a5ce408c698f6ec1272d9167440356be";
+				
+				// Set your expires for several minutes into the future.
+				// Values excessively far in the future will not be honored by the Mozscape API.
+				$expires = time() + 300;
+				
+				// A new linefeed is necessary between your AccessID and Expires.
+				$stringToSign = $accessID."\n".$expires;
+				
+				// Get the "raw" or binary output of the hmac hash.
+				$binarySignature = hash_hmac('sha1', $stringToSign, $secretKey, true);
+				
+				// We need to base64-encode it and then url-encode that.
+				$urlSafeSignature = urlencode(base64_encode($binarySignature));
+				
+				// Add up all the bit flags you want returned.
+				// Learn more here: http://apiwiki.seomoz.org/categories/api-reference
+				$cols = "16384";
+				
+				// Put it all together and you get your request URL.
+				$requestUrl = "http://lsapi.seomoz.com/linkscape/url-metrics/?Cols=".$cols."&AccessID=".$accessID."&Expires=".$expires."&Signature=".$urlSafeSignature;
+				
+				// Put your URLS into an array and json_encode them.
+				$batchedDomains = array($url);
+				$encodedDomains = json_encode($batchedDomains);
+				
+				// We can easily use Curl to send off our request.
+				// Note that we send our encoded list of domains through curl's POSTFIELDS.
+				$options = array(
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_POSTFIELDS     => $encodedDomains
+				);
+				
+				$ch = curl_init($requestUrl);
+				curl_setopt_array($ch, $options);
+				$content = curl_exec($ch);
+				curl_close( $ch );
+				
+				$contents = json_decode($content);
+				$result = $contents[0]->umrp;
 				break;
 			
 			case 'googleRank':

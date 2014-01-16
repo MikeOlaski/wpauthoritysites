@@ -1203,6 +1203,19 @@ span.displayOptionshead{
 	width: 165px;
 }
 
+.single-site .wpa-sgl-socials ul{
+	list-style: none;
+}
+
+.single-site .wpa-sgl-socials ul li{
+	display: inline-block;
+	text-align: center;
+}
+
+.single-site .wpa-sgl-socials ul li .count{
+	display: block;
+}
+
 .single-site .wpa-sgl-teams{
 	margin-bottom: 15px;
 	float: left;
@@ -1221,40 +1234,17 @@ span.displayOptionshead{
 	
 	text-indent: -999px;
 	color: transparent;
-	font-size: 0;
+	font-size: 0; 
 }
 
-.awp-twitter-icon{
-	background-position: 0px 0px;
-}
-
-.awp-youtube-icon{
-	background-position: -43px 0px;
-}
-
-.awp-facebook-icon{
-	background-position: -84px 0px;
-}
-
-.awp-linkedin-icon{
-	background-position: -126px 0px;
-}
-
-.awp-pinterest-icon{
-	background-position: 0px -48px;
-}
-
-.awp-flickr-icon{
-	background-position: -42px -48px;
-}
-
-.awp-googleplus-icon{
-	background-position: -84px -48px;
-}
-
-.awp-rss-icon{
-	background-position: -126px -48px;
-}
+.awp-twitter-icon{ background-position: 0px 0px !important; }
+.awp-youtube-icon{ background-position: -43px 0px !important; }
+.awp-facebook-icon{ background-position: -84px 0px !important; }
+.awp-linkedin-icon{ background-position: -126px 0px !important; }
+.awp-pinterest-icon{ background-position: 0px -48px !important; }
+.awp-flickr-icon{ background-position: -42px -48px !important; }
+.awp-googleplus-icon{ background-position: -84px -48px !important; }
+.awp-rss-icon{ background-position: -126px -48px !important; }
 
 .single-site .wpa-watch-button{
 	background: url(../images/wpa-watch-button.png) no-repeat top left;

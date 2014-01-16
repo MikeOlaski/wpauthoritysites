@@ -23,14 +23,14 @@ jQuery(document).ready(function($) {
 			switch(display){
 				case 'grid':
 				case 'line':
-					//$('.wpa-group-column').addClass('hide');
+					$('.wpa-group-column').addClass('hide');
 					$('.wpa-screen-options').addClass('hide');
 					$('#wpa-thumbnail-option').removeAttr('disabled');
 					setListScrollArea();
 					break;
 				
 				case 'detail':
-					//$('.wpa-group-column').addClass('hide');
+					$('.wpa-group-column').addClass('hide');
 					$('.wpa-screen-options').removeClass('hide');
 					$('#wpa-thumbnail-option').removeAttr('disabled');
 					setListScrollArea();
@@ -38,7 +38,7 @@ jQuery(document).ready(function($) {
 				
 				case 'list':
 					$('.wpa-screen-options').removeClass('hide');
-					//$('.wpa-group-column').removeClass('hide');
+					$('.wpa-group-column').removeClass('hide');
 					$('#wpa-thumbnail-option').attr('disabled', 'disabled');
 					setListScrollArea();
 					break;

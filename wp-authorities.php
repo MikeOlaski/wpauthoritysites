@@ -791,8 +791,8 @@ function wpas_register_pages(){
 }
 
 function wpas_admin_scripts(){
-	wp_enqueue_script('wpadminjs', PLUGINURL . '/js/admin.js', array('jquery'));
-	wp_enqueue_style( 'awpstyles', PLUGINURL . '/css/admin.css' );
+	wp_enqueue_script('wpadminjs', PLUGINURL . 'js/admin.js', array('jquery'));
+	wp_enqueue_style( 'awpstyles', PLUGINURL . 'css/admin.css' );
 }
 
 function wpas_import_callback(){
@@ -1147,7 +1147,7 @@ function sanitize_title_with_dots_and_dashes($title) {
 
 add_filter('sanitize_title', 'sanitize_title_with_dots_and_dashes');
 
-add_action( 'admin_bar_menu', 'wpa_admin_bar_menu', 40 );
+/*add_action( 'admin_bar_menu', 'wpa_admin_bar_menu', 40 );
 function wpa_admin_bar_menu(){
 	global $wp_admin_bar;
 	
@@ -1174,7 +1174,7 @@ function wpa_admin_bar_menu(){
 			);
 		}
 	}
-}
+}*/
 
 function get_user_by_display_name( $display_name ) {
     global $wpdb;

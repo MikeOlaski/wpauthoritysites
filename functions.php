@@ -6,27 +6,18 @@ function wpa_default_metrics(){
 
 	$shortname = 'awp';
 	
-	// Departments
 	$fields[$shortname.'-departments'] = array(
 		'name' => 'Departments',
 		'id' => $shortname.'-departments',
 		'type' => 'separator'
 	);
 	
-		// General
-		$fields[$shortname.'-general'] = array(
+		/********** 	SITE	 ***********/
+		$fields[$shortname.'-site'] = array(
 			'name' => 'Site',
-			'id' => $shortname.'-general',
+			'id' => $shortname.'-site',
 			'type' => 'heading',
 			'category' => 'departments',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-thumbnail'] = array(
-			'name' => 'Image URL',
-			'id' => $shortname.'-thumbnail',
-			'type' => 'upload',
-			'group' => $shortname.'-general',
 			'readonly' => true
 		);
 		
@@ -34,7 +25,7 @@ function wpa_default_metrics(){
 			'name' => 'Name',
 			'id' => $shortname.'-name',
 			'type' => 'text',
-			'group' => $shortname.'-general',
+			'group' => $shortname.'-site',
 			'readonly' => true
 		);
 		
@@ -42,25 +33,7 @@ function wpa_default_metrics(){
 			'name' => 'Domain',
 			'id' => $shortname.'-domain',
 			'type' => 'text',
-			'group' => $shortname.'-general',
-			'desc' => 'by Site Auditor',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-tld'] = array(
-			'name' => 'TLD',
-			'id' => $shortname.'-tld',
-			'type' => 'text',
-			'group' => $shortname.'-general',
-			'desc' => 'by Site Auditor',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-url'] = array(
-			'name' => 'URL – Link',
-			'id' => $shortname.'-url',
-			'type' => 'text',
-			'group' => $shortname.'-general',
+			'group' => $shortname.'-site',
 			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
@@ -69,26 +42,68 @@ function wpa_default_metrics(){
 			'name' => 'Date Founded',
 			'id' => $shortname.'-date',
 			'type' => 'text',
-			'group' => $shortname.'-general',
+			'group' => $shortname.'-site',
 			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-networked'] = array(
-			'name' => 'Network IN?',
-			'id' => $shortname.'-networked',
+		$fields[$shortname.'-thumbnail'] = array(
+			'name' => 'Image URL',
+			'id' => $shortname.'-thumbnail',
+			'type' => 'upload',
+			'group' => $shortname.'-site',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-domain-age'] = array(
+			'name' => 'Domain Age',
+			'id' => $shortname.'-domain-age',
 			'type' => 'text',
-			'group' => $shortname.'-general',
+			'group' => $shortname.'-site',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-domain-expiry'] = array(
+			'name' => 'Domain Expiry',
+			'id' => $shortname.'-domain-expiry',
+			'type' => 'text',
+			'group' => $shortname.'-site',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-tld'] = array(
+			'name' => 'TLD',
+			'id' => $shortname.'-tld',
+			'type' => 'text',
+			'group' => $shortname.'-site',
+			'desc' => 'by Site Auditor',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-url'] = array(
+			'name' => 'URL',
+			'id' => $shortname.'-url',
+			'type' => 'text',
+			'group' => $shortname.'-site',
 			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
 		$fields[$shortname.'-location'] = array(
-			'name' => 'Location',
+			'name' => 'Server Location',
 			'id' => $shortname.'-location',
 			'type' => 'text',
-			'group' => $shortname.'-general',
+			'group' => $shortname.'-site',
 			'desc' => 'by Site Auditor',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-business-location'] = array(
+			'name' => 'Business Location',
+			'id' => $shortname.'-business-location',
+			'type' => 'text',
+			'group' => $shortname.'-site',
+			'desc' => '',
 			'readonly' => true
 		);
 		
@@ -96,33 +111,43 @@ function wpa_default_metrics(){
 			'name' => 'Language',
 			'id' => $shortname.'-language',
 			'type' => 'text',
-			'group' => $shortname.'-general',
+			'group' => $shortname.'-site',
 			'desc' => 'by Site Auditor',
 			'readonly' => true
 		);
 		
-		// Owners
-		$fields[$shortname.'-owners'] = array(
-			'name' => 'Project',
-			'id' => $shortname.'-owners',
+		$fields[$shortname.'-site-cache'] = array(
+			'name' => 'Site Cache',
+			'id' => $shortname.'-site-cache',
+			'type' => 'text',
+			'group' => $shortname.'-site',
+			'desc' => '',
+			'readonly' => true
+		);
+		/**********		END OF SITE 	***********/
+		
+		/********** 	TEAM	 ***********/
+		$fields[$shortname.'-team'] = array(
+			'name' => 'Team',
+			'id' => $shortname.'-team',
 			'type' => 'heading',
 			'category' => 'departments',
 			'readonly' => true
 		);
 		
 		$fields[$shortname.'-founder'] = array(
-			'name' => 'Founder',
+			'name' => 'Founders',
 			'id' => $shortname.'-founder',
 			'type' => 'text',
-			'group' => $shortname.'-owners',
+			'group' => $shortname.'-team',
 			'readonly' => true
 		);
 		
 		$fields[$shortname.'-owner'] = array(
-			'name' => 'Owner',
+			'name' => 'Owners',
 			'id' => $shortname.'-owner',
 			'type' => 'text',
-			'group' => $shortname.'-owners',
+			'group' => $shortname.'-team',
 			'readonly' => true
 		);
 		
@@ -130,7 +155,7 @@ function wpa_default_metrics(){
 			'name' => 'Publisher',
 			'id' => $shortname.'-publisher',
 			'type' => 'text',
-			'group' => $shortname.'-owners',
+			'group' => $shortname.'-team',
 			'readonly' => true
 		);
 		
@@ -138,772 +163,587 @@ function wpa_default_metrics(){
 			'name' => 'Producer',
 			'id' => $shortname.'-producer',
 			'type' => 'text',
-			'group' => $shortname.'-owners',
+			'group' => $shortname.'-team',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-site-runner'] = array(
+			'name' => 'Site Runner',
+			'id' => $shortname.'-site-runner',
+			'type' => 'text',
+			'group' => $shortname.'-team',
 			'readonly' => true
 		);
 		
 		$fields[$shortname.'-manager'] = array(
-			'name' => 'Manager',
+			'name' => 'Managers',
 			'id' => $shortname.'-manager',
 			'type' => 'text',
-			'group' => $shortname.'-owners',
+			'group' => $shortname.'-team',
 			'readonly' => true
 		);
 		
 		$fields[$shortname.'-developer'] = array(
-			'name' => 'Developer',
+			'name' => 'Developers',
 			'id' => $shortname.'-developer',
 			'type' => 'text',
-			'group' => $shortname.'-owners',
+			'group' => $shortname.'-team',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-contributors'] = array(
+			'name' => 'Contributors',
+			'id' => $shortname.'-contributors',
+			'type' => 'text',
+			'group' => $shortname.'-team',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-authors'] = array(
+			'name' => 'Authors',
+			'id' => $shortname.'-authors',
+			'type' => 'text',
+			'group' => $shortname.'-team',
 			'readonly' => true
 		);
 		
 		$fields[$shortname.'-editor'] = array(
-			'name' => 'Editor',
+			'name' => 'Editors',
 			'id' => $shortname.'-editor',
 			'type' => 'text',
-			'group' => $shortname.'-owners',
+			'group' => $shortname.'-team',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-ceo'] = array(
-			'name' => 'CEO',
-			'id' => $shortname.'-ceo',
+		$fields[$shortname.'-executives'] = array(
+			'name' => 'Executives',
+			'id' => $shortname.'-executives',
 			'type' => 'text',
-			'group' => $shortname.'-owners',
+			'group' => $shortname.'-team',
 			'readonly' => true
 		);
+		/**********		END OF TEAM 	***********/
 		
-		$fields[$shortname.'-member'] = array(
-			'name' => 'Network Member',
-			'id' => $shortname.'-member',
-			'type' => 'text',
-			'group' => $shortname.'-owners',
-			'readonly' => true
-		);
-	
-	// Signals
-	$fields[$shortname.'-signals'] = array(
-		'name' => 'Signals',
-		'id' => $shortname.'-signals',
-		'type' => 'separator'
-	);
-	
-		// Links
-		$fields[$shortname.'-links'] = array(
-			'name' => 'Links',
-			'id' => $shortname.'-links',
-			'type' => 'heading',
-			'category' => 'signals',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-google'] = array(
-			'name' => 'Google',
-			'id' => $shortname.'-google',
-			'type' => 'text',
-			'group' => $shortname.'-links',
-			'desc' => 'by Google',
-			'unit' => 'backlinks',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-alexa'] = array(
-			'name' => 'Alexa',
-			'id' => $shortname.'-alexa',
-			'type' => 'text',
-			'group' => $shortname.'-links',
-			'desc' => 'by Alexa',
-			'unit' => 'backlinks',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-yahoo'] = array(
-			'name' => 'Yahoo',
-			'id' => $shortname.'-yahoo',
-			'type' => 'text',
-			'group' => $shortname.'-links',
-			'desc' => 'by Yahoo',
-			'unit' => 'backlinks',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-majestic'] = array(
-			'name' => 'Majestic',
-			'id' => $shortname.'-majestic',
-			'type' => 'text',
-			'group' => $shortname.'-links',
-			'desc' => 'by Majestic SEO',
-			'unit' => 'backlinks',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-subscriber'] = array(
-			'name' => 'Social',
-			'id' => $shortname.'-subscriber',
-			'type' => 'heading',
-			'category' => 'signals',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-shares-goolgeplus'] = array(
-			'name' => 'Google Plus',
-			'id' => $shortname.'-shares-goolgeplus',
-			'type' => 'text',
-			'group' => $shortname.'-subscriber',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-shares-facebook'] = array(
-			'name' => 'Facebook Shares',
-			'id' => $shortname.'-shares-facebook',
-			'type' => 'text',
-			'group' => $shortname.'-subscriber',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-likes-facebook'] = array(
-			'name' => 'Facebook Likes',
-			'id' => $shortname.'-likes-facebook',
-			'type' => 'text',
-			'group' => $shortname.'-subscriber',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-shares-twitter'] = array(
-			'name' => 'Twitter',
-			'id' => $shortname.'-shares-twitter',
-			'type' => 'text',
-			'group' => $shortname.'-subscriber',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-shares-pinterest'] = array(
-			'name' => 'Pinterest',
-			'id' => $shortname.'-shares-pinterest',
-			'type' => 'text',
-			'group' => $shortname.'-subscriber',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-shares-linkedin'] = array(
-			'name' => 'LinkedIn',
-			'id' => $shortname.'-shares-linkedin',
-			'type' => 'text',
-			'group' => $shortname.'-subscriber',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-score-klout'] = array(
-			'name' => 'Klout',
-			'id' => $shortname.'-score-klout',
-			'type' => 'text',
-			'group' => $shortname.'-subscriber',
-			'readonly' => true
-		);
-		
-		// Community
-		$fields[$shortname.'-social'] = array(
-			'name' => 'Community',
-			'id' => $shortname.'-social',
-			'type' => 'heading',
-			'category' => 'signals',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-googleplus-followers'] = array(
-			'name' => 'Google Plus Followers',
-			'id' => $shortname.'-googleplus-followers',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'desc' => 'on Google+',
-			'unit' => 'pluses',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-googleplus'] = array(
-			'name' => 'Google Plus URL',
-			'id' => $shortname.'-googleplus',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-facebook-followers'] = array(
-			'name' => 'Facebook Followers',
-			'id' => $shortname.'-facebook-followers',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'desc' => 'on Facebook',
-			'unit' => 'likes',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-facebook'] = array(
-			'name' => 'Facebook URL',
-			'id' => $shortname.'-facebook',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-twitter-followers'] = array(
-			'name' => 'Twitter Followers',
-			'id' => $shortname.'-twitter-followers',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'desc' => 'on Twitter',
-			'unit' => 'tweets',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-twitter'] = array(
-			'name' => 'Twitter URL',
-			'id' => $shortname.'-twitter',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-youtube-followers'] = array(
-			'name' => 'Youtube Followers',
-			'id' => $shortname.'-youtube-followers',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'desc' => 'on Youtube',
-			'unit' => 'subscriber',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-youtube'] = array(
-			'name' => 'Youtube URL',
-			'id' => $shortname.'-youtube',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-pinterest-followers'] = array(
-			'name' => 'Pinterest Followers',
-			'id' => $shortname.'-pinterest-followers',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'desc' => 'on Pinterest',
-			'unit' => 'pin',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-pinterest'] = array(
-			'name' => 'Pinterest URL',
-			'id' => $shortname.'-pinterest',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-linkedin-followers'] = array(
-			'name' => 'LinkedIn Followers',
-			'id' => $shortname.'-linkedin-followers',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'desc' => 'on LinkedIn',
-			'unit' => 'linked',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-linkedin'] = array(
-			'name' => 'LinkedIn URL',
-			'id' => $shortname.'-linkedin',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-klout-followers'] = array(
-			'name' => 'Klout Followers',
-			'id' => $shortname.'-klout-followers',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'desc' => 'on Klout',
-			'unit' => 'klout score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-klout'] = array(
-			'name' => 'Klout',
-			'id' => $shortname.'-klout',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-rss'] = array(
-			'name' => 'RSS',
-			'id' => $shortname.'-rss',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-email'] = array(
-			'name' => 'Email',
-			'id' => $shortname.'-email',
-			'type' => 'text',
-			'group' => $shortname.'-social',
-			'readonly' => true
-		);
-		
-		// Buzz
-		$fields[$shortname.'-buzz'] = array(
-			'name' => 'Buzz',
-			'id' => $shortname.'-buzz',
-			'type' => 'heading',
-			'category' => 'signals',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-community-metric'] = array(
-			'name' => 'Community Metrics',
-			'id' => $shortname.'-community-metric',
-			'type' => 'text',
-			'group' => $shortname.'-buzz',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-recent-post'] = array(
-			'name' => 'Recent Post',
-			'id' => $shortname.'-recent-post',
-			'type' => 'text',
-			'group' => $shortname.'-buzz',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-recent-comments'] = array(
-			'name' => 'Recent Comments',
-			'id' => $shortname.'-recent-comments',
-			'type' => 'text',
-			'group' => $shortname.'-buzz',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-recent-shares'] = array(
-			'name' => 'Recent Shares',
-			'id' => $shortname.'-recent-shares',
-			'type' => 'text',
-			'group' => $shortname.'-buzz',
-			'readonly' => true
-		);
-	
-		$fields[$shortname.'-klout-score'] = array(
-			'name' => 'Klout Score',
-			'id' => $shortname.'-klout-score',
-			'type' => 'text',
-			'group' => $shortname.'-buzz',
-			'readonly' => true
-		);
-		
-		// Framework
+		/********** 	FRAMEWORK	 ***********/
 		$fields[$shortname.'-framework'] = array(
 			'name' => 'Framework',
 			'id' => $shortname.'-framework',
 			'type' => 'heading',
-			'category' => 'signals',
+			'category' => 'departments',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-plugins-paid'] = array(
-			'name' => 'Plugins (Paid)',
-			'id' => $shortname.'-plugins-paid',
+		$fields[$shortname.'-framework-system'] = array(
+			'name' => 'System',
+			'id' => $shortname.'-framework-system',
+			'type' => 'subheading',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-system-host'] = array(
+			'name' => 'Host',
+			'id' => $shortname.'-framework-system-host',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-plugins-free'] = array(
-			'name' => 'Plugins (free)',
-			'id' => $shortname.'-plugins-free',
+		$fields[$shortname.'-framework-system-caching'] = array(
+			'name' => 'Caching',
+			'id' => $shortname.'-framework-system-caching',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-plugins-custom'] = array(
-			'name' => 'Plugins (Custom)',
-			'id' => $shortname.'-plugins-custom',
+		$fields[$shortname.'-framework-system-cdn'] = array(
+			'name' => 'CDN',
+			'id' => $shortname.'-framework-system-cdn',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-functions-custom'] = array(
-			'name' => 'Functions (Custom)',
-			'id' => $shortname.'-functions-custom',
+		$fields[$shortname.'-framework-themes'] = array(
+			'name' => 'Themes / Frameworks',
+			'id' => $shortname.'-framework-themes',
+			'type' => 'subheading',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-themes-paid'] = array(
+			'name' => 'Paid',
+			'id' => $shortname.'-framework-themes-paid',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-theme-paid'] = array(
-			'name' => 'Theme (Paid)',
-			'id' => $shortname.'-theme-paid',
+		$fields[$shortname.'-framework-themes-free'] = array(
+			'name' => 'Free',
+			'id' => $shortname.'-framework-themes-free',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-theme-framework'] = array(
-			'name' => 'Theme Framework',
-			'id' => $shortname.'-theme-framework',
+		$fields[$shortname.'-framework-themes-custom'] = array(
+			'name' => 'Custom',
+			'id' => $shortname.'-framework-themes-custom',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-theme-custom'] = array(
-			'name' => 'Theme (Custom)',
-			'id' => $shortname.'-theme-custom',
+		$fields[$shortname.'-framework-plugins'] = array(
+			'name' => 'Plugins',
+			'id' => $shortname.'-framework-plugins',
+			'type' => 'subheading',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-plugins-paid'] = array(
+			'name' => 'Paid',
+			'id' => $shortname.'-framework-plugins-paid',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-services-facebook'] = array(
-			'name' => 'Services (Facebook)',
-			'id' => $shortname.'-services-facebook',
+		$fields[$shortname.'-framework-plugins-free'] = array(
+			'name' => 'Free',
+			'id' => $shortname.'-framework-plugins-free',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-services-twitter'] = array(
-			'name' => 'Services (Twitter)',
-			'id' => $shortname.'-services-twitter',
+		$fields[$shortname.'-framework-plugins-custom'] = array(
+			'name' => 'Custom',
+			'id' => $shortname.'-framework-plugins-custom',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-services-google'] = array(
-			'name' => 'Services (Google+)',
-			'id' => $shortname.'-services-google',
+		$fields[$shortname.'-framework-scripts'] = array(
+			'name' => 'Scripts',
+			'id' => $shortname.'-framework-scripts',
+			'type' => 'subheading',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-scripts-paid'] = array(
+			'name' => 'Paid',
+			'id' => $shortname.'-framework-scripts-paid',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
 			'readonly' => true
 		);
 		
-	// Valuation
-	$fields[$shortname.'-valuation'] = array(
-		'name' => 'Valuation',
-		'id' => $shortname.'-valuation',
-		'type' => 'separator'
-	);
-	
-		// Ranks
-		$fields[$shortname.'-ranks'] = array(
-			'name' => 'Ranks',
-			'id' => $shortname.'-ranks',
+		$fields[$shortname.'-framework-scripts-free'] = array(
+			'name' => 'Free',
+			'id' => $shortname.'-framework-scripts-free',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-scripts-custom'] = array(
+			'name' => 'Custom',
+			'id' => $shortname.'-framework-scripts-custom',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-services'] = array(
+			'name' => 'Services',
+			'id' => $shortname.'-framework-services',
+			'type' => 'subheading',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-services-problem'] = array(
+			'name' => 'Problem',
+			'id' => $shortname.'-framework-services-problem',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-services-solution'] = array(
+			'name' => 'Solution Pairs',
+			'id' => $shortname.'-framework-services-solution',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-vendors'] = array(
+			'name' => 'Vendors',
+			'id' => $shortname.'-framework-vendors',
+			'type' => 'subheading',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-vendors-problem'] = array(
+			'name' => 'Problem',
+			'id' => $shortname.'-framework-vendors-problem',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-framework-vendors-solution'] = array(
+			'name' => 'Solution Pairs',
+			'id' => $shortname.'-framework-vendors-solution',
+			'type' => 'text',
+			'group' => $shortname.'-framework',
+			'readonly' => true
+		);
+		/**********		END OF FRAMEWORK 	***********/
+		
+		/**********		CONTENT 	***********/
+		$fields[$shortname.'-content'] = array(
+			'name' => 'Content',
+			'id' => $shortname.'-content',
 			'type' => 'heading',
-			'category' => 'valuation',
+			'category' => 'departments',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-alexa-rank'] = array(
-			'name' => 'Alexa Rank',
-			'id' => $shortname.'-alexa-rank',
+		$fields[$shortname.'-topical-directory'] = array(
+			'name' => 'Topical Directory Location',
+			'id' => $shortname.'-topical-directory',
 			'type' => 'text',
-			'group' => $shortname.'-ranks',
+			'group' => $shortname.'-content',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-moz-rank'] = array(
-			'name' => 'MOZ Rank',
-			'id' => $shortname.'-moz-rank',
+		$fields[$shortname.'-onsite-seo'] = array(
+			'name' => 'On Site SEO',
+			'id' => $shortname.'-onsite-seo',
 			'type' => 'text',
-			'group' => $shortname.'-ranks',
+			'group' => $shortname.'-content',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-compete-rank'] = array(
-			'name' => 'Compete Rank',
-			'id' => $shortname.'-compete-rank',
+		$fields[$shortname.'-visibility-gwt'] = array(
+			'name' => 'Visibility GWT',
+			'id' => $shortname.'-visibility-gwt',
 			'type' => 'text',
-			'group' => $shortname.'-ranks',
+			'group' => $shortname.'-content',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-semrush-rank'] = array(
-			'name' => 'SEM Rush Rank',
-			'id' => $shortname.'-semrush-rank',
+		$fields[$shortname.'-load-page-speed'] = array(
+			'name' => 'Load Time / Page Speed',
+			'id' => $shortname.'-load-page-speed',
 			'type' => 'text',
-			'group' => $shortname.'-ranks',
+			'group' => $shortname.'-content',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-authority-rank'] = array(
-			'name' => 'Authority Rank',
-			'id' => $shortname.'-authority-rank',
+		$fields[$shortname.'-keywords-ranking'] = array(
+			'name' => 'Keywords Ranking',
+			'id' => $shortname.'-keywords-ranking',
 			'type' => 'text',
-			'group' => $shortname.'-ranks',
+			'group' => $shortname.'-content',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-one-rank'] = array(
-			'name' => '1Rank',
-			'id' => $shortname.'-one-rank',
+		$fields[$shortname.'-duplicate-content'] = array(
+			'name' => 'Duplicate Content',
+			'id' => $shortname.'-duplicate-content',
 			'type' => 'text',
-			'group' => $shortname.'-ranks',
+			'group' => $shortname.'-content',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-one-score'] = array(
-			'name' => 'One Score',
-			'id' => $shortname.'-one-score',
+		$fields[$shortname.'-post-count'] = array(
+			'name' => 'Post Count',
+			'id' => $shortname.'-post-count',
 			'type' => 'text',
-			'group' => $shortname.'-ranks',
+			'group' => $shortname.'-content',
 			'readonly' => true
 		);
 		
-		// Scores
-		$fields[$shortname.'-score'] = array(
-			'name' => 'Scores',
-			'id' => $shortname.'-score',
+		$fields[$shortname.'-word-count'] = array(
+			'name' => 'Word Count',
+			'id' => $shortname.'-word-count',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-micro-formats'] = array(
+			'name' => 'Micro-Formats / Rich Snippets',
+			'id' => $shortname.'-micro-formats',
+			'type' => 'subheading',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-micro-formats-posts'] = array(
+			'name' => 'Number of Posts',
+			'id' => $shortname.'-micro-formats-posts',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-micro-formats-types'] = array(
+			'name' => 'Number of Types',
+			'id' => $shortname.'-micro-formats-types',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-onpage'] = array(
+			'name' => 'On Page',
+			'id' => $shortname.'-onpage',
+			'type' => 'subheading',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-onpage-meta'] = array(
+			'name' => 'Meta',
+			'id' => $shortname.'-onpage-meta',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-onpage-title'] = array(
+			'name' => 'Title',
+			'id' => $shortname.'-onpage-title',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-onpage-description'] = array(
+			'name' => 'Description',
+			'id' => $shortname.'-onpage-description',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-user-content'] = array(
+			'name' => 'User Content',
+			'id' => $shortname.'-user-content',
+			'type' => 'subheading',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-user-content-bios'] = array(
+			'name' => 'Author Bios',
+			'id' => $shortname.'-user-content-bios',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-user-content-bios'] = array(
+			'name' => 'Author Bios',
+			'id' => $shortname.'-user-content-bios',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-user-content-bylines'] = array(
+			'name' => 'Author Bylines',
+			'id' => $shortname.'-user-content-bylines',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-user-content-page'] = array(
+			'name' => 'Author Page',
+			'id' => $shortname.'-user-content-page',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'readonly' => true
+		);
+		/********	END OF CONTENT	 **********/
+		
+		/********	PRODUCTS	 **********/
+		$fields[$shortname.'-products'] = array(
+			'name' => 'Products',
+			'id' => $shortname.'-products',
 			'type' => 'heading',
-			'category' => 'valuation',
+			'category' => 'departments',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-site-score'] = array(
-			'name' => 'Site',
-			'id' => $shortname.'-site-score',
+		$fields[$shortname.'-brands'] = array(
+			'name' => 'Brands',
+			'id' => $shortname.'-brands',
 			'type' => 'text',
-			'group' => $shortname.'-score',
+			'group' => $shortname.'-products',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-project-score'] = array(
-			'name' => 'Project',
-			'id' => $shortname.'-project-score',
+		$fields[$shortname.'-reports'] = array(
+			'name' => 'Reports',
+			'id' => $shortname.'-reports',
 			'type' => 'text',
-			'group' => $shortname.'-score',
+			'group' => $shortname.'-products',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-google-rank'] = array(
-			'name' => 'Google Score',
-			'id' => $shortname.'-google-rank',
+		$fields[$shortname.'-books'] = array(
+			'name' => 'Books',
+			'id' => $shortname.'-books',
 			'type' => 'text',
-			'group' => $shortname.'-score',
+			'group' => $shortname.'-products',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-links-scores'] = array(
-			'name' => 'Link Score',
-			'id' => $shortname.'-links-scores',
+		$fields[$shortname.'-shows'] = array(
+			'name' => 'Shows',
+			'id' => $shortname.'-shows',
 			'type' => 'text',
-			'group' => $shortname.'-score',
+			'group' => $shortname.'-products',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-community-scores'] = array(
-			'name' => 'Community Score',
-			'id' => $shortname.'-community-scores',
+		$fields[$shortname.'-courses'] = array(
+			'name' => 'Courses',
+			'id' => $shortname.'-courses',
 			'type' => 'text',
-			'group' => $shortname.'-score',
+			'group' => $shortname.'-products',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-social-scores'] = array(
-			'name' => 'Social Score',
-			'id' => $shortname.'-social-scores',
+		$fields[$shortname.'-events'] = array(
+			'name' => 'Events',
+			'id' => $shortname.'-events',
 			'type' => 'text',
-			'group' => $shortname.'-score',
+			'group' => $shortname.'-products',
 			'readonly' => true
 		);
+		/********	END OF PRODUCTS 	**********/
 		
-		$fields[$shortname.'-buzz-score'] = array(
-			'name' => 'Buzz',
-			'id' => $shortname.'-buzz-score',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-framework-score'] = array(
-			'name' => 'Framework',
-			'id' => $shortname.'-framework-score',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-ranks-scores'] = array(
-			'name' => 'Ranks Score',
-			'id' => $shortname.'-ranks-scores',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-traffic-scores'] = array(
-			'name' => 'Traffic Score',
-			'id' => $shortname.'-traffic-scores',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-engagement-scores'] = array(
-			'name' => 'Engagement Score',
-			'id' => $shortname.'-engagement-scores',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-content-scores'] = array(
-			'name' => 'Content Score',
-			'id' => $shortname.'-content-scores',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-systems-score'] = array(
-			'name' => 'Systems',
-			'id' => $shortname.'-systems-score',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-authors-scores'] = array(
-			'name' => 'Authors Score',
-			'id' => $shortname.'-authors-scores',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-scores-score'] = array(
-			'name' => 'Scores',
-			'id' => $shortname.'-scores-score',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-valuation-score'] = array(
-			'name' => 'Valuation',
-			'id' => $shortname.'-valuation-score',
-			'type' => 'text',
-			'group' => $shortname.'-score',
-			'readonly' => true
-		);
-	
-		// Traffic
-		$fields[$shortname.'-traffic'] = array(
-			'name' => 'Traffic',
-			'id' => $shortname.'-traffic',
+		/********	SALES	 **********/
+		$fields[$shortname.'-sales'] = array(
+			'name' => 'Sales',
+			'id' => $shortname.'-sales',
 			'type' => 'heading',
-			'category' => 'valuation',
+			'category' => 'departments',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-unique-visitors'] = array(
-			'name' => 'Monthly Unique Visitors',
-			'id' => $shortname.'-unique-visitors',
+		$fields[$shortname.'-sales-revenue'] = array(
+			'name' => 'Product Sales Revenue',
+			'id' => $shortname.'-sales-revenue',
 			'type' => 'text',
-			'group' => $shortname.'-traffic',
+			'group' => $shortname.'-sales',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-page-views'] = array(
-			'name' => 'Monthly Page Views',
-			'id' => $shortname.'-page-views',
+		$fields[$shortname.'-advertising-revenue'] = array(
+			'name' => 'Advertising / Sponsor Revenue',
+			'id' => $shortname.'-advertising-revenue',
 			'type' => 'text',
-			'group' => $shortname.'-traffic',
+			'group' => $shortname.'-sales',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-page-speed'] = array(
-			'name' => 'Page Speed',
-			'id' => $shortname.'-page-speed',
+		$fields[$shortname.'-affiliate-revenue'] = array(
+			'name' => 'Affiliate Revenue',
+			'id' => $shortname.'-affiliate-revenue',
 			'type' => 'text',
-			'group' => $shortname.'-traffic',
+			'group' => $shortname.'-sales',
 			'readonly' => true
 		);
-	
-		// Engagement
-		$fields[$shortname.'-engagement'] = array(
-			'name' => 'Engagement',
-			'id' => $shortname.'-engagement',
+		
+		$fields[$shortname.'-other-revenue'] = array(
+			'name' => 'Other Revenue',
+			'id' => $shortname.'-other-revenue',
+			'type' => 'text',
+			'group' => $shortname.'-sales',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-total-revenue'] = array(
+			'name' => 'Total Revenue',
+			'id' => $shortname.'-total-revenue',
+			'type' => 'text',
+			'group' => $shortname.'-sales',
+			'readonly' => true
+		);
+		/********	END OF SALES	 **********/
+		
+		/********	SYSTEMS AND TOOLS	 **********/
+		$fields[$shortname.'-systems-tools'] = array(
+			'name' => 'Systems and Tools',
+			'id' => $shortname.'-systems-tools',
 			'type' => 'heading',
-			'category' => 'valuation',
+			'category' => 'departments',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-pages-per-visit'] = array(
-			'name' => 'Pages Per Visit',
-			'id' => $shortname.'-pages-per-visit',
+		$fields[$shortname.'-email-marketing'] = array(
+			'name' => 'Email Marketing',
+			'id' => $shortname.'-email-marketing',
 			'type' => 'text',
-			'group' => $shortname.'-engagement',
+			'group' => $shortname.'-systems-tools',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-time-per-visit'] = array(
-			'name' => 'Time Per Visit',
-			'id' => $shortname.'-time-per-visit',
+		$fields[$shortname.'-generated-content'] = array(
+			'name' => 'User Generated Content',
+			'id' => $shortname.'-generated-content',
 			'type' => 'text',
-			'group' => $shortname.'-engagement',
+			'group' => $shortname.'-systems-tools',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-comments-active'] = array(
-			'name' => 'Comments Active',
-			'id' => $shortname.'-comments-active',
+		$fields[$shortname.'-joint-ventures'] = array(
+			'name' => 'Advertising / Joint Ventures',
+			'id' => $shortname.'-joint-ventures',
 			'type' => 'text',
-			'group' => $shortname.'-engagement',
+			'group' => $shortname.'-systems-tools',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-comment-system'] = array(
-			'name' => 'Comment System',
-			'id' => $shortname.'-comment-system',
+		$fields[$shortname.'-system-management'] = array(
+			'name' => 'Team / Staff / Vendors / Contractors',
+			'id' => $shortname.'-system-management',
 			'type' => 'text',
-			'group' => $shortname.'-engagement',
+			'group' => $shortname.'-systems-tools',
 			'readonly' => true
 		);
+		/********	END OF SYSTEMS AND TOOLS	 **********/
 		
-		$fields[$shortname.'-comments-per-post'] = array(
-			'name' => 'Comments Per Post',
-			'id' => $shortname.'-comments-per-post',
-			'type' => 'text',
-			'group' => $shortname.'-engagement',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-percent-longer-15'] = array(
-			'name' => 'Percent Longer than 15 Seconds',
-			'id' => $shortname.'-percent-longer-15',
-			'type' => 'text',
-			'group' => $shortname.'-engagement',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-10-seconds-under-55'] = array(
-			'name' => '0-10 Seconds under 55%',
-			'id' => $shortname.'-10-seconds-under-55',
-			'type' => 'text',
-			'group' => $shortname.'-engagement',
-			'readonly' => true
-		);
-		
-		// valuation
+		/********	VALUATION	 **********/
 		$fields[$shortname.'-valuation'] = array(
 			'name' => 'Valuation',
 			'id' => $shortname.'-valuation',
 			'type' => 'heading',
-			'category' => 'valuation',
+			'category' => 'departments',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-models'] = array(
+			'name' => 'Models',
+			'id' => $shortname.'-models',
+			'type' => 'subheading',
+			'group' => $shortname.'-valuation',
 			'readonly' => true
 		);
 		
@@ -931,77 +771,9 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-last-valuation'] = array(
-			'name' => 'Last Valuation',
-			'id' => $shortname.'-last-valuation',
-			'type' => 'text',
-			'group' => $shortname.'-valuation',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-revenue-multiplier'] = array(
-			'name' => 'Revenue Value Multiplier',
-			'id' => $shortname.'-revenue-multiplier',
-			'type' => 'text',
-			'group' => $shortname.'-valuation',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-income-multiplier'] = array(
-			'name' => 'Income value Multiplier',
-			'id' => $shortname.'-income-multiplier',
-			'type' => 'text',
-			'group' => $shortname.'-valuation',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-daily-worth'] = array(
-			'name' => 'Daily Worth (From Income Diary)',
-			'id' => $shortname.'-daily-worth',
-			'type' => 'text',
-			'group' => $shortname.'-valuation',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-staff'] = array(
-			'name' => 'Staff',
-			'id' => $shortname.'-staff',
-			'type' => 'text',
-			//'group' => $shortname.'-management'
-			'group' => $shortname.'-valuation',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-net-income'] = array(
-			'name' => 'Net Income',
-			'id' => $shortname.'-net-income',
-			'type' => 'text',
-			//'group' => $shortname.'-financials'
-			'group' => $shortname.'-valuation',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-gross-revenue'] = array(
-			'name' => 'Gross Revenue',
-			'id' => $shortname.'-gross-revenue',
-			'type' => 'text',
-			//'group' => $shortname.'-financials'
-			'group' => $shortname.'-valuation',
-			'readonly' => true
-		);
-		
 		$fields[$shortname.'-trailing-12-months'] = array(
-			'name' => 'Trailing 12 Months',
+			'name' => 'Trailing Twelve Months',
 			'id' => $shortname.'-trailing-12-months',
-			'type' => 'text',
-			//'group' => $shortname.'-financials'
-			'group' => $shortname.'-valuation',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-cost-to-build'] = array(
-			'name' => 'Cost to Build',
-			'id' => $shortname.'-cost-to-build',
 			'type' => 'text',
 			'group' => $shortname.'-valuation',
 			'readonly' => true
@@ -1014,203 +786,722 @@ function wpa_default_metrics(){
 			'group' => $shortname.'-valuation',
 			'readonly' => true
 		);
+		
+		$fields[$shortname.'-net-income'] = array(
+			'name' => 'Income',
+			'id' => $shortname.'-net-income',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-revenue-sharing'] = array(
+			'name' => 'Revenue Sharing',
+			'id' => $shortname.'-revenue-sharing',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-equity-sharing'] = array(
+			'name' => 'Equity Sharing',
+			'id' => $shortname.'-equity-sharing',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-last-value'] = array(
+			'name' => 'Last Value',
+			'id' => $shortname.'-last-value',
+			'type' => 'subheading',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-last-value-multiple'] = array(
+			'name' => 'Multiple',
+			'id' => $shortname.'-last-value-multiple',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-last-value-income'] = array(
+			'name' => 'Income',
+			'id' => $shortname.'-last-value-income',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-last-value-revenue'] = array(
+			'name' => 'Revenue',
+			'id' => $shortname.'-last-value-revenue',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-current-value'] = array(
+			'name' => 'Current Value',
+			'id' => $shortname.'-current-value',
+			'type' => 'subheading',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-current-value-multiple'] = array(
+			'name' => 'Multiple',
+			'id' => $shortname.'-current-value-multiple',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-current-value-income'] = array(
+			'name' => 'Income',
+			'id' => $shortname.'-current-value-income',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-current-value-revenue'] = array(
+			'name' => 'Revenue',
+			'id' => $shortname.'-current-value-revenue',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-projected-value'] = array(
+			'name' => 'Projected Value',
+			'id' => $shortname.'-current-value',
+			'type' => 'subheading',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-projected-value-multiple'] = array(
+			'name' => 'Multiple',
+			'id' => $shortname.'-projected-value-multiple',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-projected-value-income'] = array(
+			'name' => 'Income',
+			'id' => $shortname.'-projected-value-income',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-projected-value-revenue'] = array(
+			'name' => 'Revenue',
+			'id' => $shortname.'-projected-value-revenue',
+			'type' => 'text',
+			'group' => $shortname.'-valuation',
+			'readonly' => true
+		);
+		/********	END OF VALUATION	 **********/
 	
-		// Content
-		$fields[$shortname.'-content'] = array(
-			'name' => 'Content',
-			'id' => $shortname.'-content',
-			'type' => 'heading',
-			'category' => 'valuation',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-silos-number'] = array(
-			'name' => 'Number of Defined Silos',
-			'id' => $shortname.'-silos-number',
-			'type' => 'text',
-			'group' => $shortname.'-content',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-silos-tag'] = array(
-			'name' => 'Silos',
-			'id' => $shortname.'-silos-tag',
-			'type' => 'text',
-			'group' => $shortname.'-content',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-rich-snippet-types'] = array(
-			'name' => 'Number of Rich Snippet Types',
-			'id' => $shortname.'-rich-snippet-types',
-			'type' => 'text',
-			'group' => $shortname.'-content',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-rich-snippets'] = array(
-			'name' => 'Number of Rich Snippets',
-			'id' => $shortname.'-rich-snippets',
-			'type' => 'text',
-			'group' => $shortname.'-content',
-			'readonly' => true
-		);
+	$fields[$shortname.'-metrics'] = array(
+		'name' => 'Metrics',
+		'id' => $shortname.'-metrics',
+		'type' => 'separator'
+	);
 	
-		/*Developments
-		$fields[] = array(
-			'name' => 'Development',
-			'id' => $shortname.'-development',
-			'type' => 'heading'
+		/********	AUDIENCE	 **********/
+		$fields[$shortname.'-audience'] = array(
+			'name' => 'Audience',
+			'id' => $shortname.'-audience',
+			'type' => 'heading',
+			'category' => 'metrics',
+			'readonly' => true
 		);
 		
-		$fields[] = array(
-			'name' => 'Percent Customized',
-			'id' => $shortname.'-percent-customized',
+		$fields[$shortname.'-traffic'] = array(
+			'name' => 'Traffic',
+			'id' => $shortname.'-traffic',
+			'type' => 'subheading',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-traffic-daily-average'] = array(
+			'name' => 'Daily Average',
+			'id' => $shortname.'-traffic-daily-average',
 			'type' => 'text',
-			'group' => $shortname.'-development'
-		);*/
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-traffic-daily-max'] = array(
+			'name' => 'Daily Max',
+			'id' => $shortname.'-traffic-daily-max',
+			'type' => 'text',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-traffic-monthly-average'] = array(
+			'name' => 'Monthly Average',
+			'id' => $shortname.'-traffic-monthly-average',
+			'type' => 'text',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-traffic-monthly-max'] = array(
+			'name' => 'Monthly Max',
+			'id' => $shortname.'-traffic-monthly-max',
+			'type' => 'text',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-demographics'] = array(
+			'name' => 'Demographics',
+			'id' => $shortname.'-demographics',
+			'type' => 'subheading',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-demographics-gender'] = array(
+			'name' => 'Male / Female',
+			'id' => $shortname.'-demographics-gender',
+			'type' => 'text',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-demographics-age'] = array(
+			'name' => 'Age',
+			'id' => $shortname.'-demographics-age',
+			'type' => 'text',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-demographics-education'] = array(
+			'name' => 'Education',
+			'id' => $shortname.'-demographics-education',
+			'type' => 'text',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-demographics-income'] = array(
+			'name' => 'Income',
+			'id' => $shortname.'-demographics-income',
+			'type' => 'text',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-demographics-location'] = array(
+			'name' => 'Location',
+			'id' => $shortname.'-demographics-location',
+			'type' => 'text',
+			'group' => $shortname.'-audience',
+			'readonly' => true
+		);
+		/********	 END OF AUDIENCE	 **********/
+		
+		/********	 LINKS	 **********/
+		$fields[$shortname.'-links'] = array(
+			'name' => 'Links',
+			'id' => $shortname.'-links',
+			'type' => 'heading',
+			'category' => 'metrics',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-google'] = array(
+			'name' => 'Google Backlinks',
+			'id' => $shortname.'-google',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-alexa'] = array(
+			'name' => 'Alexa Backlinks',
+			'id' => $shortname.'-alexa',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-yahoo'] = array(
+			'name' => 'Yahoo Backlinks',
+			'id' => $shortname.'-yahoo',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-majestic'] = array(
+			'name' => 'Majestic Backlinks',
+			'id' => $shortname.'-majestic',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-links-average'] = array(
+			'name' => 'Average',
+			'id' => $shortname.'-links-average',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-external-links'] = array(
+			'name' => 'External Link',
+			'id' => $shortname.'-external-links',
+			'type' => 'subheading',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-external-referalls'] = array(
+			'name' => 'Referalls',
+			'id' => $shortname.'-external-referalls',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-external-listings'] = array(
+			'name' => 'Listings',
+			'id' => $shortname.'-external-listings',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-external-nofollow'] = array(
+			'name' => 'No-Follow',
+			'id' => $shortname.'-external-nofollow',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-external-dofollow'] = array(
+			'name' => 'Do-Follow',
+			'id' => $shortname.'-external-dofollow',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-external-in-shares'] = array(
+			'name' => 'In-Shares',
+			'id' => $shortname.'-external-in-shares',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-external-TextImage'] = array(
+			'name' => 'Text, Image',
+			'id' => $shortname.'-external-TextImage',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-external-broken'] = array(
+			'name' => 'Broken',
+			'id' => $shortname.'-external-broken',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-internal-links'] = array(
+			'name' => 'Internal Link',
+			'id' => $shortname.'-internal-links',
+			'type' => 'subheading',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-internal-levels'] = array(
+			'name' => 'Levels',
+			'id' => $shortname.'-internal-levels',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-internal-404'] = array(
+			'name' => '404',
+			'id' => $shortname.'-internal-404',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-internal-broken'] = array(
+			'name' => 'Broken',
+			'id' => $shortname.'-internal-broken',
+			'type' => 'text',
+			'group' => $shortname.'-links',
+			'readonly' => true
+		);
+		/********	 END OF LINKS	 **********/
+		
+		/********	 COMMUNITY	 **********/
+		$fields[$shortname.'-community'] = array(
+			'name' => 'Community',
+			'id' => $shortname.'-community',
+			'type' => 'heading',
+			'category' => 'metrics',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-marketing-department'] = array(
+			'name' => 'Marketing Department',
+			'id' => $shortname.'-marketing-department',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-network-subscribers'] = array(
+			'name' => 'Network Subscribers',
+			'id' => $shortname.'-network-subscribers',
+			'type' => 'subheading',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-network-websites'] = array(
+			'name' => 'Websites',
+			'id' => $shortname.'-network-websites',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-email'] = array(
+			'name' => 'Email',
+			'id' => $shortname.'-email',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-rss'] = array(
+			'name' => 'RSS',
+			'id' => $shortname.'-rss',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-facebook'] = array(
+			'name' => 'Facebook',
+			'id' => $shortname.'-facebook',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true,
+			'followers' => true
+		);
+		
+		$fields[$shortname.'-googleplus'] = array(
+			'name' => 'Google Plus',
+			'id' => $shortname.'-googleplus',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true,
+			'followers' => true
+		);
+		
+		$fields[$shortname.'-twitter'] = array(
+			'name' => 'Twitter',
+			'id' => $shortname.'-twitter',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true,
+			'followers' => true
+		);
+		
+		$fields[$shortname.'-pinterest'] = array(
+			'name' => 'Pinterest',
+			'id' => $shortname.'-pinterest',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true,
+			'followers' => true
+		);
+		
+		$fields[$shortname.'-linkedin'] = array(
+			'name' => 'LinkedIn',
+			'id' => $shortname.'-linkedin',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true,
+			'followers' => true
+		);
+		
+		$fields[$shortname.'-reach-subcribers'] = array(
+			'name' => 'Reach - Subscribers of Subscribers',
+			'id' => $shortname.'-reach-subcribers',
+			'type' => 'subheading',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-klout'] = array(
+			'name' => 'Klout',
+			'id' => $shortname.'-klout',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-kred'] = array(
+			'name' => 'Kred',
+			'id' => $shortname.'-kred',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-empire'] = array(
+			'name' => 'Empire',
+			'id' => $shortname.'-empire',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-buzz-mentions'] = array(
+			'name' => 'Buzz - Brand Mentions',
+			'id' => $shortname.'-buzz-mentions',
+			'type' => 'subheading',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-buzz-now'] = array(
+			'name' => 'Now',
+			'id' => $shortname.'-buzz-now',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-buzz-today'] = array(
+			'name' => 'Today',
+			'id' => $shortname.'-buzz-today',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-buzz-week'] = array(
+			'name' => 'This Week',
+			'id' => $shortname.'-buzz-week',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-buzz-month'] = array(
+			'name' => 'This Month',
+			'id' => $shortname.'-buzz-month',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-buzz-year'] = array(
+			'name' => 'This Year',
+			'id' => $shortname.'-buzz-year',
+			'type' => 'text',
+			'group' => $shortname.'-community',
+			'readonly' => true
+		);
+		/********	 END OF COMMUNITY	 **********/
+		
+		/********	 ENGAGEMENT 	**********/
+		$fields[$shortname.'-engagement'] = array(
+			'name' => 'Engagement',
+			'id' => $shortname.'-engagement',
+			'type' => 'heading',
+			'category' => 'metrics',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-bounce-rate'] = array(
+			'name' => 'Bounce Rate',
+			'id' => $shortname.'-bounce-rate',
+			'type' => 'text',
+			'group' => $shortname.'-engagement',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-time-on-site'] = array(
+			'name' => 'Time on Site',
+			'id' => $shortname.'-time-on-site',
+			'type' => 'text',
+			'group' => $shortname.'-engagement',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-pages-visited'] = array(
+			'name' => 'Pages Visited',
+			'id' => $shortname.'-pages-visited',
+			'type' => 'text',
+			'group' => $shortname.'-engagement',
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-comments'] = array(
+			'name' => 'Comments - User Posts',
+			'id' => $shortname.'-comments',
+			'type' => 'text',
+			'group' => $shortname.'-engagement',
+			'readonly' => true
+		);
+		/********	 END OF ENGAGEMENT 	**********/
 	
-		// Authors
-		$fields[$shortname.'-authors'] = array(
-			'name' => 'Authors',
-			'id' => $shortname.'-authors',
+		/********	 SOCIAL/SHARES	  **********/
+		$fields[$shortname.'-social'] = array(
+			'name' => 'Social / Shares',
+			'id' => $shortname.'-social',
 			'type' => 'heading',
-			'category' => 'valuation',
+			'category' => 'metrics',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-authors-number'] = array(
-			'name' => 'Number of Authors',
-			'id' => $shortname.'-authors-number',
+		$fields[$shortname.'-shares-googleplus'] = array(
+			'name' => 'Google Plus',
+			'id' => $shortname.'-shares-googleplus',
 			'type' => 'text',
-			'group' => $shortname.'-authors',
+			'group' => $shortname.'-social',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-bio-type'] = array(
-			'name' => 'Bio Type',
-			'id' => $shortname.'-bio-type',
+		$fields[$shortname.'-shares-facebook'] = array(
+			'name' => 'Facebook Shares',
+			'id' => $shortname.'-shares-facebook',
 			'type' => 'text',
-			'group' => $shortname.'-authors',
+			'group' => $shortname.'-social',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-byline-type'] = array(
-			'name' => 'Byline Type',
-			'id' => $shortname.'-byline-type',
+		$fields[$shortname.'-likes-facebook'] = array(
+			'name' => 'Facebook Likes',
+			'id' => $shortname.'-likes-facebook',
 			'type' => 'text',
-			'group' => $shortname.'-authors',
+			'group' => $shortname.'-social',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-author-page-type'] = array(
-			'name' => 'Author Page Type',
-			'id' => $shortname.'-author-page-type',
+		$fields[$shortname.'-shares-twitter'] = array(
+			'name' => 'Twitter',
+			'id' => $shortname.'-shares-twitter',
 			'type' => 'text',
-			'group' => $shortname.'-authors',
+			'group' => $shortname.'-social',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-author-paid'] = array(
-			'name' => 'Paid',
-			'id' => $shortname.'-author-paid',
+		$fields[$shortname.'-shares-pinterest'] = array(
+			'name' => 'Pinterest',
+			'id' => $shortname.'-shares-pinterest',
 			'type' => 'text',
-			'group' => $shortname.'-authors',
+			'group' => $shortname.'-social',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-author-free'] = array(
-			'name' => 'Free',
-			'id' => $shortname.'-author-free',
+		$fields[$shortname.'-shares-linkedin'] = array(
+			'name' => 'LinkedIn',
+			'id' => $shortname.'-shares-linkedin',
 			'type' => 'text',
-			'group' => $shortname.'-authors',
+			'group' => $shortname.'-social',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-revenue-share'] = array(
-			'name' => 'Revenue Share',
-			'id' => $shortname.'-revenue-share',
+		$fields[$shortname.'-social-site'] = array(
+			'name' => 'Site',
+			'id' => $shortname.'-social-site',
 			'type' => 'text',
-			'group' => $shortname.'-authors',
+			'group' => $shortname.'-social',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-profiles-number'] = array(
-			'name' => 'Number of Connected Profiles',
-			'id' => $shortname.'-profiles-number',
+		$fields[$shortname.'-page-total'] = array(
+			'name' => 'Page Total',
+			'id' => $shortname.'-page-total',
 			'type' => 'text',
-			'group' => $shortname.'-authors',
+			'group' => $shortname.'-social',
 			'readonly' => true
 		);
+		/********	 END OF SOCIAL/SHARES	  **********/
 		
-		// Products (Old = Brand)
-		$fields[$shortname.'-products'] = array(
-			'name' => 'Products',
-			'id' => $shortname.'-products',
+		/********	 SCORES	  **********/
+		$fields[$shortname.'-scores'] = array(
+			'name' => 'Scores',
+			'id' => $shortname.'-scores',
 			'type' => 'heading',
-			'category' => 'valuation',
+			'category' => 'metrics',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-brand-number'] = array(
-			'name' => 'Number',
-			'id' => $shortname.'-brand-number',
+		$fields[$shortname.'-points-summary'] = array(
+			'name' => 'Summary of Points Total',
+			'id' => $shortname.'-points-summary',
 			'type' => 'text',
-			'group' => $shortname.'-products',
+			'group' => $shortname.'-scores',
 			'readonly' => true
 		);
 		
-		// Systems
-		$fields[$shortname.'-systems'] = array(
-			'name' => 'Systems',
-			'id' => $shortname.'-systems',
+		$fields[$shortname.'-each-department'] = array(
+			'name' => 'Each Department',
+			'id' => $shortname.'-each-department',
+			'type' => 'text',
+			'group' => $shortname.'-scores',
+			'readonly' => true
+		);
+		/********	 END OF SCORES	  **********/
+		
+		/********	 TRUST	  **********/
+		$fields[$shortname.'-trust'] = array(
+			'name' => 'Trust',
+			'id' => $shortname.'-trust',
 			'type' => 'heading',
-			'category' => 'valuation',
+			'category' => 'metrics',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-system-content'] = array(
-			'name' => 'Content',
-			'id' => $shortname.'-system-content',
+		$fields[$shortname.'-moz-stats'] = array(
+			'name' => 'MOZ Stats',
+			'id' => $shortname.'-moz-stats',
 			'type' => 'text',
-			'group' => $shortname.'-systems',
+			'group' => $shortname.'-trust',
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-system-marketing'] = array(
-			'name' => 'Marketing',
-			'id' => $shortname.'-system-marketing',
+		$fields[$shortname.'-ows-stats'] = array(
+			'name' => 'Onewebsite Stats',
+			'id' => $shortname.'-ows-stats',
 			'type' => 'text',
-			'group' => $shortname.'-systems',
+			'group' => $shortname.'-trust',
 			'readonly' => true
 		);
-		
-		$fields[$shortname.'-system-sales'] = array(
-			'name' => 'Sales',
-			'id' => $shortname.'-system-sales',
-			'type' => 'text',
-			'group' => $shortname.'-systems',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-system-fulfilment'] = array(
-			'name' => 'Fulfillment',
-			'id' => $shortname.'-system-fulfilment',
-			'type' => 'text',
-			'group' => $shortname.'-systems',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-system-management'] = array(
-			'name' => 'Management (Staff)',
-			'id' => $shortname.'-system-management',
-			'type' => 'text',
-			'group' => $shortname.'-systems',
-			'readonly' => true
-		);
+		/********	 END OF TRUST	  **********/
 	
 	$cfields = get_option('wpa_metrics');
-	
 	$fields = wp_parse_args( $cfields, $fields);
 	
 	return $fields;
