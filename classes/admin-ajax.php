@@ -24,19 +24,45 @@ add_action('wp_ajax_audit_metric', 'audit_metric_callback');
 define('GOOGLE_MAGIC', 0xE6359A60);
 
 function audit_metric_callback(){
-	if(isset($_POST['field']) && $_POST['field'] != ''){
-		$return = awp_evaluate($_POST['url'], $_POST['field'], $_POST['id']);
+	if( !isset($_POST['id']) )
+		die();
+	
+	if( !isset($_POST['field']) )
+		die();
+	
+	if( !isset($_POST['url']) )
+		die();
+	
+	$user_ID = get_current_user_id();
+	
+	$result = awp_evaluate($_POST['url'], $_POST['field'], $_POST['id']);
+	if( $result ){
+		$return = update_post_meta($_POST['id'], $_POST['field'], $result);
 		
-		wp_die( $return );
+		update_post_meta( $_POST['id'], $_POST['field'].'-updated', date('c'));
+		update_post_meta( $_POST['id'], $_POST['field'].'-through', 'programmatically');
+		update_post_meta( $_POST['id'], $_POST['field'].'-author', $user_ID);
 	}
-	die();
+	
+	if( $return ){ echo $result; die(); } else { die(); }
 }
 
 function update_metric_callback(){
-	if(isset($_POST['field']) && $_POST['field'] != ''){
-		
-	}
-	die();
+	if( !isset($_POST['id']) )
+		die();
+	
+	if( !isset($_POST['field']) )
+		die();
+	
+	$user_ID = get_current_user_id();
+	
+	$return = update_post_meta($_POST['id'], $_POST['field'], $_POST['value']);
+	
+	update_post_meta( $_POST['id'], $_POST['field'].'-updated', date('c'));
+	update_post_meta( $_POST['id'], $_POST['field'].'-through', 'manually');
+	update_post_meta( $_POST['id'], $_POST['field'].'-author', $user_ID);
+	
+	if( $return ){ die( 'true' ); } else { die(); }
 }
 
 function submit_departments_callback(){
@@ -200,6 +226,7 @@ function evaluate_js_callback( $args = null ){
 	$settings = get_option('awp_settings');
 	
 	set_time_limit(500); //  Increased the timeout
+	$user_ID = get_current_user_id();
 	
 	// Set fields to evaluate for
 	$fors = array(
@@ -309,12 +336,13 @@ function evaluate_js_callback( $args = null ){
 		// Move upload file into WP Upload DIR
 		$upload_dir = wp_upload_dir();
 		$filename = $upload_dir['basedir'] . "/$file.jpg";
+		$fileurl = $upload_dir['baseurl'] . "/$file.jpg";
 		rename($filepath, $upload_dir['basedir'] . "/$file.jpg");
 		
 		// Create attachment post
 		$wp_filetype = wp_check_filetype(basename($filename), null );
 		$attachment = array(
-			'guid' => "$file.jpg",
+			'guid' => $fileurl,
 			'post_mime_type' => $wp_filetype['type'],
 			'post_title' => preg_replace('/\.[^.]+$/', '', basename($filename)),
 			'post_content' => '',
@@ -322,20 +350,25 @@ function evaluate_js_callback( $args = null ){
 		);
 		
 		$attach_id = wp_insert_attachment( $attachment, "$file.jpg", $id );
-		$attach_data = wp_generate_attachment_metadata( $attach_id, "$file.jpg" );
+		$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
 		wp_update_attachment_metadata( $attach_id, $attach_data );
 		
 		set_post_thumbnail( $id, $attach_id );
 		
 		// Update additional Custom Fields
-		update_post_meta($id, 'awp-name', $name);
-		update_post_meta($id, 'awp-domain', $domain);
-		update_post_meta($id, 'awp-tld', '.' . $domains[$slugCount - 1]);
-		update_post_meta($id, 'awp-url', 'http://www.'.$name);
-		update_post_meta($id, '_wpa_last_audit', date('c'));
+		$return['awp-thumbnail'] = $fileurl;
+		$return['awp-name'] = $name;
+		$return['awp-domain'] = $domain;
+		$return['awp-tld'] = '.' . $domains[$slugCount - 1];
+		$return['awp-url'] = 'http://www.'.$name;
+		$return['_wpa_last_audit'] = date('c');
 		
 		foreach( $return as $meta_key=>$meta_value ){
 			update_post_meta($id, $meta_key, $meta_value);
+			
+			update_post_meta( $id, $meta_key.'-updated', date('c'));
+			update_post_meta( $id, $meta_key.'-through', 'programmatically');
+			update_post_meta( $id, $meta_key.'-author', $user_ID);
 		}
 		
 		// Update score counts and status tag
@@ -370,7 +403,7 @@ function evaluate_js_callback( $args = null ){
 
 function awp_evaluate($url, $for, $pID = ''){
 	switch( $for ){
-		// General
+		// Site
 		case 'awp-language':
 			return awp_sharecounts($url, 'language');
 		
@@ -380,7 +413,7 @@ function awp_evaluate($url, $for, $pID = ''){
 		case 'awp-date':
 			return awp_sharecounts($url, 'founded');
 		
-		// Shares and likes
+		// Shares
 		case 'awp-shares-goolgeplus':
 			return awp_sharecounts($url, 'googlePlus');
 		
@@ -403,24 +436,24 @@ function awp_evaluate($url, $for, $pID = ''){
 			return awp_sharecounts($url, 'klout');
 		
 		case 'awp-googleplus-followers':
-			return awp_sharecounts($url, 'ggfollowers');
+			return awp_sharecounts($url, 'ggfollowers', $pID);
 		
 		case 'awp-facebook-followers':
-			return awp_sharecounts($url, 'fbfollowers');
+			return awp_sharecounts($url, 'fbfollowers', $pID);
 		
 		case 'awp-twitter-followers':
-			return awp_sharecounts($url, 'ttfollowers');
+			return awp_sharecounts($url, 'ttfollowers', $pID);
 		
 		case 'awp-pinterest-followers':
-			return awp_sharecounts($url, 'pifollowers');
+			return awp_sharecounts($url, 'pifollowers', $pID);
 		
 		case 'awp-linkedin-followers':
-			return awp_sharecounts($url, 'lifollowers');
+			return awp_sharecounts($url, 'lifollowers', $pID);
 		
 		case 'awp-klout-followers':
 			return awp_sharecounts($url, 'klfollowers');
 		
-		// Network
+		// Social Media page
 		case 'awp-facebook':
 			return awp_sharecounts($url, 'facebookPage');
 		
@@ -442,7 +475,7 @@ function awp_evaluate($url, $for, $pID = ''){
 		case 'awp-rss':
 			return awp_sharecounts($url, 'rssPage');
 		
-		// Links
+		// Back Links
 		case 'awp-google':
 			return awp_sharecounts($url, 'googleBackLinks');
 		
@@ -474,6 +507,21 @@ function awp_evaluate($url, $for, $pID = ''){
 		// Traffic
 		case 'awp-page-speed':
 			return awp_sharecounts($url, 'pageSpeed');
+		
+		// Scores
+		case 'awp-scores-site':
+		case 'awp-scores-team':
+		case 'awp-scores-authors':
+		case 'awp-scores-framework':
+		case 'awp-scores-content':
+		case 'awp-scores-systems':
+		case 'awp-scores-valuation':
+		case 'awp-scores-links':
+		case 'awp-scores-subscribers':
+		case 'awp-scores-buzz':
+		case 'awp-scores-shares':
+		case 'awp-scores-ranks':
+			return wpas_count_metric_scores($pID, $for);
 	}
 }
 
@@ -623,48 +671,33 @@ function awp_sharecounts($url, $type, $pID = ''){
 				break;
 			
 			case 'ggfollowers':
-				$GGurl = parse_social_links($url, 'plus.google');
-				if($GGurl){
-					$result = awp_sharecounts($GGurl, 'googlePlus');
-				} else {
-					$result = new WP_Error(__('Broke'), __('Error: Google Followers error'));
-				}
+				$page = get_post_meta($pID, 'awp-googleplus', true);
+				if( !$page ){ $page = parse_social_links($url, 'plus.google'); }
+				$result = wpas_get_social_counts('Google+', $url, $page);
 				break;
 			
 			case 'fbfollowers':
-				$FBurl = parse_social_links($url, 'facebook');
-				if($FBurl){
-					$result = awp_sharecounts($FBurl, 'facebookLikes');
-				} else {
-					$result = new WP_Error(__('Broke'), __('Error: Facebook Likes error'));
-				}
+				$page = get_post_meta($pID, 'awp-facebook', true);
+				if( !$page ){ $page = parse_social_links($url, 'facebook'); }
+				$result = wpas_get_social_counts('Facebook', $url, $page);
 				break;
 			
 			case 'ttfollowers':
-				$TTurl = parse_social_links($url, 'twitter');
-				if($TTurl){
-					$result = awp_sharecounts($TTurl, 'twitterShares');
-				} else {
-					$result = new WP_Error(__('Broke'), __('Error: Facebook Followers error'));
-				}
+				$page = get_post_meta($pID, 'awp-twitter', true);
+				if(!$page){ $page = parse_social_links($url, 'twitter'); }
+				$result = wpas_get_social_counts('Twitter', $url, $page);
 				break;
 			
 			case 'pifollowers':
-				$PIurl = parse_social_links($url, 'pinterest');
-				if($PIurl){
-					$result = awp_sharecounts($PIurl, 'pinterest');
-				} else {
-					$result = new WP_Error(__('Broke'), __('Error: Pinterest Followers error'));
-				}
+				$page = get_post_meta($pID, 'awp-pinterest', true);
+				if( !$page ){ $page = parse_social_links($url, 'pinterest'); }
+				$result = wpas_get_social_counts('Pinterest', $url, $page);
 				break;
 			
 			case 'lifollowers':
-				$LIurl = parse_social_links($url, 'linkedin');
-				if($LIurl){
-					$result = awp_sharecounts($LIurl, 'linkedin');
-				} else {
-					$result = new WP_Error(__('Broke'), __('Error: LinkedIn Followers error'));
-				}
+				$page = get_post_meta($pID, 'awp-linkedin', true);
+				if( !$page ){ $page = parse_social_links($url, 'linkedin'); }
+				$result = wpas_get_social_counts('LinkedIn', $url, $page);
 				break;
 			
 			case 'klfollowers':

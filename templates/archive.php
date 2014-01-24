@@ -62,7 +62,7 @@ if(isset($_REQUEST['meta_key'])){
 $wp_query->set("tax_query", apply_filters('wpa_archive_wp_query', $wp_query ) );
 $wp_query->get_posts( $wp_query );
 
-// wp_die( '<pre>' . print_r($wp_query, true) . '</pre>' );
+//wp_die( '<pre>' . print_r($wp_query, true) . '</pre>' );
 
 $columns = array();
 
@@ -229,8 +229,8 @@ get_header();
                 }
             ?></select> Per page</span></li>
             <li><a href="#grid" class="wpa-control grid current" title="Grid View">Grid</a></li>
-            <?php /*<li><a href="#detail" class="wpa-control detail" title="Detail View">Detail</a></li>*/ ?>
-            <li><a href="#list" class="wpa-control list" title="Detailed List View">Detail list</a></li>
+            <li><a href="#detail" class="wpa-control detail" title="Detail View">Detail</a></li>
+            <li><a href="#list" class="wpa-control list" title="List View">List</a></li>
             <?php /*<li><a href="#line" class="wpa-control line" title="Line List View">Line List</a></li>*/ ?>
             <li>&nbsp;</li>
             <li class="openSearch"><a href="#openSearch" class="wpa-control search" title="Screen Options">Open Search</a>
@@ -401,7 +401,7 @@ get_header();
                 <div class="wpa-site-wrapper">
 				
                 <div class="wpa-list-header">
-                	<div class="wpa-th wpa-th-change">&nbsp;</div>
+                	<div class="wpa-th wpa-th-change"><?php _e('Level', 'wpas'); ?></div>
 					<div class="wpa-th wpa-th-count">1Rank</div>
                     <div class="wpa-th wpa-th-title">
                     	<a href="<?php echo $sortbytitle; ?>" class="wpa-sortable <?php echo $order; echo ($orderby == 'title') ? ' current' : ''; ?>">Blog</a>
@@ -460,9 +460,9 @@ get_header();
 					}
 					
                     ?><div class="clear"></div>
-				</div>
+				</div><!-- /.wpa-site-wrapper -->
 				
-				<?php /* Start the Loop */
+				<div class="wpas-site-loop"><?php /* Start the Loop */
 				
 				$i = 1;
 				while ( $wp_query->have_posts() ) : $wp_query->the_post();
@@ -474,7 +474,9 @@ get_header();
 					$class .= (current_user_can('edit_post')) ? ' edit-enabled' : '';
 					$attachment = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ) );
 					$attachmentURL = ($attachment) ? PLUGINURL . '/timthumb.php?src=' . $attachment[0] . '&w=150&h=150' : null;
-					$thumbnailURL = ($attachment) ? PLUGINURL . '/timthumb.php?src=' . $attachment[0] . '&w=180&h=100' : null;
+					$default_img = sprintf('<span>%s</span>', __('NO IMAGE', 'wpas') ); 
+					$thumbnailURL = ($attachment) ? PLUGINURL.'/timthumb.php?src=' . $attachment[0] . '&w=180&h=100' : null;
+					$thumbnail = sprintf('<img src="%s" alt="%s" />', $thumbnailURL, get_the_title());
 					
 					$pageRank = get_post_meta($post_id, 'awp-google-rank', true);
 					$alexaRank = get_post_meta($post_id, 'awp-alexa-rank', true);
@@ -501,11 +503,7 @@ get_header();
                         <div class="wpa-line-item">
                             <div class="wpa-td wpa-td-thumbnail"><div class="thumbnail alignleft">
                                 <a href="<?php the_permalink(); ?>"><?php
-                                    if($attachmentURL){
-                                        ?><img src="<?php echo $thumbnailURL ?>" align="<?php the_title(); ?>" /><?php
-                                    } else {
-                                        ?><span><?php echo 'NO IMAGE'; ?></span><?php
-                                    }
+                                    echo ($attachmentURL) ? $thumbnail : $default_img;
                                 ?></a>
                             </div></div>
                             <div class="wpa-td wpa-td-description">
@@ -518,7 +516,9 @@ get_header();
                         
                         <!-- List View -->
 						<div class="wp-list-item">
-                        	<div class="wpa-td wpa-td-change">&nbsp;</div>
+                        	<div class="wpa-td wpa-td-change"><?php
+                            	wpas_get_authority_level(true, get_the_ID(), 'single');
+                            ?></div>
                         	<div class="wpa-td wpa-td-count"><?php echo $metrics['awp-one-rank'][0]; ?></div>
                             <div class="wpa-td wpa-td-title">
                             	<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
@@ -598,119 +598,80 @@ get_header();
 						</div>
 						
                         <!-- Grid View -->
-						<div class="wpa-grid-item"><?php
-							
-							?><header class="entry-header">
+						<div class="wpa-grid-item">
+							<header class="entry-header">
 								<div class="thumbnail alignleft">
 									<a href="<?php the_permalink(); ?>"><?php
-										if($attachmentURL){
-											?><img src="<?php echo $thumbnailURL ?>" align="<?php the_title(); ?>" /><?php
-										} else {
-											?><span><?php echo 'NO IMAGE'; ?></span><?php
-										}
+										echo ($attachmentURL) ? $thumbnail : $default_img;
 									?></a>
                                 </div>
                                 
-                                <h4 class="entry-title"><a href="<?php the_permalink(); ?>" title="<?php echo esc_attr( sprintf( __( 'Permalink to %s', 'awp' ), the_title_attribute( 'echo=0' ) ) ); ?>" rel="bookmark"><?php the_title(); ?></a>
+                                <h4 class="entry-title"><a href="javascript:void(0);" title="<?php echo esc_attr( sprintf( __( 'Permalink to %s', 'awp' ), the_title_attribute( 'echo=0' ) ) ); ?>" rel="bookmark"><?php the_title(); ?></a>
                                 
-                                <a href="<?php echo $metrics['awp-url'][0]; ?>" title="<?php the_title(); ?>" target="_blank"><img src="<?php echo PLUGINURL; ?>/images/link-icon.png" alt="<?php the_title(); ?>" /></a></h4>
+                                <a class="external-link" href="<?php echo $metrics['awp-url'][0]; ?>" title="<?php the_title(); ?>" target="_blank"><img src="<?php echo PLUGINURL; ?>/images/link-icon.png" alt="<?php the_title(); ?>" /></a></h4>
                             </header><!-- .entry-header -->
 							
 							<div class="entry-summary"><?php
-								?><h2><?php echo number_format( (float)$alexaRank ); ?></h2>
-                                
-                                <p class="clear"><strong>Page Ranks</strong></p>
-                                <span class="meta"><span class="wpa-icons wpa-icon-alexa">Alexa</span><?php
-									echo number_format( (float)$alexaRank );
-								?></span> 
-                                <span class="meta"><span class="wpa-icons wpa-icon-moz">MOZ Authority</span><?php
-                                	echo '';
-								?></span>
-                                
-                                <p class="clear"><strong>Social</strong></p>
-                                <!-- Social -->
-                                <span class="meta"><span class="wpa-icons wpa-icon-googleplus">Google+</span><?php
-									echo $metrics['awp-shares-goolgeplus'][0];
-								?></span>
-                                <span class="meta"><span class="wpa-icons wpa-icon-facebook">Facebook Shares</span><?php
-                                	echo $metrics['awp-shares-facebook'][0];
-								?></span>
-                                <span class="meta"><span class="wpa-icons wpa-icon-fblikes">Facebook Likes</span><?php
-                                	echo $metrics['awp-likes-facebook'][0];
-								?></span>
-                                <span class="meta"><span class="wpa-icons wpa-icon-twitter">Twitter Feed</span><?php
-									echo $metrics['awp-shares-twitter'][0];
-								?></span>
-                                <span class="meta"><span class="wpa-icons wpa-icon-pinterest">Pinterest</span><?php
-									echo $metrics['awp-shares-pinterest'][0];
-								?></span>
-                                <span class="meta"><span class="wpa-icons wpa-icon-linkedin">LinkedIn</span><?php
-                                	echo $metrics['awp-score-klout'][0];
-								?></span>
-                                
-                                <p class="clear"><strong>Network</strong></p>
-                                <!-- Community --><?php
-								
-								if($metrics['awp-googleplus'][0]){ ?><a href="<?php echo $metrics['awp-googleplus'][0]; ?>" class="wpa-icons wpa-icon-googleplus" target="_blank">Google+</a><?php }
-								
-								if($metrics['awp-facebook'][0]){ ?><a href="<?php echo $metrics['awp-facebook'][0]; ?>" class="wpa-icons wpa-icon-facebook" target="_blank">Facebook</a><?php }
-								
-								if($metrics['awp-twitter'][0]){ ?><a href="<?php echo $metrics['awp-twitter'][0]; ?>" class="wpa-icons wpa-icon-twitter" target="_blank">Twitter</a><?php }
-                                
-                                if($metrics['awp-pinterest'][0]){ ?><a href="<?php echo $metrics['awp-pinterest'][0]; ?>" class="wpa-icons wpa-icon-pinterest" target="_blank">Pinterest</a><?php }
-								
-								if($metrics['awp-linkedin'][0]){ ?><a href="<?php echo $metrics['awp-linkedin'][0]; ?>" class="wpa-icons wpa-icon-linkedin" target="_blank">LinkedIn</a><?php }
-								
-								if($metrics['awp-klout'][0]){ ?><a href="<?php echo $metrics['awp-klout'][0]; ?>" class="wpa-icons wpa-icon-klout" target="_blank">Klout</a><?php }
-                                
-                                ?><p class="clear"><strong>One Score</strong></p>
-                                <span class="meta">One Score: <?php echo $metrics['awp-one-score'][0]; ?></span>
-                                <span class="meta">One Rank: <?php echo $metrics['awp-one-rank'][0]; ?></span>
-                                <?php edit_post_link('Edit'); ?>
+								wpas_get_authority_level(true, get_the_ID());
+								wpas_get_authorit_ranks(true, get_the_ID());
+								wpas_site_coveraged_feed(true, get_the_ID());
+								wpas_site_network_feed(true, get_the_ID());
+								?><div class="clear"></div><?php
+								wpas_site_metrics_grade(true, get_the_ID());
+								?><a href="<?php echo site_url('/'); ?>" class="wpa-watch-button"><?php _e('Watch This', 'wpa'); ?></a> <?php edit_post_link('Edit'); ?>
                             </div><!-- .entry-summary -->
                             
                             <div class="clear"></div>
-						</div>
+						</div><!-- /Grid View -->
 						
                         <!-- Detail View -->
 						<div class="wpa-detail-item">
-                            <div class="thumbnail alignleft metrics-thumbnail">
-								<a href="<?php the_permalink(); ?>"><?php
-									if($attachmentURL){
-										?><img src="<?php echo $attachmentURL ?>" align="<?php the_title(); ?>" /><?php
-									} else {
-										?><span><?php echo 'NO IMAGE'; ?></span><?php
-									}
-								?></a>
+                        	<a href="javascript:void(0);" class="wpas-detail-more"><?php _e('See more', 'wpas'); ?></a>
+                        	<div class="wpas-detail-view-col">
+                            	<a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>"><?php
+									echo ($attachmentURL) ? $thumbnail : $default_img;
+								?></a><?php
+                                wpas_get_authority_level(true, get_the_ID());
+                                ?><a href="<?php echo site_url('/'); ?>" class="wpa-watch-button"><?php _e('Watch This', 'wpa'); ?></a> <?php edit_post_link('Edit'); ?>
                             </div>
-							
-							<div class="entry-summary">
-                                <header class="entry-header">
-                                	<?php edit_post_link('Edit'); ?>
-                                    <h3 class="entry-title"><a href="<?php the_permalink(); ?>" title="<?php echo esc_attr( sprintf( __( 'Permalink to %s', 'awp' ), the_title_attribute( 'echo=0' ) ) ); ?>" rel="bookmark"><?php the_title(); ?></a></h3>
-                                </header><!-- .entry-header --><?php
-								
-								the_excerpt();
-								
-								$checkboxes = array_merge($columns, $departmentColumns, $metricsColumns);
-								foreach($checkboxes as $name=>$group){
-									?><p><?php
-									foreach($group as $col){
-										?><span class="meta metrics-<?php echo $col['meta_key']; ?>"> <?php echo $col['name']; ?>: <span class="metaval"><?php echo $metrics[$col['meta_key']][0]; ?></span></span><?php
-									}
-									?></p><?php
-								}
                             
-							?></div><!-- .entry-summary -->
+                            <div class="wpas-detail-view-col">
+                            	<h4 class="entry-title"><a href="<?php the_permalink(); ?>" title="<?php echo esc_attr( sprintf( __( 'Permalink to %s', 'wpas' ), the_title_attribute( 'echo=0' ) ) ); ?>" rel="bookmark"><?php the_title(); ?></a>
+                                
+                                <a class="external-link" href="<?php echo $metrics['awp-url'][0]; ?>" title="<?php the_title(); ?>" target="_blank"><img src="<?php echo PLUGINURL; ?>/images/link-icon.png" alt="<?php the_title(); ?>" /></a></h4>
+                                
+                                <div class="entry-summary"><?php
+                                	the_excerpt();
+                                ?></div>
+                            </div>
+                            
+                            <div class="wpas-detail-view-col">
+                            	<h4><?php _e('Ranks', 'wpas'); ?></h4><?php
+								wpas_get_authorit_ranks(true, get_the_ID());
+                            ?></div>
+                            
+                            <div class="wpas-detail-view-col">
+                            	<h4><?php _e('Grades', 'wpas'); ?></h4><?php
+								wpas_site_metrics_grade(true, get_the_ID());
+                            ?></div>
+                            
+                            <div class="wpas-detail-view-col">
+                            	<h4><?php the_title(); ?> <?php _e('Coveraged', 'wpas'); ?></h4><?php
+								wpas_site_coveraged_feed(true, get_the_ID());
+                            	?><h4><?php _e('Recent Popular Posts', 'wpas'); ?></h4><?php
+								wpas_site_network_feed(true, get_the_ID());
+                            ?></div>
                             
                             <div class="clear"></div>
-						</div><?php
+						</div><!-- /Detail View --><?php
 						$i++;
 					?></article><?php
 				endwhile;
 				
 				?><div class="clear"></div>
-                </div><!-- wpa-site-wrapper -->
+                
+                </div><!-- /.wpas-site-loop -->
+                </div><!-- /.wpa-site-wrapper -->
                 
 			</div><?php
 			

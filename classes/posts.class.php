@@ -260,7 +260,7 @@ class Sites_CPT{
 			'hierarchical' => false,
 			'menu_position' => 2,
 			'menu_icon' => PLUGINURL . 'images/favicon.ico',
-			'supports' => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' )
+			'supports' => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields', 'revisions' )
 		);
 		
 		register_post_type('site', $args);
@@ -630,29 +630,28 @@ class Sites_CPT{
 			return;
 		
 		$disabled = array();
+		$categories = wpas_get_metrics_categories();
 		$headings = wpa_get_metrics_groups();
 		?><div id="awp_tabs" class="awp_meta_box">
-			<ul class="awp-tabber">
-            	<li class="awp-tab not-tab ui-state-disabled"><a href="javascript:void(0);">Departments</a></li><?php
-                	$depts = wpa_get_metrics_group_by_category('departments');
+			<ul class="awp-tabber"><?php
+				
+				$i = 1;
+				foreach( $categories as $separator ){
+					if($i > 1){
+					_e('<li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li>');
+					}
+					
+					?><li class="awp-tab not-tab ui-state-disabled">
+                    	<a href="javascript:void(0);"><?php echo $separator['name']; ?></a>
+                    </li><?php
+                	
+					$depts = wpa_get_metrics_group_by_category( str_replace('awp-', '', $separator['id']) );
 					foreach($depts as $head){
 						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
                             <div class="wp-menu-arrow"><div></div></div></li><?php
 					}
-				?><li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li>
-                <li class="awp-tab not-tab ui-state-disabled"><a href="javascript:void(0);">Metrics</a></li><?php
-                	$depts = wpa_get_metrics_group_by_category('metrics');
-					foreach($depts as $head){
-						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
-                            <div class="wp-menu-arrow"><div></div></div></li><?php
-					}
-				/*?><li class="wp-not-current-submenu wp-menu-separator not-tab"><div class="separator"></div></li>
-				<li class="awp-tab not-tab ui-state-disabled"><a href="javascript:void(0);">Valuation</a></li><?php
-					$depts = wpa_get_metrics_group_by_category('valuation');
-					foreach($depts as $head){
-						?><li class="awp-tab"><a href="#<?php echo $head['id']; ?>"><?php echo $head['name']; ?></a>
-                            <div class="wp-menu-arrow"><div></div></div></li><?php
-					}*/
+					$i++;
+				}
 			?></ul>
             
             <div class="awp-panels"><?php
@@ -722,6 +721,7 @@ class Sites_CPT{
 		
 		foreach($controls as $control){
 			
+			$classes = array();
 			$metaname = $control['id'];
 			$metaID = 'awp-'.$control['id'];
 			$metavalue = get_post_meta( $post_id, $metaname, true );
@@ -734,76 +734,125 @@ class Sites_CPT{
 				?><label for="<?php echo $metaID; ?>"><?php echo $control['name'] ?></label>
                 <div class="awp-controls"><?php
 					
+					$classes[] = 'regular-' . $control['type'];
+					if( $control['programmatic'] ){
+						$classes[] = 'small';
+					}
+					
 					switch( $control['type'] ){
 						case 'text':
-							?><input type="text" class="regular-text" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>" value="<?php echo $metavalue; ?>" />
-							<br /><span class="description"><?php echo $control['desc']; ?></span><?php
+							?><input type="text" class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>" value="<?php echo $metavalue; ?>" /><?php
 							break;
 						
 						case 'checkbox':
-							?><input type="checkbox" class="regular-checkbox" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>" value="true" <?php checked($metavalue, 'true'); ?> />
-                            <span class="description"><?php echo $control['desc']; ?></span><?php
+							?><input type="checkbox" class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>" value="true" <?php checked($metavalue, 'true'); ?> /><?php
 							break;
 						
 						case 'checkbox2':
 							$i = 1;
 							foreach( $control['options'] as $value=>$option ){
 								$checked = in_array($value, $metavalue) ? 'checked="checked"' : '';
-								?><input type="checkbox" class="regular-checkbox" name="<?php echo $metaname; ?>[]" id="<?php echo $metaID; ?>-<?php echo $i; ?>" value="<?php echo $value; ?>" <?php echo $checked; ?> />
+								?><input type="checkbox" class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>[]" id="<?php echo $metaID; ?>-<?php echo $i; ?>" value="<?php echo $value; ?>" <?php echo $checked; ?> />
                                 <label for="<?php echo $metaID; ?>-<?php echo $i; ?>"><?php echo $option; ?></label><br /><?php
 								$i++;
 							}
-							?><br /><span class="description"><?php echo $control['desc']; ?></span><?php
 							break;
 						
 						case 'radio':
 							$i = 1;
 							foreach( $control['options'] as $value=>$option ){
-								?><input type="radio" class="regular-radio" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>-<?php echo $i; ?>" value="<?php echo $value; ?>" <?php checked($value, $metavalue); ?> />
+								?><input type="radio" class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>-<?php echo $i; ?>" value="<?php echo $value; ?>" <?php checked($value, $metavalue); ?> />
                                 <label for="<?php echo $metaID; ?>-<?php echo $i; ?>"><?php echo $option; ?></label><br /><?php
 								$i++;
 							}
-							?><br /><span class="description"><?php echo $control['desc']; ?></span><?php
 							break;
 						
 						case 'select':
-							?><select class="regular-select" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>">
+							?><select class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>">
                                 <option value="0" <?php selected($metavalue, 0); ?>>Select to return to default</option><?php
                                 foreach( $control['options'] as $value=>$option ){
                                     ?><option value="<?php echo $value; ?>" <?php selected($metavalue, $value); ?>><?php echo $option; ?></option><?php
                                 }
-                            ?></select>
-                            <br /><span class="description"><?php echo $control['desc']; ?></span><?php
+                            ?></select><?php
 							break;
 						
 						case 'textarea':
-							?><textarea class="regular-textarea" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>"><?php echo stripslashes($metavalue); ?></textarea>
-                            <br /><span class="description"><?php echo $control['desc']; ?></span><?php
+							?><textarea class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>"><?php echo stripslashes($metavalue); ?></textarea><?php
 							break;
 						
 						case 'upload':
-							?><input type="text" class="regular-text of-input" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>_upload" value="<?php echo $metavalue; ?>" /><?php
-							if( !empty($metavalue) ) {
-								?><br /><a class="of-uploaded-image" href="<?php echo $metavalue; ?>"><img class="of-option-image" id="image_<?php echo $metaID; ?>" src="<?php echo $metavalue; ?>" alt="" /></a><br /><?php
-							}
-							?><span class="button image_upload_button" id="<?php echo $metaID; ?>_button">Upload Image</span><?php
+							$classes[] = 'of-input';
+							?><input type="text" class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>_upload" value="<?php echo $metavalue; ?>" /><?php
+					}
+					
+					?> <span class="button manual_update_button">Update</span>
+                    <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader" style="display:none;"><?php
+					
+					if( $control['programmatic'] ){
+						echo sprintf(' <span class="button run_audit_button">%s</span>', __('Audit', 'wpas') );
+					}
+					
+					if( $control['type'] == 'upload' ){
+						if( !empty($metavalue) ) {
+							echo sprintf(
+								'<br /><a class="of-uploaded-image" href="%1$s">
+									<img class="of-option-image" id="%2$s" src="%3$s" alt="" />
+								</a><br />',
+								$metavalue,
+								'image_' . $metaID,
+								$metavalue
+							);
+						}
+						
+						echo sprintf(
+							'<span class="button image_upload_button" id="%s">%s</span>',
+							$metaID . '_button',
+							__('Upload Image', 'wpas')
+                        );
+					}
+					
+					if( $control['field_desc'] != '' ){
+						echo sprintf('<span class="description">%s</span>', $control['field_desc']);
+					}
+					
+					if( $control['programmatic'] ){
+						$lastUpdate = get_post_meta($post_id, $metaname.'-updated', true);
+						$through = get_post_meta($post_id, $metaname.'-through', true);
+						$updatedBy = get_post_meta($post_id, $metaname.'-author', true);
+						
+						echo sprintf(
+							'<span class="description">Last %1$s updated: %2$s by <a href="%3$s">%4$s</a><span>',
+							$through,
+							date('F j, Y', strtotime($lastUpdate)),
+							get_author_posts_url( $updatedBy ),
+							get_the_author_meta('display_name', $updatedBy)
+						);
 					}
 				?></div><?php
 				
 				if($control['followers']){
+					$metaname = $metaname.'-followers';
 					?><label for="<?php echo $metaID.'-followers'; ?>"><?php echo $control['name'].' followers' ?></label>
 					<div class="awp-controls">
-                    	<input type="text" class="regular-text small" name="<?php echo $metaname.'-followers'; ?>" id="<?php echo $metaID.'-followers'; ?>" value="<?php echo get_post_meta($post_id, $metaname.'-followers', true); ?>" />
+                    	<input type="text" class="regular-text small" name="<?php echo $metaname; ?>" id="<?php echo $metaID.'-followers'; ?>" value="<?php echo get_post_meta($post_id, $metaname, true); ?>" />
                         <span class="button manual_update_button">Update</span>
                         <span class="button run_audit_button">Audit</span>
                         
-                        <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader" style="display:none;">
-                        
-                        <br /><span class="description">Last updated: <?php
-						echo get_post_meta($post, $metaname.'-updated', true); ?> by <?php
-						echo get_post_meta($post, $metaname.'-updater', true);
-						?></span>
-					</div><?php
+                        <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader" style="display:none;"><?php
+						
+						$lastUpdate = get_post_meta($post_id, $metaname.'-updated', true);
+						$through = get_post_meta($post_id, $metaname.'-through', true);
+						$updatedBy = get_post_meta($post_id, $metaname.'-author', true);
+						
+						echo sprintf(
+							'<span class="description">Last %1$s updated: %2$s by <a href="%3$s">%4$s</a><span>',
+							$through,
+							date('F j, Y', strtotime($lastUpdate)),
+							get_author_posts_url( $updatedBy ),
+							get_the_author_meta('display_name', $updatedBy)
+						);
+						
+					?></div><?php
 				}
 				
                 ?><div class="clear"></div><?php
@@ -816,10 +865,20 @@ class Sites_CPT{
 		global $fields;
 		
 		if(!$post_id)
-			return;
+			return $post_id;
+		
+		if ( !current_user_can('edit_posts') )
+			return $post_id;
+		
+		if( get_post_type( $post_id ) != 'site' )
+			return $post_id;
+		
+		$user_ID = get_current_user_id();
 		
 		foreach( $fields as $fl ){
-			if('heading' == $fl['type']){
+			if('heading' == $fl['type']) {
+				continue;
+			} elseif('subheading' == $fl['type']) {
 				continue;
 			} else {
 				if( isset($_POST[$fl['id']]) and (NULL != $_POST[$fl['id']]) ){
@@ -827,10 +886,24 @@ class Sites_CPT{
 				} else {
 					delete_post_meta( $post_id, $fl['id'] );
 				}
+				
+				if($fl['programmatic']){
+					update_post_meta( $post_id, $fl['id'].'-updated', date('c'));
+					update_post_meta( $post_id, $fl['id'].'-through', 'manually');
+					update_post_meta( $post_id, $fl['id'].'-author', $user_ID);
+				}
+				
+				if($fl['followers']){
+					$fieldname = $fl['id'] . '-followers';
+					update_post_meta( $post_id, $fieldname, $_POST[$fieldname]);
+					update_post_meta( $post_id, $fieldname.'-updated', date('c'));
+					update_post_meta( $post_id, $fieldname.'-through', 'manually');
+					update_post_meta( $post_id, $fieldname.'-author', $user_ID);
+				}
 			}
 		}
 		
-		return;
+		return $post_id;
 	}
 	
 	function site_manager_scripts(){
@@ -845,7 +918,19 @@ class Sites_CPT{
 			$view = get_user_meta($user_ID, 'user_defined_view', true);
 			
 			$fields = wpa_default_metrics();
-			$columns = array();
+			$columns = array(
+				'action' => array(
+					'taxonomy-site-category',
+					'taxonomy-site-tag',
+					'site-action',
+					'site-status',
+					'site-include',
+					'site-topic',
+					'site-type',
+					'site-location',
+					'site-assignment'
+				)
+			);
 			foreach( $fields as $field ){
 				if( $field['type'] == 'heading' ) {
 					// continue

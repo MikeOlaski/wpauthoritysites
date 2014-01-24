@@ -1,24 +1,73 @@
 jQuery(document).ready(function($) {
 	
-	$('.run_audit_button').click(function(e) {
-        $(this).siblings('.preloader').show();
-		
-		var url = $('#awp-awp-url').val();
-		var id = $('#post_ID').val();
-		if('' == url){
-			url = 'http://' + $('#title').val();
+	$('.manual_update_button').click(function(e) {
+		if( $(this).hasClass('disabled') ){
+			$(this).removeClass('disabled').siblings('.preloader').hide();
+			return;
+		} else {
+			button = $(this);
+			button.addClass('disabled').siblings('.preloader').show();
+			
+			var id = $('#post_ID').val();
+			var field = button.siblings('input:first-child').attr('name');
+			var value = $('input[name=' + field + ']').val();
+			
+			var data = {
+				action: 'update_metric',
+				id: id,
+				field: field,
+				value: value
+			};
+			
+			jQuery.post(WPAJAX_OBJ.ajax_url, data, function(response) {
+				if( response == 'true' ){
+					button.removeClass('disabled').siblings('.preloader').hide();
+					button.parents('.awp-control-group').css('background-color','yellow').animate({backgroundColor:"#F8F8F8"},1000);
+				}
+				
+				console.log( response );
+			});
 		}
 		
-		var data = {
-			action: 'audit_metric',
-			field: $(this).siblings('input[type=text]').attr('name'),
-			url: url,
-			id: id
-		};
-		
-		jQuery.post(WPAJAX_OBJ.ajax_url, data, function(response) {
-			console.log(response);
-		});
+		e.preventDefault();
+	});
+	
+	$('.run_audit_button').click(function(e) {
+		if( $(this).hasClass('disabled') ){
+			$(this).removeClass('disabled').siblings('.preloader').hide();
+			return;
+		} else {
+			button = $(this);
+			button.addClass('disabled').siblings('.preloader').show();
+			
+			var id = $('#post_ID').val();
+			var url = $('#awp-awp-url').val();
+			var field = button.siblings('input:first-child').attr('name');
+			var input = $('input[name=' + field + ']');
+			var value = input.val();
+			
+			if('' == url){ url = 'http://' + $('#title').val(); }
+			
+			console.log( 'current values are ', id, url, field, value );
+			
+			var data = {
+				action: 'audit_metric',
+				id: id,
+				url: url,
+				field: field,
+				value: value
+			};
+			
+			jQuery.post(WPAJAX_OBJ.ajax_url, data, function(response) {
+				if( response != 'false' ){
+					input.val( response );
+					button.removeClass('disabled').siblings('.preloader').hide();
+					button.parents('.awp-control-group').css('background-color','yellow').animate({backgroundColor:"#F8F8F8"},1000);
+				}
+				
+				console.log(response);
+			});
+		}
     });
 	
 	$('#toplevel_page_wpauthorities, li#toplevel_page_wpauthorities > a').addClass('wp-has-current-submenu wp-menu-open').removeClass('wp-not-current-submenu');

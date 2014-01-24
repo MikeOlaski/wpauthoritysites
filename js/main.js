@@ -260,7 +260,28 @@ jQuery(document).ready(function($) {
 		});
 	}
 	
-	if( $('#wpa-scores').length > 0 ){
-		$('#wpa-scores').tabs();
-	}
+	$('.wpa-grid-item .entry-title > a').click(function(e) {
+        $(this).parents('.entry-header').siblings('.entry-summary').toggle('show');
+		e.preventDefault();
+    });
+	
+	$('.wpas-detail-more').click(function(e) {
+		if( $(this).hasClass('less') ){
+			$(this).removeClass('less').parents('.wpa-detail-item').animate({'height':250},200);
+		} else {
+			$(this).addClass('less').parents('.wpa-detail-item').animate({ height : '100%' },200);
+		}
+    });
+	
+	$('a.wpas-score-tabs-prev').click(function(e) {
+		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) + 140;
+        $('.wpas-metric-groups-tab').css('margin-left', (marginLleft > 0) ? 0 : marginLleft );
+		e.preventDefault();
+    });
+	
+	$('a.wpas-score-tabs-next').click(function(e) {
+		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) - 140;
+        $('.wpas-metric-groups-tab').css('margin-left', (marginLleft < -700) ? -700 : marginLleft );
+		e.preventDefault();
+    });
 });

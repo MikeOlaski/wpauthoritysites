@@ -213,17 +213,18 @@ select[name=seo_filter]{
 	color: #aaa;
 }
 
-.awp-controls .regular-text{
+.awp-controls .regular-text,
+.awp-controls .regular-upload{
 	background: none repeat scroll 0 0 #F4F4F4;
 	color: #444444;
 	font-size: 11px;
 	margin: 0 0 10px;
 	padding: 5px;
-	width: 90%;
+	width: 80%;
 }
 
 .awp-controls .regular-text.small{
-	width: 56%;
+	width: 65%;
 }
 
 .awp-controls .regular-checkbox{
@@ -246,8 +247,15 @@ select[name=seo_filter]{
 	width: 90%;
 }
 
+.awp-controls .button.disabled{
+	color: #ccc;
+}
+
 .awp-controls .description{
 	color: #aaa;
+	padding-bottom: 10px;
+	display: block;
+	font-size: 10px;
 }
 
 .wrap{

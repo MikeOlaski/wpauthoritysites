@@ -185,30 +185,16 @@ function wpa_site_rank(){
 	global $post;
 	
 	if( is_single() && 'site' == $post->post_type ){
-		?><div class="wpa-sgl-ranks">
-			<div class="wpa-sgl-rates">
-				<span class="wpa-sgl-rate wpa-rate-4">4</span>
-			</div>
+		$authority_level = get_post_meta($post->ID, 'awp-authority-level', true);
+		if( $authority_level > 5 ){ $authority_level = 5; }
+		
+		?><div class="wpa-sgl-ranks"><?php
+        	
+			wpas_get_authority_level();
 			
-			<div class="wpa-sgl-topranks">
-				<ul>
-					<li>
-						<span class="alexa-sgl-icon">Alexa Rank</span>
-						<?php echo number_format((int)get_post_meta($post->ID, 'awp-alexa-rank', true)); ?>
-						<br class="clear" />
-					</li>
-					<li>
-						<span class="seomoz-sgl-icon">SEOMoz Rank</span>
-						<?php echo number_format((int)get_post_meta($post->ID, 'awp-moz-rank', true), 1); ?>
-						<br class="clear" />
-					</li>
-					<li>
-						<span class="onerank-sgl-icon">ONE Rank</span>
-						<?php echo number_format((int)get_post_meta($post->ID, 'awp-one-rank', true)); ?>
-						<br class="clear" />
-					</li>
-				</ul>
-			</div>
+			?><div class="wpa-sgl-topranks"><?php
+				wpas_get_authorit_ranks();
+			?></div>
 		</div>
 		
 		<div class="fix"></div><?php
@@ -279,19 +265,21 @@ function wpa_site_footer(){
 				<h3><?php _e('Follow', 'wpa'); ?></h3>
 				<ul><?php
 					$socials = array(
-						'awp-twitter' => 'Twitter',
-						'awp-youtube' => 'Youtube',
 						'awp-facebook' => 'Facebook',
-						'awp-linkedin' => 'LinkedIn',
-						'awp-pinterest' => 'Pinterest',
-						'awp-flickr' => 'FlickR',
+						'awp-twitter' => 'Twitter',
 						'awp-googleplus' => 'Google+',
+						'awp-linkedin' => 'LinkedIn',
+						'awp-youtube' => 'Youtube',
+						'awp-pinterest' => 'Pinterest',
 						'awp-rss' => 'RSS'
 					);
 					
 					foreach($socials as $meta_key=>$media){
+						$url = get_post_meta($post->ID, 'awp-url', true);
+						$page = get_post_meta($post->ID, $meta_key, true);
+						
 						$count = get_post_meta($post->ID, $meta_key.'-followers', true);
-						$link = get_post_meta($post->ID, $meta_key, true);
+						if( $count == '' ) { $count = wpas_get_social_counts($media, $url, $page); }
 						
 						if(!$count) {
 							$title = $media;
@@ -299,11 +287,15 @@ function wpa_site_footer(){
 							$title = $media .' '. number_format((int)$count);
 						}
 						
-						if($link){
-							?><li><a href="<?php echo $link; ?>" target="_blank" title="<?php echo $title; ?>" class="wpa-sgl-icon <?php echo $meta_key; ?>-icon"><?php
-								echo $media;
-							?></a>
-							<span class="count"><?php echo number_format((int)$count); ?></span></li><?php
+						if($page){
+							echo sprintf(
+								'<li><a href="%s" data-type="%s" data-text="%s" target="_blank" class="%s">%2$s</a>',
+								$page,
+								$media,
+								'Follow',
+								'wpa-sgl-icon '. $meta_key . '-icon'
+							);
+							echo sprintf('<span class="count">%s</span>', wpas_numbers_to_readable_size($count) );
 						}
 					}
 				?></ul>
@@ -312,8 +304,33 @@ function wpa_site_footer(){
 			
 			<div class="fix"></div>
 		</div>
-		
-		<div class="fix"></div><?php
+        
+		<div class="fix"></div>
+		<script type="text/javascript">
+			jQuery(document).ready(function($){
+				// Use the each() method to gain access to each of the elements attributes
+				$('.wpa-sgl-icon').each(function(){
+					$(this).qtip({
+						content: '<a href="' + $(this).attr('href') +'" class="' + $(this).attr('data-type') + '" target="_blank"><span>&nbsp;</span>Follow on ' + $(this).attr('data-type') + '</a>',
+						position: {
+							corner: {
+								target: 'bottomLeft',
+							}
+						},
+						hide: {
+							fixed: true
+						},
+						style: {
+							width: 155,
+							name: 'light',
+							border: {
+								width: 0
+							}
+						}
+					});
+				});
+			});
+		</script><?php
 	}
 }
 
@@ -337,7 +354,7 @@ function wpas_site_coveraged(){
 			endforeach;
 		}
 		
-		$generals = get_sites_generally_related_posts();
+		$generals = wpas_get_sites_generally_related_posts($post->ID);
 		$shows = array_merge($generals, $directs);
 		
 		?><div class="wpa-sgl-coverage">
@@ -440,94 +457,7 @@ add_action('wpa_post_inside_after', 'wpa_audit_site_score');
 function wpa_audit_site_score(){
 	global $post;
 	
-	$columns = array();
-	
-	// [ACTION]
-	$columns['wpa-col-action'] = array(
-		array(
-			'name' => 'Action',
-			'header' => 'wpa-th-site-action',
-			'body' => 'wpa-td-site-action',
-			'taxonomy' => 'site-action'
-		),
-		array(
-			'name' => 'Status',
-			'header' => 'wpa-th-site-status',
-			'body' => 'wpa-td-site-status',
-			'taxonomy' => 'site-status'
-		),
-		array(
-			'name' => 'Include',
-			'header' => 'wpa-th-site-include',
-			'body' => 'wpa-td-site-include',
-			'taxonomy' => 'site-include'
-		),
-		array(
-			'name' => 'Topic',
-			'header' => 'wpa-th-site-topic',
-			'body' => 'wpa-td-site-topic',
-			'taxonomy' => 'site-topic'
-		),
-		array(
-			'name' => 'Type',
-			'header' => 'wpa-th-site-type',
-			'body' => 'wpa-td-site-type',
-			'taxonomy' => 'site-type'
-		),
-		array(
-			'name' => 'Location',
-			'header' => 'wpa-th-site-location',
-			'body' => 'wpa-td-site-location',
-			'taxonomy' => 'site-location'
-		),
-		array(
-			'name' => 'Assignment',
-			'header' => 'wpa-th-site-assignment',
-			'body' => 'wpa-td-site-assignment',
-			'taxonomy' => 'site-assignment'
-		),
-		array(
-			'name' => 'Date',
-			'header' => 'wpa-th-date',
-			'body' => 'wpa-td-date',
-			'post' => 'post_date',
-			'format' => 'date',
-			'sortable' => true
-		)
-	);
-	
 	$fields = wpa_default_metrics();
-	$departmentColumns = array();
-	$metricsColumns = array();
-	foreach( $fields as $field ){
-		if( $field['type'] == 'heading' ) {
-			if($field['category'] == 'departments'){
-				$departmentColumns[$field['id']] = array();
-			} else {
-				$metricsColumns[$field['id']] = array();
-			}
-		} elseif( $field['type'] == 'separator' ) {
-			// continue;
-		} else {
-			if($fields[$field['group']]['category'] == 'departments'){
-				$departmentColumns[$field['group']][] = array(
-					'name' => $field['name'],
-					'header' => 'wpa-th-' . $field['id'],
-					'body' => 'wpa-td-' . $field['id'],
-					'meta_key' => $field['id'],
-					'sortable' => $field['sortable']
-				);
-			} else {
-				$metricsColumns[$field['group']][] = array(
-					'name' => $field['name'],
-					'header' => 'wpa-th-' . $field['id'],
-					'body' => 'wpa-td-' . $field['id'],
-					'meta_key' => $field['id'],
-					'sortable' => $field['sortable']
-				);
-			}
-		}
-	}
 	
 	if( is_single() && 'site' == $post->post_type ){
 		?><div class="wpa-sgl-audits">
@@ -546,209 +476,108 @@ function wpa_audit_site_score(){
 			
 			<h3><?php _e('Authority Audit Score'); ?></h3>
 			
-			<div id="wpa-scores" class="wpa-score-tabs">
-				<ul class="tabs">
-					<li><a class="grade-2" href="#none">
-						<span>LINKS</span>
-						<em>0%</em>
-						<small>163 VS 163</small>
-					</a></li>
-					<li><a class="grade-2" href="#none">
-						<span>SOCIAL</span>
-						<em>0%</em>
-						<small>163 VS 163</small>
-					</a></li>
-					<li><a class="grade-1" href="#none">
-						<span>COMMUNITY</span>
-						<em>0%</em>
-						<small>163 VS 163</small>
-					</a></li>
-					<li><a class="grade-1" href="#none">
-						<span>BUZZ</span>
-						<em>0%</em>
-						<small>163 VS 163</small>
-					</a></li>
-					<li><a class="grade-0" href="#none">
-						<span>TRAFFIC</span>
-						<em>0%</em>
-						<small>163 VS 163</small>
-					</a></li>
-					<li><a class="grade-2" href="#none">
-						<span>ENGAGEMENT</span>
-						<em>0%</em>
-						<small>163 VS 163</small>
-					</a></li>
-					<li><a href="#none">
-						<span>NETWORK</span>
-						<em>0%</em>
-						<small>163 VS 163</small>
-					</a></li>
-				</ul>
-				<div id="none"></div>
-			</div>
-		</div>
-		
-		<div class="clear"></div>
-		
-		<div class="wpa-group-column alignleft">
-			<ul>
-                <li class="first"><span><strong><?php _e('Workflow:', 'wpas'); ?></strong></span></li>
-                <li class="first current"><a href=".wpa-col">All</a></li>
-                <li><a href=".wpa-default">Summary</a></li><?php
-				$i = 1;
-                foreach($columns as $name=>$group){
-                    $classes = array();
-					if( $i >= count($columns) )
-						$classes[] = 'last';
-                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('wpa-col-', '', $name) ); ?></a></li><?php
-					$i++;
-                }
-            ?></ul>
-            <ul>
-            	<li class="first"><span><strong><?php _e('Departments:', 'wpas'); ?></strong></span></li>
-                <?php $i = 1;
-				foreach($departmentColumns as $name=>$group){
-                    $classes = array();
-                    if( $i >= count($departmentColumns) )
-						$classes[] = 'last';
-                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('-', ' ', str_replace('awp-', '', $name)) ); ?></a></li><?php
-					$i++;
-                } ?>
-            </ul>
-            <ul>
-            	<li class="first"><span><strong><?php _e('Metrics:', 'wpas'); ?></strong></span></li>
-                <?php $i = 1;
-				foreach($metricsColumns as $name=>$group){
-                    $classes = array();
-                    if( $i >= count($metricsColumns) )
-						$classes[] = 'last';
-                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('-', ' ', str_replace('awp-', '', $name)) ); ?></a></li><?php
-					$i++;
-                } ?>
-            </ul>
-		</div>
-		
-		<a href="#" class="wpa-sgl-compare-button alignright">+ Compare Site</a>
-		
-		<ul class="wpa-display-controls">
-			<li class="openSearch">
-				<a href="#openSearch" class="wpa-control search" title="Screen Options">Open Search</a>
-				<div class="wpa-screen-options hide"></div>
-			</li>
-			<li class="openExport">
-				<a href="#export" class="wpa-control export" title="Export Options">Export</a>
-				<div class="wpa-export-options hide"></div>
-			</li>
-		</ul>
-		
-		<div class="clear"></div><?php
-	}
-}
-
-add_action('wpa_post_inside_after', 'wpa_metrics_table');
-function wpa_metrics_table( $post_id = '' ){
-	global $post, $fields;
-	$post_id = empty($post_id) ? $post->ID : $post_id;
-	$fields = wpa_default_metrics();
-	
-	if( is_single() && 'site' == $post->post_type ){
-		$site = array('domain', 'tld', 'url', 'date', 'networked', 'location', 'language');
-		$links = array('google', 'alexa', 'yahoo', 'majestic');
-		$socials = array(
-			'googleplus' => 'googleplus-followers',
-			'facebook' => 'facebook-followers',
-			'twitter' => 'twitter-followers',
-			'youtube' => 'youtube-followers',
-			'pinterest' => 'pinterest-followers',
-			'linkedin' => 'linkedin-followers',
-			'klout' => 'klout-followers'
-		);
-		
-		?><div class="wpa-sgl-metrics">
-			<h3><?php _e('Site', 'wpa'); ?></h3>
-			<table class="wpa-metrics-table"><?php
-				foreach( $site as $row ){
-					$data = $fields['awp-'.$row];
-					
-					if( $value = get_post_meta($post_id, $data['id'], true) ){
-						?><tr valign="top">
-							<th scope="row"><?php
-								echo sprintf('<i title="%s">%s</i>', $data['details'], $data['details']);
-								echo sprintf('<strong>%s</strong>', $data['name']);
-								echo sprintf('<span class="description">%s</span>', $data['desc']);
-							?></th>
-							<td><?php
-								echo sprintf('<em>%s</em> <span class="description">%s</span>', $value, $data['unit']);
-							?></td>
-							<td></td>
-						</tr><?php
-					}
-				}
-			?></table>
-			
-			<h3><?php _e('Links', 'wpa'); ?></h3>
-			<table class="wpa-metrics-table"><?php
-				foreach( $links as $row ){
-					$data = $fields['awp-'.$row];
-					
-					if( $value = get_post_meta($post_id, $data['id'], true) ){
-						?><tr valign="top">
-							<th scope="row"><?php
-								echo sprintf('<i title="%s">%s</i>', $data['details'], $data['details']);
-								echo sprintf('<strong>%s</strong>', __('External Backlinks', 'wpas'));
-								echo sprintf('<span class="description">%s</span>', $data['desc']);
-							?></th>
-							<td><?php
-								echo sprintf('<em>%s</em> <span class="description">%s</span>', $value, $data['unit']);
-							?></td>
-							<td></td>
-						</tr><?php
-					}
-				}
-			?></table>
-			
-			<h3><?php _e('Social', 'wpa'); ?></h3>
-			
-			<table class="wpa-metrics-table"><?php
-				/*<tr valign="top">
-					<th scope="row">
-						<i title="A detailed explanation about this field">A detailed explanation about this field</i>
-						<strong><?php _e('Social Integration'); ?></strong>
-						<span class="description">by Site Auditor</span>
-					</th>
-					<td><ul>
-						<li>Facebook</li>
-						<li>Twitter</li>
-						<li>Google+</li>
-						<li>LinkedIn</li>
-					</ul></td>
-					<td></td>
-				</tr>*/
+            <div id="wpa-scores" class="wpa-score-tabs">
+            	<a class="wpas-score-tabs-prev" href="#">Prev</a>
+				<a class="wpas-score-tabs-next" href="#">Next</a>
 				
-				foreach($socials as $social=>$row){
-					$media = $fields['awp-'.$social];
-					$data = $fields['awp-'.$row];
-					$value = get_post_meta($post_id, $data['id'], true);
-					$externaLink = get_post_meta($post_id, $media['id'], true);
-					
-					if( ($value > 0 && $externaLink != '') || $externaLink != '' ){
-						?><tr>
-							<th scope="row"><?php
-								echo sprintf('<i title="%s">%s</i>', $data['details'], $data['details']);
-								echo sprintf('<span class="external-links"><a target="_blank" href="%s">%s</a></span>', $externaLink, $media['name']);
-								echo sprintf('<strong>%s</strong>', $data['name']);
-								echo sprintf('<span class="description">%s</span>', $data['desc']);
-							?></th>
-							<td><?php
-								echo sprintf('<em>%s</em> <span class="description">%s</span>', $value, $data['unit']);
-							?></td>
-							<td></td>
-						</tr><?php
+				<div style="overflow: hidden; margin: 0 25px;"><?php
+            		wpas_site_metrics_grade(true, $post->ID);
+				?></div>
+                
+                <a href="#" class="wpa-sgl-compare-button alignright">+ Compare Site</a>
+                
+                <ul class="wpa-display-controls">
+                    <li class="openSearch">
+                        <a href="#openSearch" class="wpa-control search" title="Screen Options">Open Search</a>
+                        <div class="wpa-screen-options hide"></div>
+                    </li>
+                    <li class="openExport">
+                        <a href="#export" class="wpa-control export" title="Export Options">Export</a>
+                        <div class="wpa-export-options hide"></div>
+                    </li>
+                </ul><?php
+                
+                $site = array('domain', 'tld', 'url', 'date', 'networked', 'location', 'language');
+                $links = array('google', 'alexa', 'yahoo', 'majestic');
+                $socials = array(
+                    'googleplus' => 'googleplus-followers',
+                    'facebook' => 'facebook-followers',
+                    'twitter' => 'twitter-followers',
+                    'youtube' => 'youtube-followers',
+                    'pinterest' => 'pinterest-followers',
+                    'linkedin' => 'linkedin-followers',
+                    'klout' => 'klout-followers'
+                );
+                
+                ?><div class="wpa-sgl-metrics"><?php
+					$heads = wpa_get_metrics_groups();
+					unset($heads['awp-scores']);
+					foreach( $heads as $head ){
+						$metrics = wpa_get_metrics_by_group($head['id']);
+						
+						?><div id="<?php echo $head['id']; ?>">
+							<h3><?php echo $head['name']; ?></h3>
+							<table class="wpa-metrics-table">
+								<thead><tr>
+									<th class="metric"><?php _e('Metric Name', 'wpas'); ?></th>
+									<th class="result"><?php _e('Audit Result', 'wpas'); ?></th>
+									<th class="score"><?php _e('Score', 'wpas'); ?></th>
+									<th class="solutions"><?php _e('Solutions', 'wpas'); ?></th>
+								</tr></thead>
+								
+								<tbody><?php
+									foreach( $metrics as $metric ){
+										$value = get_post_meta($post->ID, $metric['id'], true);
+										switch($metric['format']):
+											case 'date':
+												$result = date('F j, Y', strtotime($value)); break;
+											case 'link':
+												$text = ($metric['link_text']) ? $metric['link_text'] : $value;
+												$result = sprintf('<a href="%s" target="_blank">%s</a>', $value, $text);
+												break;
+											case 'meta':
+												$text = get_post_meta($post->ID, $metric['meta_value'], true);
+												$result = sprintf('<a href="%s" target="_blank">%s</a>', $value, $text);
+												break;
+											case 'image':
+												$result = sprintf('<img src="%s" alt="%s" />', $value, get_the_title($post->ID)); break;
+											default:
+												$result = $value;
+										endswitch;
+										
+										?><tr valign="top">
+											<th class="metric" scope="row"><?php
+												echo sprintf('<i title="%1$s">%1$s</i>', stripslashes($metric['tip']));
+												echo sprintf('<strong>%s</strong>', $metric['name']);
+												echo sprintf('<span class="description">%s</span>', $metric['data_source']);
+											?></th>
+											<td class="result"><?php
+												echo sprintf('<em>%s</em> <span class="description">%s</span>', $result, $metric['unit']);
+											?></td>
+											<td class="score"><?php
+												$points = 53;
+												echo sprintf('<em>%s</em> <span>Points</span>', $points);
+											?></td>
+											<td class="solutions"><?php
+												echo sprintf('<h3>%s</h3> <p>%s</>', __('Get Radar Detector', 'wpas'), __('Your\'e going way to fast, your\'e going to get a ticket.', 'wpas'));
+											?></td>
+										</tr><?php
+									}
+								?></tbody>
+							</table>
+						</div><?php
 					}
-				}
-					
-			?></table>
-		</div><?php
+                ?></div><!-- /.wpa-sgl-metrics -->
+            </div><!-- /#wpa-scores -->
+		</div><!-- /wpa-sgl-audits -->
+		
+        <script type="text/javascript">
+			jQuery(document).ready(function($) {
+                $("#wpa-scores").tabs();
+            });
+		</script>
+        
+		<div class="clear"></div><?php
 	}
 }
 

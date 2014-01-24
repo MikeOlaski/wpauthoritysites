@@ -30,6 +30,7 @@ load_template( trailingslashit( PLUGINPATH ) . 'classes/template-functions.php' 
 load_template( trailingslashit( PLUGINPATH ) . 'classes/template-loader.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/template-hooks.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/shortcodes.class.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/wpas-post-revisions.php' );
 
 register_activation_hook( __FILE__, 'wpas_activate' );
 register_deactivation_hook( __FILE__, 'wpas_deactivate' );
@@ -674,32 +675,37 @@ function wpas_options_handle(){
 			$$key = $val;
 		}
 		
-		$fields = wpa_default_metrics();
+		$fields = get_option('wpa_metrics'); // wpa_default_metrics();
+		if( empty($fields) ){ $fields = array(); }
 		
-		if($metric_id){
-			unset($fields[$metric_id]);
+		$fields[$wpa_metrics['id']]['name'] = $wpa_metrics['name'];
+		$fields[$wpa_metrics['id']]['id'] = $wpa_metrics['id'];
+		$fields[$wpa_metrics['id']]['type'] = $wpa_metrics['type'];
+		$fields[$wpa_metrics['id']]['group'] = $wpa_metrics['group'];
+		$fields[$wpa_metrics['id']]['description'] = $wpa_metrics['description'];
+		$fields[$wpa_metrics['id']]['tip'] = $wpa_metrics['tip'];
+		$fields[$wpa_metrics['id']]['data_source'] = $wpa_metrics['data_source'];
+		$fields[$wpa_metrics['id']]['unit'] = $wpa_metrics['unit'];
+		
+		if( $wpa_metrics['readonly'] ){
+			$fields[$wpa_metrics['id']]['readonly'] = true;
 		}
 		
-		$options = '';
-		if($wpa_metrics['options']){
-			$options = array();
-			$opts = explode('|', stripslashes($wpa_metrics['options']) );
-			foreach($opts as $opt){
-				$options[$opt] = $opt;
-			}
+		if( $wpa_metrics['programmatic'] ){
+			$fields[$wpa_metrics['id']]['programmatic'] = true;
 		}
 		
-		$fields[$wpa_metrics['id']] = array(
-			'name' => $wpa_metrics['name'],
-			'id' => $wpa_metrics['id'],
-			'type' => $wpa_metrics['type'],
-			'group' => $wpa_metrics['group'],
-			'tip' => $wpa_metrics['tip'],
-			'std' => $wpa_metrics['value'],
-			'desc' => $wpa_metrics['desc'],
-			'options' => $options,
-			'readonly' => $readonly
-		);
+		if( $wpa_metrics['format'] ){
+			$fields[$wpa_metrics['id']]['format'] = $wpa_metrics['format'];
+		}
+		
+		if( $wpa_metrics['meta_value'] ){
+			$fields[$wpa_metrics['id']]['meta_value'] = $wpa_metrics['meta_value'];
+		}
+		
+		if( $wpa_metrics['link_text'] ){
+			$fields[$wpa_metrics['id']]['link_text'] = $wpa_metrics['link_text'];
+		}
 		
 		// Record and save metrics
 		$return = update_option('wpa_metrics', $fields);
