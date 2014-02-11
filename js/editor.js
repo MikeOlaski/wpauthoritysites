@@ -1,5 +1,37 @@
 jQuery(document).ready(function($) {
 	
+	$('.compute_score_button').click(function(e) {
+        if( $(this).hasClass('disabled') ){
+			$(this).removeClass('disabled').siblings('.preloader').hide();
+			return;
+		} else {
+			button = $(this);
+			button.addClass('disabled').siblings('.preloader').show();
+			
+			var id = $('#post_ID').val();
+			var field = button.siblings('input:first-child').attr('name');
+			var input = $('input[name=' + field + ']');
+			
+			var data = {
+				action: 'calculate_metric',
+				id: id,
+				field: field
+			};
+			
+			jQuery.post(WPAJAX_OBJ.ajax_url, data, function(response) {
+				if( response ){
+					input.val( response );
+					button.removeClass('disabled').siblings('.preloader').hide();
+					button.parents('.awp-control-group').css('background-color','yellow').animate({backgroundColor:"#F8F8F8"},1000);
+				}
+				
+				console.log( response );
+			});
+		}
+		
+		e.preventDefault();
+    });
+	
 	$('.manual_update_button').click(function(e) {
 		if( $(this).hasClass('disabled') ){
 			$(this).removeClass('disabled').siblings('.preloader').hide();
@@ -9,8 +41,10 @@ jQuery(document).ready(function($) {
 			button.addClass('disabled').siblings('.preloader').show();
 			
 			var id = $('#post_ID').val();
-			var field = button.siblings('input:first-child').attr('name');
-			var value = $('input[name=' + field + ']').val();
+			var field = $( $(this).attr('data-field') ).attr('name');
+			var value = $( $(this).attr('data-field') ).val();
+			
+			console.log( value );
 			
 			var data = {
 				action: 'update_metric',
@@ -105,10 +139,7 @@ jQuery(document).ready(function($) {
     });
 	
 	$('#awp-evaluate').click(function(e){
-		// Set preloader
-		$(this).parents('ul').next('.preloader').show();
-		console.log('Collecting data...');
-		
+		var element = $(this);
 		var url = $('#awp-awp-url').val();
 		var id = $('#post_ID').val();
 		if('' == url){
@@ -121,16 +152,14 @@ jQuery(document).ready(function($) {
 			id: id
 		};
 		
-		console.log('Posting variables...');
-		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
+		// Set preloader
+		element.parents('ul').siblings('.preloader').show().siblings('p.error').text('');
+		
 		$.post(WPAJAX_OBJ.ajax_url, data, function(response) {
-			console.log( 'response is ', response );
-			
 			if('true' == response){
 				window.location.href = WPAJAX_OBJ.post_url + '?post=' + id + '&action=edit&message=1';
 			} else {
-				$(this).next('.preloader').hide();
-				$(this).parent().append('<p style="color:#f00;">Error: Cannot run evaluator.</p>');
+				element.parents('ul').siblings('.preloader').hide().siblings('p.error').text(response);
 			}
 		});
 	});

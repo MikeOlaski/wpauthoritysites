@@ -80,21 +80,24 @@ class SiteTemplate
 		
 		if( is_singular($this->pt) ){
 			wp_register_script( 'flexslider', PLUGINURL . 'js/jquery.flexslider.js' );
-			wp_register_script( 'jquery-qtip', PLUGINURL . 'js/jquery.qtip-1.0.0-rc3.js' );
 			
 			wp_enqueue_script('jquery-ui-core');
 			wp_enqueue_script('jquery-ui-tabs');
-			wp_enqueue_script('jquery-qtip');
+			
 			
 			wp_enqueue_style( 'ui-css', 'http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css' );
 			wp_enqueue_style( 'flexslider', PLUGINURL . 'css/flexslider.css' );
-			wp_enqueue_style( 'cBoxStyle', PLUGINURL . 'css/colorbox.css' );
 		}
+		
+		wp_register_script( 'jquery-qtip', PLUGINURL . 'js/jquery.qtip-1.0.0-rc3.js' );
 		
 		wp_enqueue_script( 'cBoxScript', PLUGINURL . 'js/jquery.colorbox.js', array('jquery') );
 		wp_enqueue_script( 'awpmain', PLUGINURL . 'js/main.js', array('jquery') );
+		wp_enqueue_script('jquery-qtip');
+		
 		wp_localize_script( 'awpmain', 'wpaObj', array('ajaxurl' => admin_url( 'admin-ajax.php' )));
 		
+		wp_enqueue_style( 'cBoxStyle', PLUGINURL . 'css/colorbox.css' );
 		wp_enqueue_style( 'awpmain', PLUGINURL . 'css/main.css' );
     }
 

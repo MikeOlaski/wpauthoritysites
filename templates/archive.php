@@ -65,60 +65,16 @@ $wp_query->get_posts( $wp_query );
 //wp_die( '<pre>' . print_r($wp_query, true) . '</pre>' );
 
 $columns = array();
-
-// [ACTION]
-$columns['wpa-col-action'] = array(
-	array(
-		'name' => 'Action',
-		'header' => 'wpa-th-site-action',
-		'body' => 'wpa-td-site-action',
-		'taxonomy' => 'site-action'
-	),
-	array(
-		'name' => 'Status',
-		'header' => 'wpa-th-site-status',
-		'body' => 'wpa-td-site-status',
-		'taxonomy' => 'site-status'
-	),
-	array(
-		'name' => 'Include',
-		'header' => 'wpa-th-site-include',
-		'body' => 'wpa-td-site-include',
-		'taxonomy' => 'site-include'
-	),
-	array(
-		'name' => 'Topic',
-		'header' => 'wpa-th-site-topic',
-		'body' => 'wpa-td-site-topic',
-		'taxonomy' => 'site-topic'
-	),
-	array(
-		'name' => 'Type',
-		'header' => 'wpa-th-site-type',
-		'body' => 'wpa-td-site-type',
-		'taxonomy' => 'site-type'
-	),
-	array(
-		'name' => 'Location',
-		'header' => 'wpa-th-site-location',
-		'body' => 'wpa-td-site-location',
-		'taxonomy' => 'site-location'
-	),
-	array(
-		'name' => 'Assignment',
-		'header' => 'wpa-th-site-assignment',
-		'body' => 'wpa-td-site-assignment',
-		'taxonomy' => 'site-assignment'
-	),
-	array(
-		'name' => 'Date',
-		'header' => 'wpa-th-date',
-		'body' => 'wpa-td-date',
-		'post' => 'post_date',
-		'format' => 'date',
-		'sortable' => true
-	)
-);
+$columns['awp-action'] = array();
+$taxonomies = get_object_taxonomies('site', 'objects');
+foreach($taxonomies as $tax){
+	$columns['awp-action'][] = array(
+		'name' => $tax->label,
+		'header' => 'wpa-th-'.$tax->name,
+		'body' => 'wpa-td-'.$tax->name,
+		'taxonomy' => $tax->name
+	);
+}
 
 $fields = wpa_default_metrics();
 $departmentColumns = array();
@@ -139,7 +95,10 @@ foreach( $fields as $field ){
 				'header' => 'wpa-th-' . $field['id'],
 				'body' => 'wpa-td-' . $field['id'],
 				'meta_key' => $field['id'],
-				'sortable' => $field['sortable']
+				'sortable' => $field['sortable'],
+				'format' => ($field['format']) ? $field['format'] : '',
+				'link_text' => ($field['link_text']) ? $field['link_text'] : false,
+				'meta_value' => ($field['meta_value']) ? $field['meta_value'] : false
 			);
 		} else {
 			$metricsColumns[$field['group']][] = array(
@@ -147,7 +106,10 @@ foreach( $fields as $field ){
 				'header' => 'wpa-th-' . $field['id'],
 				'body' => 'wpa-td-' . $field['id'],
 				'meta_key' => $field['id'],
-				'sortable' => $field['sortable']
+				'sortable' => $field['sortable'],
+				'format' => ($field['format']) ? $field['format'] : '',
+				'link_text' => ($field['link_text']) ? $field['link_text'] : false,
+				'meta_value' => ($field['meta_value']) ? $field['meta_value'] : false
 			);
 		}
 	}
@@ -186,9 +148,9 @@ get_header();
             </form>
             
             <ul class="filterButtons">
-            	<li><a id="addFilterButton" href="javascript:void(0);" title="Add new conditional filter row">Add new Conditional Filter</a></li>
+            	<li><a id="addFilterButton" href="javascript:void(0);" data-title="Add new conditional filter row">Add new Conditional Filter</a></li>
                 <li>
-                	<a id="filterGroups" class="wpa-filterg-btn" href="javascript:void(0);" title="Extra Buttons">Extra Buttons</a>
+                	<a id="filterGroups" class="wpa-filterg-btn" href="javascript:void(0);" data-title="Extra Buttons">Extra Buttons</a>
                     <div class="wpa-filter-groups hide">
                     	<span class="displayOptionshead"><?php _e('DISPLAY OPTIONS'); ?></span>
                         <p>
@@ -228,46 +190,17 @@ get_header();
                     ?><option value="<?php echo $URLquery; ?>" <?php selected($number, $count); ?>><?php echo $count; ?></option><?
                 }
             ?></select> Per page</span></li>
-            <li><a href="#grid" class="wpa-control grid current" title="Grid View">Grid</a></li>
-            <li><a href="#detail" class="wpa-control detail" title="Detail View">Detail</a></li>
-            <li><a href="#list" class="wpa-control list" title="List View">List</a></li>
+            <li><a href="#grid" class="wpa-control grid current" data-title="Show grid view">Grid</a></li>
+            <li><a href="#detail" class="wpa-control detail" data-title="Show detail view">Detail</a></li>
+            <li><a href="#list" class="wpa-control list" data-title="Show list view">List</a></li>
             <?php /*<li><a href="#line" class="wpa-control line" title="Line List View">Line List</a></li>*/ ?>
             <li>&nbsp;</li>
-            <li class="openSearch"><a href="#openSearch" class="wpa-control search" title="Screen Options">Open Search</a>
-            	<div class="wpa-screen-options hide">
-					<span class="displayOptionshead"><?php _e('DISPLAY OPTIONS'); ?></span><?php
-					
-					$checkboxes = array_merge($columns, $departmentColumns, $metricsColumns);
-					foreach($checkboxes as $name=>$group){
-						?><h4> <strong><?php echo ucwords(str_replace('wpa-col-', '', $name)); ?></strong> <p><?php
-						
-						foreach($group as $col){
-							
-							if( isset($col['meta_key']) ) { 
-								$inputID = $col['meta_key'].'-option';
-								$inputVal = '.metrics-' . $col['meta_key'];
-							} elseif( isset($col['value']) ) {
-								$inputID = $col['value'].'-option';
-								$inputVal = '.metrics-' . $col['value'];
-							} elseif( isset($col['taxonomy']) ) {
-								$inputID = $col['taxonomy'].'-option';
-								$inputVal = '.metrics-' . $col['taxonomy'];
-							} elseif( isset($col['post']) ) {
-								$inputID = $col['post'].'-option';
-								$inputVal = '.metrics-' . $col['post'];
-							}
-							
-							?><label for="<?php echo $inputID; ?>"><input type="checkbox" class="ch-box checkbox-<?php echo $name; ?>" id="<?php echo $inputID; ?>" value="<?php echo $inputVal; ?>" <?php echo ($name == 'wpa-col-site') ? 'checked="checked"' : ''; ?> /><?php echo $col['name']; ?></label><?php
-						}
-						?></p>
-                        <span class="clear"></span>
-						</h4><?php
-					}
-					?><div class="clear"></div>
-				</div>
-            </li>
+            <li class="openSearch">
+            	<a href="javascript:void(0);" class="wpa-control search" title="Screen Options">Open Search</a><?php
+				wpas_site_display_options();
+            ?></li>
             <li class="openExport">
-            	<a href="#export" class="wpa-control export" title="Export Options">Export</a>
+            	<a href="javscript:void(0);" class="wpa-control export" title="Export Options">Export</a>
                 <div class="wpa-export-options hide">
                 	<span class="displayOptionshead"><?php _e('DISPLAY OPTIONS'); ?></span>
                 	<ul class="export">
@@ -290,56 +223,45 @@ get_header();
 		
 		<div class="clear"></div>
 		
-		<div class="wpa-group-column alignleft hide">
-            <ul>
-                <li class="first"><span><strong><?php _e('Workflow:', 'wpas'); ?></strong></span></li>
-                <li class="first current"><a href=".wpa-col">All</a></li>
-                <li><a href=".wpa-default">Summary</a></li><?php
-				$i = 1;
-                foreach($columns as $name=>$group){
-                    $classes = array();
-					if( $i >= count($columns) )
-						$classes[] = 'last';
-                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('wpa-col-', '', $name) ); ?></a></li><?php
-					$i++;
-                }
-            ?></ul>
-            <ul>
-            	<li class="first"><span><strong><?php _e('Departments:', 'wpas'); ?></strong></span></li>
-                <?php $i = 1;
-				foreach($departmentColumns as $name=>$group){
-                    $classes = array();
-                    if( $i >= count($departmentColumns) )
-						$classes[] = 'last';
-                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('-', ' ', str_replace('awp-', '', $name)) ); ?></a></li><?php
-					$i++;
-                } ?>
-            </ul>
-            <ul>
-            	<li class="first"><span><strong><?php _e('Metrics:', 'wpas'); ?></strong></span></li>
-                <?php $i = 1;
-				foreach($metricsColumns as $name=>$group){
-                    $classes = array();
-                    if( $i >= count($metricsColumns) )
-						$classes[] = 'last';
-                    ?><li class="<?php echo implode(' ', $classes); ?>"><a data-inputs=".checkbox-<?php echo $name; ?>" href=".<?php echo $name; ?>"><?php echo ucwords( str_replace('-', ' ', str_replace('awp-', '', $name)) ); ?></a></li><?php
-					$i++;
-                } ?>
-            </ul>
-        </div><?php
+		<div class="wpa-group-column alignleft hide"><?php
+            wpas_archive_view_groups();
+        ?></div><?php
 		
 		$replaceOrder = ($order == 'asc') ? 'desc' : 'asc';
-		$sortbytitle = $archivePage . 'orderby=title&order='. $replaceOrder;
-		$sortbyAR = $archivePage . 'meta_key=awp-authority-rank&orderby=meta_value_num&order=' . $replaceOrder;
-		$sortbyalexa = $archivePage . 'meta_key=awp-alexa-rank&orderby=meta_value_num&order=' . $replaceOrder;
+		$sorts = array(
+			'Title' => array(
+				'orderby' => 'title',
+				'order' => $replaceOrder
+			),
+			'Alexa Rank' => array(
+				'meta_key' => 'awp-alexa-rank',
+				'orderby' => 'meta_value_num',
+				'order' => $replaceOrder
+			),
+			'Authority Rank' => array(
+				'meta_key' => 'awp-authority-rank',
+				'orderby' => 'meta_value_num',
+				'order' => $replaceOrder
+			)
+		);
 		
 		/* Sort Header */
 		?><div class="wpa-sort-wrapper alignright">
-			<p>Sort by:
-			<a href="<?php echo $sortbytitle; ?>" class="wpa-sortable <?php echo $order; echo ($orderby == 'title') ? ' current' : ''; ?>" >Title</a> |
-			<a href="<?php echo $sortbyalexa; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-alexa-rank') ? ' current' : ''; ?>">Alexa Rank</a> |
-			<a href="<?php echo $sortbyAR; ?>" class="wpa-sortable <?php echo $order; echo ($meta == 'awp-authority-rank') ? ' current' : ''; ?>">Authority Rank</a>
-			</p>
+			<p><?php _e('Sort by:', 'wpas');
+				$i = 1;
+				foreach($sorts as $label=>$sort){
+					$current = (isset($_REQUEST['meta_key']) and $_REQUEST['meta_key'] == $sort['meta_key']) ? true : ((isset($_REQUEST['orderby']) and $_REQUEST['orderby'] == $sort['orderby']) ? true : false);
+					
+					echo sprintf(
+						'<a href="%s" class="wpa-sortable %s" >%s</a>',
+						add_query_arg($sort, $archivePage),
+						($current) ? $order.' current' : $order,
+						$label
+					);
+					if($i < count($sorts)){ echo '|'; }
+					$i++;
+				}
+			?></p>
 		</div>
 		
 		<div class="clear"></div>
@@ -363,18 +285,6 @@ get_header();
             
             <div class="clear"></div>
 		</form><?php
-		
-		/* Collapsable area
-		?><div class="wpa-collapse-wrapper">
-			<a href="javascript:void(0);" class="wpa-collapse-btn">
-				<span>Open Search</span>
-				<span style="display:none;">Close Search</span>
-			</a>
-			<div class="wpa-collapse">
-                
-			</div>
-		</div><?php
-		End of Collapsable area */
 		
 		if ( $wp_query->have_posts() ) :
 		
@@ -400,66 +310,11 @@ get_header();
                 <!-- Start of list HR wrapper -->
                 <div class="wpa-site-wrapper">
 				
-                <div class="wpa-list-header">
-                	<div class="wpa-th wpa-th-change"><?php _e('Level', 'wpas'); ?></div>
-					<div class="wpa-th wpa-th-count">1Rank</div>
-                    <div class="wpa-th wpa-th-title">
-                    	<a href="<?php echo $sortbytitle; ?>" class="wpa-sortable <?php echo $order; echo ($orderby == 'title') ? ' current' : ''; ?>">Blog</a>
-                    </div><?php
-                    
-					$checkboxes = array_merge($columns, $departmentColumns, $metricsColumns);
-					foreach($checkboxes as $name=>$group){
-						foreach($group as $col){
-							$oby = 'meta_value';
-							
-							if($name == 'wpa-col-ranks'){
-								$oby = 'meta_value_num';
-							}
-							
-							if( isset($col['meta_key']) ){
-								$sort = $archivePage.'meta_key='.$col['meta_key'].'&orderby='.$oby.'&order='.$order;
-							} elseif( isset($col['post']) ) {
-								$sort = $archivePage.'&orderby='.$col['post'].'&order='.$order;
-							}
-							
-							$class = array('wpa-sortable', $order);
-							$class[] = ($meta == $col['meta_key']) ? 'current' : null;
-							
-							$classes = array('wpa-th', 'wpa-col', 'hide');
-							
-							if( isset($col['meta_key']) ) { 
-								$classes[] = 'metrics-' . $col['meta_key'];
-							} elseif( isset($col['value']) ) {
-								$classes[] = 'metrics-' . $col['value'];
-							} elseif( isset($col['taxonomy']) ) {
-								$classes[] = 'metrics-' . $col['taxonomy'];
-							} elseif( isset($col['post']) ) {
-								$classes[] = 'metrics-' . $col['post'];
-							}
-							
-							$classes[] = $col['header'];
-							$classes[] = $name;
-							
-							if($name == 'wpa-col-site'){
-								$classes[] = 'wpa-default';
-							}
-							
-							if($col['group'] == 'Scores'){
-								$classes[] = 'wpa-scores';
-							}
-							
-							?><div class="<?php echo implode(' ', $classes); ?>"><?php
-								$column = $col['name'];
-								
-								if($col['sortable'])
-									$column = sprintf('<a href="%s" class="%s">%s</a>', $sort, implode(' ', $class), $column);
-								
-								echo $column;
-							?></div><?php
-						}
-					}
+                <div class="wpa-list-header"><?php
 					
-                    ?><div class="clear"></div>
+					wpas_archive_list_header( $archivePage );
+					
+                	?><div class="clear"></div>
 				</div><!-- /.wpa-site-wrapper -->
 				
 				<div class="wpas-site-loop"><?php /* Start the Loop */
@@ -467,133 +322,22 @@ get_header();
 				$i = 1;
 				while ( $wp_query->have_posts() ) : $wp_query->the_post();
 				
-					$metrics = get_post_meta( get_the_ID() );
-					
 					$post_id = get_the_ID();
+					$metrics = get_post_meta( $post_id );
+					
 					$class = (is_sticky()) ? 'sticky-site' : '';
 					$class .= (current_user_can('edit_post')) ? ' edit-enabled' : '';
-					$attachment = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ) );
-					$attachmentURL = ($attachment) ? PLUGINURL . '/timthumb.php?src=' . $attachment[0] . '&w=150&h=150' : null;
+					
 					$default_img = sprintf('<span>%s</span>', __('NO IMAGE', 'wpas') ); 
-					$thumbnailURL = ($attachment) ? PLUGINURL.'/timthumb.php?src=' . $attachment[0] . '&w=180&h=100' : null;
-					$thumbnail = sprintf('<img src="%s" alt="%s" />', $thumbnailURL, get_the_title());
-					
-					$pageRank = get_post_meta($post_id, 'awp-google-rank', true);
-					$alexaRank = get_post_meta($post_id, 'awp-alexa-rank', true);
-					$date = get_post_meta($post_id, 'awp-date', true);
-					$location = get_post_meta($post_id, 'awp-location', true);
-					$language = get_post_meta($post_id, 'awp-language', true);
-					
-					$gplus = get_post_meta($post_id, 'awp-googleplus', true);
-					$fb = get_post_meta($post_id, 'awp-facebook', true);
-					$twitter = get_post_meta($post_id, 'awp-twitter', true);
-					$pinteret = get_post_meta($post_id, 'awp-pinterest', true);
-					$linkedin = get_post_meta($post_id, 'awp-linkedin', true);
-					
-					$gPlusCount = get_post_meta($post_id, 'awp-shares-goolgeplus', true);
-					$fbShares = get_post_meta($post_id, 'awp-shares-facebook', true);
-					$fbLikes = get_post_meta($post_id, 'awp-likes-facebook', true);
-					$tweets = get_post_meta($post_id, 'awp-shares-twitter', true);
-					$pinCount = get_post_meta($post_id, 'awp-shares-pinterest', true);
-					$linkedCount = get_post_meta($post_id, 'awp-shares-linkedin', true);
+					$attachment = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ) );
+					$attachmentURL = ($attachment) ? PLUGINURL.'/timthumb.php?src='.$attachment[0].'&w=150&h=150' : null;
+					$thumbnail = sprintf('<img src="%s" alt="%s" />', $attachmentURL, get_the_title());
 					
 					?><article id="post-<?php the_ID(); ?>" <?php post_class($class); ?>>
 						
-                        <!-- Line List View -->
-                        <div class="wpa-line-item">
-                            <div class="wpa-td wpa-td-thumbnail"><div class="thumbnail alignleft">
-                                <a href="<?php the_permalink(); ?>"><?php
-                                    echo ($attachmentURL) ? $thumbnail : $default_img;
-                                ?></a>
-                            </div></div>
-                            <div class="wpa-td wpa-td-description">
-                            	<?php edit_post_link('Edit'); ?>
-                            	<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-                            </div>
-                            
-                            <div class="clear"></div>
-                        </div>
-                        
                         <!-- List View -->
-						<div class="wp-list-item">
-                        	<div class="wpa-td wpa-td-change"><?php
-                            	wpas_get_authority_level(true, get_the_ID(), 'single');
-                            ?></div>
-                        	<div class="wpa-td wpa-td-count"><?php echo $metrics['awp-one-rank'][0]; ?></div>
-                            <div class="wpa-td wpa-td-title">
-                            	<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-                                <?php edit_post_link('Edit'); ?>
-                            </div><?php
-							
-							$checkboxes = array_merge($columns, $departmentColumns, $metricsColumns);
-							foreach($checkboxes as $class=>$group){
-								foreach($group as $col){
-									
-									$classes = array('wpa-td', 'wpa-col', 'hide');
-									$classes[] = $col['body'];
-									$classes[] = $class;
-									
-									if( isset($col['meta_key']) ) { 
-										$classes[] = 'metrics-' . $col['meta_key'];
-									} elseif( isset($col['value']) ) {
-										$classes[] = 'metrics-' . $col['value'];
-									} elseif( isset($col['taxonomy']) ) {
-										$classes[] = 'metrics-' . $col['taxonomy'];
-									} elseif( isset($col['post']) ) {
-										$classes[] = 'metrics-' . $col['post'];
-									}
-									
-									if($class == 'wpa-col-site'){
-										$classes[] = 'wpa-default';
-									}
-									
-									if($class == 'wpa-col-scores'){
-										$classes[] = 'wpa-scores';
-									}
-									
-									?><div class="<?php echo implode(' ', $classes); ?> "><?php
-										
-										$data = '';
-										if( isset($col['meta_key']) ){
-											$data .= $metrics[$col['meta_key']][0];
-										} elseif( isset($col['taxonomy']) ) {
-											$term_list = wp_get_post_terms($post_id, $col['taxonomy']);
-											foreach($term_list as $term){
-												$data .= '<a href="' . get_term_link( $term, $term->taxonomy ) . '">' . $term->name . '</a>';
-											}
-										} elseif( isset($col['post']) ) {
-											$data .= $post->$col['post'];
-										} elseif( isset($col['value']) ) {
-											switch($col['value']){
-												case 'thumbnail':
-													$data .= '<img src="' . $thumbnailURL . '" alt="' . get_the_title() . '" />';
-													break;
-											}
-										}
-										
-										if( isset($col['format']) ){
-											switch( $col['format'] ){
-												case 'date':
-													$data = ($data) ? date('F j, Y', strtotime($data)) : ''; break;
-											}
-										}
-										
-										if( isset($col['link']) ){
-											switch($col['link']){
-												case 'meta':
-													$link = $col['meta_key']; break;
-												default:
-													$link = $metrics[$col['link']][0];
-											}
-											$data = '<a href="'. $link .'" target="_blank">'. $data .'</a>';
-										}
-										
-										echo $data;
-										
-									?></div><?php
-								}
-							}
-                            
+						<div class="wp-list-item"><?php
+                        	wpas_archive_list_content(true, $post_id);
                             ?><div class="clear"></div>
 						</div>
 						
@@ -612,14 +356,17 @@ get_header();
                             </header><!-- .entry-header -->
 							
 							<div class="entry-summary"><?php
-								wpas_get_authority_level(true, get_the_ID());
-								wpas_get_authorit_ranks(true, get_the_ID());
-								wpas_site_coveraged_feed(true, get_the_ID());
-								wpas_site_network_feed(true, get_the_ID());
+								wpas_get_authority_level(true, $post_id);
+								wpas_get_authorit_ranks(true, $post_id);
+								wpas_site_coveraged_feed(true, $post_id);
+								echo wpas_site_network_feed(true, $post_id, 1);
 								?><div class="clear"></div><?php
-								wpas_site_metrics_grade(true, get_the_ID());
-								?><a href="<?php echo site_url('/'); ?>" class="wpa-watch-button"><?php _e('Watch This', 'wpa'); ?></a> <?php edit_post_link('Edit'); ?>
-                            </div><!-- .entry-summary -->
+								wpas_site_metrics_grade(true, $post_id);
+								
+								wpas_get_watch_popup(true, $post_id);
+								
+								edit_post_link('Edit');
+                            ?></div><!-- .entry-summary -->
                             
                             <div class="clear"></div>
 						</div><!-- /Grid View -->
@@ -632,7 +379,10 @@ get_header();
 									echo ($attachmentURL) ? $thumbnail : $default_img;
 								?></a><?php
                                 wpas_get_authority_level(true, get_the_ID());
-                                ?><a href="<?php echo site_url('/'); ?>" class="wpa-watch-button"><?php _e('Watch This', 'wpa'); ?></a> <?php edit_post_link('Edit'); ?>
+                                
+								wpas_get_watch_popup(true, $post_id);
+								
+								edit_post_link('Edit'); ?>
                             </div>
                             
                             <div class="wpas-detail-view-col">
@@ -659,11 +409,12 @@ get_header();
                             	<h4><?php the_title(); ?> <?php _e('Coveraged', 'wpas'); ?></h4><?php
 								wpas_site_coveraged_feed(true, get_the_ID());
                             	?><h4><?php _e('Recent Popular Posts', 'wpas'); ?></h4><?php
-								wpas_site_network_feed(true, get_the_ID());
+								echo wpas_site_network_feed(true, get_the_ID(), 1);
                             ?></div>
                             
                             <div class="clear"></div>
 						</div><!-- /Detail View --><?php
+						
 						$i++;
 					?></article><?php
 				endwhile;

@@ -38,7 +38,8 @@ add_action( 'add_meta_boxes', 'wpa_base_custom_boxes' );
 add_action( 'save_post', 'wpa_base_custom_boxes_handle' );
 
 function wpa_base_custom_boxes_handle( $post_id ){
-	$fields = array('_base_people_fname', '_base_people_lname', '_base_people_email', '_base_people_website');
+	$fields = array('_base_people_fname', '_base_people_lname', '_base_people_email', '_base_people_website',
+	'_base_people_fb', '_base_people_tw', '_base_people_gg', '_base_people_li');
 	
 	foreach($fields as $field){
 		if ( isset( $_POST[$field] ) ){
@@ -60,35 +61,58 @@ function wpa_base_people_metabox( $post ){
 	$website = get_post_meta( $post->ID, '_base_people_website', true );
 	$urole = get_post_meta( $post->ID, '_base_people_role', true );
 	
-	?><table class="woo_metaboxes_table">
-        <tr>
-        	<th class="woo_metabox_names"><label class="selectit" for="_base_people_fname"><?php _e( "First Name", 'wpa' ); ?></label></th>
+	$fb = get_post_meta($post->ID, '_base_people_fb', true);
+	$tw = get_post_meta($post->ID, '_base_people_tw', true);
+	$gg = get_post_meta($post->ID, '_base_people_gg', true);
+	$li = get_post_meta($post->ID, '_base_people_li', true);
+	
+	?><h2><?php _e('General Information', 'wpas'); ?></h2>
+    
+    <table class="form-table">
+        <tr valign="top">
+        	<th scope="row"><label class="selectit" for="_base_people_fname"><?php _e( "First Name", 'wpas' ); ?></label></th>
         	<td><input class="regular-text" type="text" id="_base_people_fname" name="_base_people_fname" value="<?php echo esc_attr( $fname ) ?>" /></td>
         </tr>
         
-        <tr>
-        	<th class="woo_metabox_names"><label class="selectit" for="_base_people_lname"><?php _e( "Last name", 'wpa' ); ?></label></th>
+        <tr valign="top">
+        	<th scope="row"><label class="selectit" for="_base_people_lname"><?php _e( "Last name", 'wpas' ); ?></label></th>
         	<td><input class="regular-text" type="text" id="_base_people_lname" name="_base_people_lname" value="<?php echo esc_attr( $lname ) ?>" /></td>
         </tr>
         
-        <tr>
-            <th class="woo_metabox_names"><label class="selectit" for="_base_people_email"><?php _e( "Email", 'wpa' ); ?></label></th>
+        <tr valign="top">
+            <th scope="row"><label class="selectit" for="_base_people_email"><?php _e( "Email", 'wpas' ); ?></label></th>
             <td><input class="regular-text" type="text" id="_base_people_email" name="_base_people_email" value="<?php echo esc_attr( $email ) ?>" /></td>
         </tr>
         
-        <tr>
-            <th class="woo_metabox_names"><label class="selectit" for="_base_people_website"><?php _e( "Website", 'wpa' ); ?></label></th>
+        <tr valign="top">
+            <th scope="row"><label class="selectit" for="_base_people_website"><?php _e( "Website", 'wpas' ); ?></label></th>
             <td><input class="regular-text" type="text" id="_base_people_website" name="_base_people_website" value="<?php echo esc_attr( $website ) ?>" /></td>
-        </tr><?php
+        </tr>
+	</table>
+	
+	<h2><?php _e('Social Places', 'wpas'); ?></h2>
+	
+	<table class="form-table">
+		<tr valign="top">
+        	<th scope="row"><label for="base_people_fb"><?php _e('Facebook', ''); ?></label></th>
+            <td><input class="regular-text" type="text" name="_base_people_fb" id="base_people_fb" value="<?php echo ($fb) ? $fb : ''; ?>" /></td>
+        </tr>
         
-        /*<tr>
-            <th class="woo_metabox_names"><label class="selectit" for="_base_people_role"><?php _e( "Role", 'wpa' ); ?></label></th>
-            <td><select class="regular-text" type="text" id="_base_people_role" name="_base_people_role">
-            	<option value="">Select a Role</option><?php
-				get_dropdown_roles( $urole );
-            ?></select></td>
-        </tr>*/
-	?></table><?php
+        <tr valign="top">
+        	<th scope="row"><label for="base_people_tw"><?php _e('Twitter', ''); ?></label></th>
+            <td><input class="regular-text" type="text" name="_base_people_tw" id="base_people_tw" value="<?php echo ($tw) ? $tw : ''; ?>" /></td>
+        </tr>
+        
+        <tr valign="top">
+        	<th scope="row"><label for="base_people_gg"><?php _e('Google+', ''); ?></label></th>
+            <td><input class="regular-text" type="text" name="_base_people_gg" id="base_people_gg" value="<?php echo ($gg) ? $gg : ''; ?>" /></td>
+        </tr>
+        
+        <tr valign="top">
+        	<th scope="row"><label for="base_people_li"><?php _e('LinkedIn', ''); ?></label></th>
+            <td><input class="regular-text" type="text" name="_base_people_li" id="base_people_li" value="<?php echo ($li) ? $li : ''; ?>" /></td>
+        </tr>
+	</table><?php
 }
 
 function get_dropdown_roles( $selected = null ){

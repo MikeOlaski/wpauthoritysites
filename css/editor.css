@@ -194,7 +194,7 @@ select[name=seo_filter]{
 	
 	font-weight: normal;
 	font-weight: bold;
-	line-height: 24px;
+	line-height: 16px;
 	font-size: 11px;
 	color: #000;
 }
@@ -223,7 +223,12 @@ select[name=seo_filter]{
 	width: 80%;
 }
 
-.awp-controls .regular-text.small{
+.awp-controls .regular-text.score{
+	width: 58%;
+}
+
+.awp-controls .regular-text.small,
+.awp-controls .regular-upload.small{
 	width: 65%;
 }
 
@@ -236,7 +241,7 @@ select[name=seo_filter]{
 	color: #444444;
 	font-size: 11px;
 	margin: 0 0 10px;
-	width: 90%;
+	width: 80%;
 }
 
 .awp-controls .regular-textarea{

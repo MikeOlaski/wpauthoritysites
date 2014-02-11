@@ -172,7 +172,7 @@ function wpa_post_meta_filter(){
 				}); 
 			</script><?php
 		} else {
-			_e('No Tags Found', 'wpa');
+			_e('No Tags Found', 'wpas');
 		}
 		
 		?><div class="fix"></div><?php
@@ -218,8 +218,8 @@ function wpa_site_footer(){
 	
 	if( is_single() && 'site' == $post->post_type ){
 		?><div class="wpa-sgl-site">
-			<div class="wpa-sgl-teams">
-				<h3><?php _e('Team', 'wpa'); ?></h3><?php
+			<div class="wpa-sgl-syndicate">
+				<h3><?php _e('Syndicate', 'wpas'); ?></h3><?php
 				
 				$teams = array();
 				if( $include_list = get_the_terms( $post->ID, 'site-include' ) ) {
@@ -233,18 +233,20 @@ function wpa_site_footer(){
 									if($peopleTagName == get_the_title($post->ID)){
 										if( $user = get_user_by_display_name( $tagName ) ) {
 											$teams[] = sprintf(
-												'<a href="%1$s" title="%2$s">%2$s</a>',
+												'<li><a href="%1$s" title="%2$s">%3$s</a> %4$s</li>',
 												get_author_posts_url($user->ID),
 												$clean_name,
-												get_avatar( $user->ID, 32 )
+												get_avatar( $user->ID, 48 ),
+												wpas_people_social_places(false, $user->ID, 'user')
 											);
 										} else {
 											$email = get_post_meta($people->ID, '_base_people_email', true);
 											$teams[] = sprintf(
-												'<a href="%1$s" title="%2$s">%3$s</a>',
+												'<li><a href="%1$s" title="%2$s">%3$s</a> %4$s</li>',
 												get_permalink($people->ID),
 												get_the_title($people->ID),
-												get_avatar( $email, 32 )
+												get_avatar( $email, 48 ),
+												wpas_people_social_places(false, $people->ID)
 											);
 										}
 									}
@@ -255,82 +257,68 @@ function wpa_site_footer(){
 				}
 				
 				if( $teams ){
-					echo implode(' ', $teams);
+					echo sprintf( '<ul class="wpas-site-syndicate">%s</ul>', implode(' ', $teams));
+				} else {
+					echo sprintf( '<p>%s</p>', __('No one is set as member of this team', 'wpas') );
+				}
+			?></div>
+            
+            <div class="wpa-sgl-teams">
+				<h3><?php _e('Team', 'wpas'); ?></h3><?php
+				
+				$teams = array();
+				if( $include_list = get_the_terms( $post->ID, 'site-include' ) ) {
+					foreach($include_list as $inc){
+						$tagName = str_replace('@', '', $inc->name);
+						$people = get_page_by_title($tagName, 'OBJECT', 'people');
+						if( $people ){
+							if( $tag_list = get_the_terms( $people, 'people-include' ) ){
+								foreach($tag_list as $tag):
+									$peopleTagName = str_replace('@', '', $tag->name);
+									if($peopleTagName == get_the_title($post->ID)){
+										if( $user = get_user_by_display_name( $tagName ) ) {
+											$teams[] = sprintf(
+												'<li><a href="%1$s" title="%2$s">%3$s</a> %4$s</li>',
+												get_author_posts_url($user->ID),
+												$clean_name,
+												get_avatar( $user->ID, 48 ),
+												wpas_people_social_places(false, $user->ID, 'user')
+											);
+										} else {
+											$email = get_post_meta($people->ID, '_base_people_email', true);
+											$teams[] = sprintf(
+												'<li><a href="%1$s" title="%2$s">%3$s</a> %4$s</li>',
+												get_permalink($people->ID),
+												get_the_title($people->ID),
+												get_avatar( $email, 48 ),
+												wpas_people_social_places(false, $people->ID)
+											);
+										}
+									}
+								endforeach;
+							}
+						}
+					}
+				}
+				
+				if( $teams ){
+					echo sprintf( '<ul class="wpas-site-team">%s</ul>', implode(' ', $teams));
 				} else {
 					echo sprintf( '<p>%s</p>', __('No one is set as member of this team', 'wpas') );
 				}
 			?></div>
 			
 			<div class="wpa-sgl-socials">
-				<h3><?php _e('Follow', 'wpa'); ?></h3>
-				<ul><?php
-					$socials = array(
-						'awp-facebook' => 'Facebook',
-						'awp-twitter' => 'Twitter',
-						'awp-googleplus' => 'Google+',
-						'awp-linkedin' => 'LinkedIn',
-						'awp-youtube' => 'Youtube',
-						'awp-pinterest' => 'Pinterest',
-						'awp-rss' => 'RSS'
-					);
-					
-					foreach($socials as $meta_key=>$media){
-						$url = get_post_meta($post->ID, 'awp-url', true);
-						$page = get_post_meta($post->ID, $meta_key, true);
-						
-						$count = get_post_meta($post->ID, $meta_key.'-followers', true);
-						if( $count == '' ) { $count = wpas_get_social_counts($media, $url, $page); }
-						
-						if(!$count) {
-							$title = $media;
-						} else {
-							$title = $media .' '. number_format((int)$count);
-						}
-						
-						if($page){
-							echo sprintf(
-								'<li><a href="%s" data-type="%s" data-text="%s" target="_blank" class="%s">%2$s</a>',
-								$page,
-								$media,
-								'Follow',
-								'wpa-sgl-icon '. $meta_key . '-icon'
-							);
-							echo sprintf('<span class="count">%s</span>', wpas_numbers_to_readable_size($count) );
-						}
-					}
-				?></ul>
-            </div>
-			<a href="<?php echo site_url('/'); ?>" class="wpa-watch-button"><?php _e('Watch This', 'wpa'); ?></a>
+				<h3><?php _e('Follow', 'wpas'); ?></h3><?php
+				wpas_site_subscribers(true, $post->ID);
+            ?></div><?php
 			
-			<div class="fix"></div>
+			wpas_get_watch_popup(true, $post->ID);
+			
+			?><div class="fix"></div>
 		</div>
         
-		<div class="fix"></div>
-		<script type="text/javascript">
-			jQuery(document).ready(function($){
-				// Use the each() method to gain access to each of the elements attributes
-				$('.wpa-sgl-icon').each(function(){
-					$(this).qtip({
-						content: '<a href="' + $(this).attr('href') +'" class="' + $(this).attr('data-type') + '" target="_blank"><span>&nbsp;</span>Follow on ' + $(this).attr('data-type') + '</a>',
-						position: {
-							corner: {
-								target: 'bottomLeft',
-							}
-						},
-						hide: {
-							fixed: true
-						},
-						style: {
-							width: 155,
-							name: 'light',
-							border: {
-								width: 0
-							}
-						}
-					});
-				});
-			});
-		</script><?php
+		<div class="fix"></div><?php
 	}
 }
 
@@ -359,29 +347,18 @@ function wpas_site_coveraged(){
 		
 		?><div class="wpa-sgl-coverage">
 			<ul class="wpa-coverage-filter alignright">
-				<li class="first"><a href="#">Reviews</a></li>
-				<li><a href="#">Interviews</a></li>
-				<li><a href="#">Courses</a></li>
-				<li><a href="#">Tutorials</a></li>
-				<li class="last"><a href="#">Hangouts</a></li>
+				<li class="first"><a href="javascript:void(0);" data-type="all"><?php _e('All', 'wpas'); ?></a></li>
+                <li><a href="javascript:void(0);" data-type="interviews"><?php _e('Interviews', 'wpas'); ?></a></li>
+				<li><a href="javascript:void(0);" data-type="reviews"><?php _e('Reviews', 'wpas'); ?></a></li>
+				<li class="last"><a href="javascript:void(0);" data-type="show"><?php _e('Shows', 'wpas'); ?></a></li>
 			</ul>
 			
-			<h3><?php _e('WPA Coveraged', 'wpa'); ?></h3><?php
+			<h3><?php _e('WPA Coveraged', 'wpas'); ?></h3><?php
 			
             if( $shows ){
-				?><div id="wpa-coverage-flexslider" class="wpa-flexslider flexslider">
-                    <ul class="wpa-coverage-slides slides"><?php
-						foreach( $shows as $show ):
-							?><li><a href="<?php echo get_permalink($show->ID); ?>" title="<?php echo get_the_title($show->ID); ?>"><?php
-                            	if( has_post_thumbnail($show->ID) ){
-									echo get_the_post_thumbnail($show->ID, 'medium');
-								} else {
-									?><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /><?php
-								}
-                            ?></a></li><?php
-						endforeach;
-                    ?></ul>
-                </div>
+				?><div id="wpa-coverage-flexslider" class="wpa-flexslider flexslider"><?php
+					wpas_site_coveraged_feed(true, $post->ID);
+                ?></div>
                 
                 <script type="text/javascript">
                     jQuery(window).load(function() {
@@ -393,6 +370,21 @@ function wpas_site_coveraged(){
                             itemMargin: 42,
                             slideshow: false,
                             controlNav: false
+                        });
+                    });
+					
+					jQuery(document).ready(function($) {
+                        $('.wpa-coverage-filter li a').click(function(e) {
+							filter = $(this).attr('data-type');
+							$('#wpa-coverage-flexslider li').each(function(i, e) {
+                                if( $(this).hasClass(filter) ){
+									$(this).show('slow');
+								} else {
+									$(this).hide();
+								}
+                            });
+							
+							e.preventDefault();
                         });
                     });
                 </script><?php
@@ -412,33 +404,37 @@ function wpa_site_most_shared(){
 	if( is_single() && 'site' == $post->post_type ){
 		wp_enqueue_script('flexslider');
 		
-		?><div class="wpa-sgl-coverage">
-			<ul class="wpa-popular-filter alignright">
-				<li class="first"><a href="#">Today</a></li>
-				<li><a href="#">Week</a></li>
-				<li><a href="#">Month</a></li>
-				<li><a href="#">Year</a></li>
-				<li class="last"><a href="#">All Time</a></li>
-			</ul>
+		?><div class="wpa-sgl-coverage"><?php
 			
-			<h3><?php _e('Most Shared Content on', 'wpa'); ?> <?php echo get_the_title($post->ID); ?>'s Network</h3>
+			$filters = wpas_site_network_feed_categories();
+			if( $filters ){
+				?><ul class="wpas-popular-filter alignright">
+					<li class="first"><a href="javascript:void(0);" data-type="all"><?php _e('All', 'wpas'); ?></a></li><?php
+					$i = 1;
+					foreach( $filters as $filter=>$label ){
+						if( $i <= 5 ){
+							echo sprintf(
+								'<li class="%s"><a href="javascript:void(0);" data-type="%s">%s</a></li>',
+								($i == 5) ? 'last' : '',
+								$filter,
+								$label
+							);
+						} $i++;
+					}
+				?></ul><?php
+			}
 			
-			<div id="wpa-popular-flexslider" class="wpa-flexslider flexslider">
-				<ul class="wpa-populars-slides slides">
-					<li><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></li>
-					<li><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></li>
-					<li><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></li>
-					<li><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></li>
-					<li><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></li>
-					<li><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></li>
-					<li><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></li>
-					<li><img src="<?php echo PLUGINURL; ?>images/placeholder.jpg" alt="Placeholder" /></li>
-				</ul>
-			</div>
+			?><h3><?php _e('Most Shared Content on', 'wpas'); ?> <?php echo get_the_title($post->ID); ?>'s Network</h3>
+			
+			<div id="wpas-popular-flexslider" class="wpa-flexslider flexslider"><?php
+				
+				echo wpas_site_network_feed(true, $post->ID);
+			
+            ?></div>
 			
 			<script type="text/javascript">
 				jQuery(window).load(function() {
-					jQuery('#wpa-popular-flexslider').flexslider({
+					jQuery('#wpas-popular-flexslider').flexslider({
 						animation: "slide",
 						animationLoop: false,
 						itemWidth: 175,
@@ -446,6 +442,21 @@ function wpa_site_most_shared(){
 						itemMargin: 42,
 						slideshow: false,
 						controlNav: false
+					});
+				});
+				
+				jQuery(document).ready(function($) {
+					$('.wpas-popular-filter li a').click(function(e) {
+						filter = $(this).attr('data-type');
+						$('#wpas-popular-flexslider li').each(function(i, e) {
+							if( $(this).hasClass(filter) ){
+								$(this).show('slow');
+							} else {
+								$(this).hide();
+							}
+						});
+						
+						e.preventDefault();
 					});
 				});
 			</script>
@@ -488,9 +499,9 @@ function wpa_audit_site_score(){
                 
                 <ul class="wpa-display-controls">
                     <li class="openSearch">
-                        <a href="#openSearch" class="wpa-control search" title="Screen Options">Open Search</a>
-                        <div class="wpa-screen-options hide"></div>
-                    </li>
+                        <a href="javascript:void(0);" class="wpa-control search" data-title="<?php _e('Display Options', 'wpas'); ?>"><?php _e('Display Options', 'wpas'); ?></a><?php
+						wpas_site_display_options();
+                    ?></li>
                     <li class="openExport">
                         <a href="#export" class="wpa-control export" title="Export Options">Export</a>
                         <div class="wpa-export-options hide"></div>
@@ -528,6 +539,7 @@ function wpa_audit_site_score(){
 								<tbody><?php
 									foreach( $metrics as $metric ){
 										$value = get_post_meta($post->ID, $metric['id'], true);
+										$points = get_post_meta($post->ID, $metric['id'] . '-score', true);
 										switch($metric['format']):
 											case 'date':
 												$result = date('F j, Y', strtotime($value)); break;
@@ -555,8 +567,7 @@ function wpa_audit_site_score(){
 												echo sprintf('<em>%s</em> <span class="description">%s</span>', $result, $metric['unit']);
 											?></td>
 											<td class="score"><?php
-												$points = 53;
-												echo sprintf('<em>%s</em> <span>Points</span>', $points);
+												echo ($points) ? sprintf('<em>%s</em> <span>Points</span>', $points) : '';
 											?></td>
 											<td class="solutions"><?php
 												echo sprintf('<h3>%s</h3> <p>%s</>', __('Get Radar Detector', 'wpas'), __('Your\'e going way to fast, your\'e going to get a ticket.', 'wpas'));

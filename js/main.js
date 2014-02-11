@@ -2,54 +2,49 @@
 jQuery(document).ready(function($) {
 	
 	var display;
-    
-	$('.wpa-display-controls li a.wpa-control').click(function(e) {
+	$('.wpa-display-controls .grid, .wpa-display-controls .detail, .wpa-display-controls .list').click(function(e) {
 		display = $(this).attr('href').replace('#', '');
 		
-		if('openSearch' == display || 'export' == display){
-		} else {
-			$(this).addClass('current').parent().siblings().find('a.wpa-control').removeClass('current');
-			$('.wpa-display-archives').toggleClass(function(){
-				if('grid' == display){
-					return 'list detail line';
-				} else if('list' == display) {
-					return 'grid detail line';
-				} else if('detail' == display) {
-					return 'list grid line';
-				} else if('line' == display){
-					return 'list grid detail';
-				}
-			}, false).addClass( display );
-			switch(display){
-				case 'grid':
-				case 'line':
-					$('.wpa-group-column').addClass('hide');
-					$('.wpa-screen-options').addClass('hide');
-					$('#wpa-thumbnail-option').removeAttr('disabled');
-					setListScrollArea();
-					break;
-				
-				case 'detail':
-					$('.wpa-group-column').addClass('hide');
-					$('.wpa-screen-options').removeClass('hide');
-					$('#wpa-thumbnail-option').removeAttr('disabled');
-					setListScrollArea();
-					break;
-				
-				case 'list':
-					$('.wpa-screen-options').removeClass('hide');
-					$('.wpa-group-column').removeClass('hide');
-					$('#wpa-thumbnail-option').attr('disabled', 'disabled');
-					setListScrollArea();
-					break;
+		$(this).addClass('current').parent().siblings().find('a.wpa-control').removeClass('current');
+		
+		$('.wpa-display-archives').toggleClass(function(){
+			if('grid' == display){
+				return 'list detail line';
+			} else if('list' == display) {
+				return 'grid detail line';
+			} else if('detail' == display) {
+				return 'list grid line';
+			} else if('line' == display){
+				return 'list grid detail';
 			}
+		}, false).addClass( display );
+		
+		switch(display){
+			case 'grid':
+			case 'line':
+				$('.wpa-group-column').addClass('hide');
+				$('#wpa-thumbnail-option').removeAttr('disabled');
+				setListScrollArea();
+				break;
+			
+			case 'detail':
+				$('.wpa-group-column').addClass('hide');
+				$('#wpa-thumbnail-option').removeAttr('disabled');
+				setListScrollArea();
+				break;
+			
+			case 'list':
+				$('.wpa-group-column').removeClass('hide');
+				$('#wpa-thumbnail-option').attr('disabled', 'disabled');
+				setListScrollArea();
+				break;
 		}
 		
 		setListHeight();
-        e.preventDefault();
-    });
+		e.preventDefault();
+	});
 	
-	$('body').click(function(e){
+	/*$('body').click(function(e){
 		var target = $(e.target).attr('class');
 		
 		if( target == 'wpa-control search' ){
@@ -87,7 +82,7 @@ jQuery(document).ready(function($) {
 			$('.wpa-screen-options').fadeOut('fast');
 			$('.wpa-export-options').fadeOut('fast');
 		}
-	});
+	});*/
 	
 	$('#addFilterButton').click(function(e) {
         target = $('.wpa-filter-form');
@@ -235,7 +230,6 @@ jQuery(document).ready(function($) {
 			$(this).css('width', '100%');
 			
 			widestCol += $(this).outerWidth();
-			console.log( $(this).outerWidth() );
 			
 			$(this).css('width', '');
 		});
@@ -281,7 +275,77 @@ jQuery(document).ready(function($) {
 	
 	$('a.wpas-score-tabs-next').click(function(e) {
 		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) - 140;
-        $('.wpas-metric-groups-tab').css('margin-left', (marginLleft < -700) ? -700 : marginLleft );
+        $('.wpas-metric-groups-tab').css('margin-left', (marginLleft < -824) ? -824 : marginLleft );
 		e.preventDefault();
     });
+	
+	$('.wpa-display-controls .search').qtip({
+		hide: { when: { event: 'click' } },
+		show: { when: { event: 'click' } },
+		content: $('.wpa-screen-options'),
+		position: {
+			corner: { target: 'leftMiddle', tooltip: 'topRight' }
+		},
+		style: { name: 'blue', width: 960 }
+	});
+	
+	$('.wpa-display-controls .export').qtip({
+		hide: { when: { event: 'click' } },
+		show: { when: { event: 'click' } },
+		content: $('.wpa-export-options'),
+		position: {
+			corner: { target: 'leftMiddle', tooltip: 'topRight' }
+		},
+		style: { name: 'blue', width: 180 }
+	});
+	
+	$('.single-site .wpas-social-subscribers li').each(function(){
+		$(this).qtip({
+			content: $(this).find('.hover'),
+			position: {
+				/*corner: { target: 'leftMiddle', tooltip: 'bottomRight' },*/
+				target: 'mouse', adjust: { mouse: true }
+			},
+			hide: { fixed: true },
+			style: { background: 'none', name: 'light', border: { width: 0 } }
+		});
+	});
+	
+	$('.wpas-site-rates li a, .wpa-control, .filterButtons a').each(function(){
+		$(this).qtip({
+			content: $(this).attr('data-title'),
+			position: { target: 'mouse', adjust: { mouse: true } },
+			hide: { fixed: true },
+			style: { name: 'blue' }
+		});
+	});
+	
+	$('.single-site .wpas-site-syndicate li').each(function(){
+		$(this).qtip({
+			content: $(this).find('.wpas-people-places'),
+			position: { corner: { target: 'leftMiddle', tooltip: 'rightMiddle' } },
+			hide: { fixed: true },
+			style: { background: 'none', width: 70, name: 'light', border: { width: 0 } }
+		});
+	});
+	
+	$('.single-site .wpas-site-team li').each(function(){
+		$(this).qtip({
+			content: $(this).find('.wpas-people-places'),
+			position: { corner: { target: 'leftMiddle', tooltip: 'rightMiddle' } },
+			hide: { fixed: true },
+			style: { background: 'none', width: 70, name: 'light', border: { width: 0 } }
+		});
+	});
+	
+	$('.sites-subscription').each(function(){
+		$(this).qtip({
+			content: $(this).find('.socials'),
+			position: { corner: { target: 'leftMiddle', tooltip: 'rightMiddle' } },
+			hide: { fixed: true },
+			style: { background: 'none', width: 70, name: 'light', border: { width: 0 } }
+		});
+	});
+	
+	$(".wpa-watch-button").colorbox({inline:true, href:$(this).attr('href')});
 });

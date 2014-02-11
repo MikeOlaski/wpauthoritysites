@@ -26,6 +26,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-thumbnail',
 			'type' => 'upload',
 			'group' => $shortname.'-site',
+			'programmatic' => true,
 			'readonly' => true,
 			'format' => 'image'
 		);
@@ -36,6 +37,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-site',
 			'desc' => 'by Site Auditor',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -66,6 +68,7 @@ function wpa_default_metrics(){
 			'desc' => 'by Site Auditor',
 			'programmatic' => true,
 			'readonly' => true,
+			'score' => true,
 			'format' => 'date'
 		);
 		
@@ -112,6 +115,8 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-domain-age',
 			'type' => 'text',
 			'group' => $shortname.'-site',
+			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -120,7 +125,9 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-domain-expiry',
 			'type' => 'text',
 			'group' => $shortname.'-site',
-			'readonly' => true
+			'readonly' => true,
+			'score' => true,
+			'format' => 'date'
 		);
 		
 		$fields[$shortname.'-server-location'] = array(
@@ -239,6 +246,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-contributors',
 			'type' => 'text',
 			'group' => $shortname.'-team',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -247,6 +255,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-authors',
 			'type' => 'text',
 			'group' => $shortname.'-team',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -255,6 +264,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-editor',
 			'type' => 'text',
 			'group' => $shortname.'-team',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -287,9 +297,17 @@ function wpa_default_metrics(){
 		$fields[$shortname.'-framework-system-host'] = array(
 			'name' => 'Host',
 			'id' => $shortname.'-framework-system-host',
-			'type' => 'text',
+			'type' => 'select',
 			'group' => $shortname.'-framework',
-			'readonly' => true
+			'score' => true,
+			'readonly' => true,
+			'options' => array(
+				'amazon' => 'Amazon',
+				'liquid' => 'Liquid',
+				'wpengine' => 'WPEngine',
+				'hostgator' => 'HostGator',
+				'bluehost' => 'BlueHost'
+			)
 		);
 		
 		$fields[$shortname.'-framework-system-caching'] = array(
@@ -297,6 +315,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-framework-system-caching',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -305,6 +324,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-framework-system-cdn',
 			'type' => 'text',
 			'group' => $shortname.'-framework',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -422,11 +442,21 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 		
+		$fields[$shortname.'-authors-aggregated-authority'] = array(
+			'name' => 'Authors Aggregated Authority (Klout)',
+			'id' => $shortname.'-authors-aggregated-authority',
+			'type' => 'text',
+			'group' => $shortname.'-authors',
+			'score' => true,
+			'readonly' => true
+		);
+		
 		$fields[$shortname.'-authors-number'] = array(
 			'name' => 'No. of Authors',
 			'id' => $shortname.'-authors-number',
 			'type' => 'text',
 			'group' => $shortname.'-authors',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -435,6 +465,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-authors-bio-type',
 			'type' => 'text',
 			'group' => $shortname.'-authors',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -443,6 +474,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-authors-byline-type',
 			'type' => 'text',
 			'group' => $shortname.'-authors',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -451,6 +483,16 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-authors-page-type',
 			'type' => 'text',
 			'group' => $shortname.'-authors',
+			'score' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-authors-markup'] = array(
+			'name' => 'Authorhip Markup',
+			'id' => $shortname.'-authors-markup',
+			'type' => 'text',
+			'group' => $shortname.'-authors',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -485,14 +527,6 @@ function wpa_default_metrics(){
 			'group' => $shortname.'-authors',
 			'readonly' => true
 		);
-		
-		$fields[$shortname.'-authors-score'] = array(
-			'name' => 'Authors Score',
-			'id' => $shortname.'-authors-score',
-			'type' => 'text',
-			'group' => $shortname.'-authors',
-			'readonly' => true
-		);
 		/********	END OF AUTHORS	 **********/
 		
 		/**********		CONTENT 	***********/
@@ -504,11 +538,48 @@ function wpa_default_metrics(){
 			'readonly' => true
 		);
 		
+		$fields[$shortname.'-content-pages-majestic'] = array(
+			'name' => 'No. of Pages indexed (Majestic)',
+			'id' => $shortname.'-content-pages-majestic',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'score' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-content-pages-google'] = array(
+			'name' => 'No. of Pages indexed (Google)',
+			'id' => $shortname.'-content-pages-google',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'score' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-content-post-frequency'] = array(
+			'name' => 'No. of Post frequency',
+			'id' => $shortname.'-content-post-frequency',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'score' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-content-post-types'] = array(
+			'name' => 'No. of Post Types',
+			'id' => $shortname.'-content-post-types',
+			'type' => 'text',
+			'group' => $shortname.'-content',
+			'score' => true,
+			'readonly' => true
+		);
+		
 		$fields[$shortname.'-content-pillars'] = array(
-			'name' => 'Pillars - Silos',
+			'name' => 'No. of Defined Pillars - Silos',
 			'id' => $shortname.'-content-pillars',
 			'type' => 'text',
 			'group' => $shortname.'-content',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -517,6 +588,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-content-type-snippet-count',
 			'type' => 'text',
 			'group' => $shortname.'-content',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -525,14 +597,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-content-posts-snippet-count',
 			'type' => 'text',
 			'group' => $shortname.'-content',
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-content-score'] = array(
-			'name' => 'Content Score',
-			'id' => $shortname.'-content-score',
-			'type' => 'text',
-			'group' => $shortname.'-content',
+			'score' => true,
 			'readonly' => true
 		);
 		/********	END OF CONTENT	 **********/
@@ -609,6 +674,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-valuation-ttm',
 			'type' => 'text',
 			'group' => $shortname.'-valuation',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -617,6 +683,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-valuation-income',
 			'type' => 'text',
 			'group' => $shortname.'-valuation',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -625,6 +692,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-valuation-expenses',
 			'type' => 'text',
 			'group' => $shortname.'-valuation',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -713,6 +781,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-links',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -722,6 +791,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-links',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -740,6 +810,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-links',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		/********	 END OF LINKS	 **********/
@@ -762,6 +833,7 @@ function wpa_default_metrics(){
 			'readonly' => true,
 			'followers' => true,
 			'format' => 'meta',
+			'score' => true,
 			'meta_value' => $shortname.'-facebook-followers'
 		);
 		
@@ -774,6 +846,7 @@ function wpa_default_metrics(){
 			'readonly' => true,
 			'followers' => true,
 			'format' => 'meta',
+			'score' => true,
 			'meta_value' => $shortname.'-twitter-followers'
 		);
 		
@@ -786,6 +859,7 @@ function wpa_default_metrics(){
 			'readonly' => true,
 			'followers' => true,
 			'format' => 'meta',
+			'score' => true,
 			'meta_value' => $shortname.'-youtube-followers'
 		);
 		
@@ -798,6 +872,7 @@ function wpa_default_metrics(){
 			'readonly' => true,
 			'followers' => true,
 			'format' => 'meta',
+			'score' => true,
 			'meta_value' => $shortname.'-googleplus-followers'
 		);
 		
@@ -810,6 +885,7 @@ function wpa_default_metrics(){
 			'readonly' => true,
 			'followers' => true,
 			'format' => 'meta',
+			'score' => true,
 			'meta_value' => $shortname.'-linkedin-followers'
 		);
 		
@@ -822,6 +898,7 @@ function wpa_default_metrics(){
 			'readonly' => true,
 			'followers' => true,
 			'format' => 'meta',
+			'score' => true,
 			'meta_value' => $shortname.'-pinterest-followers'
 		);
 		
@@ -831,6 +908,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-subscribers',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -839,6 +917,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-email',
 			'type' => 'text',
 			'group' => $shortname.'-subscribers',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -847,6 +926,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-websites',
 			'type' => 'text',
 			'group' => $shortname.'-subscribers',
+			'score' => true,
 			'readonly' => true
 		);
 		/********	 END OF SUBSCRIBERS	 **********/
@@ -865,6 +945,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-buzz-recent-comments',
 			'type' => 'text',
 			'group' => $shortname.'-buzz',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -881,6 +962,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-buzz-recent-shares',
 			'type' => 'text',
 			'group' => $shortname.'-buzz',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -889,6 +971,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-buzz-klout',
 			'type' => 'text',
 			'group' => $shortname.'-buzz',
+			'score' => true,
 			'readonly' => true
 		);
 		/********	 END OF BUZZ	 **********/
@@ -907,6 +990,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-shares-site-googleplus',
 			'type' => 'text',
 			'group' => $shortname.'-shares',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -915,6 +999,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-shares-site-facebook',
 			'type' => 'text',
 			'group' => $shortname.'-shares',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -923,6 +1008,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-shares-site-twitter',
 			'type' => 'text',
 			'group' => $shortname.'-shares',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -931,6 +1017,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-shares-site-linkedin',
 			'type' => 'text',
 			'group' => $shortname.'-shares',
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -940,6 +1027,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-shares',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -949,6 +1037,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-shares',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -958,6 +1047,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-shares',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -967,6 +1057,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-shares',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		/********	 END OF SHARES	  **********/
@@ -1118,6 +1209,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-authority-level',
 			'type' => 'text',
 			'group' => $shortname.'-scores',
+			'score' => true,
 			'readonly' => true
 		);
 		/********	 END OF SCORES	  **********/
@@ -1137,6 +1229,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-ranks',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -1146,6 +1239,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-ranks',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
@@ -1155,28 +1249,53 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-ranks',
 			'programmatic' => true,
+			'score' => true,
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-authority-rank'] = array(
+		/*$fields[$shortname.'-authority-rank'] = array(
 			'name' => 'Authority Rank',
 			'id' => $shortname.'-authority-rank',
 			'type' => 'text',
 			'group' => $shortname.'-ranks',
 			'readonly' => true
-		);
+		);*/
 		
 		$fields[$shortname.'-tachnorati-rank'] = array(
 			'name' => 'Technorati Rank',
 			'id' => $shortname.'-tachnorati-rank',
 			'type' => 'text',
 			'group' => $shortname.'-ranks',
+			'score' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-quantcast-rank'] = array(
+			'name' => 'Quantcast Rank',
+			'id' => $shortname.'-quantcast-rank',
+			'type' => 'text',
+			'group' => $shortname.'-ranks',
+			'score' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-google-rank'] = array(
+			'name' => 'Google Page Rank',
+			'id' => $shortname.'-google-rank',
+			'type' => 'text',
+			'group' => $shortname.'-ranks',
+			'score' => true,
 			'readonly' => true
 		);
 		/********	 END OF RANKS	 **********/
 	
 	$cfields = get_option('wpa_metrics');
-	$fields = wp_parse_args( $cfields, $fields);
+	
+	if( empty($cfields) and !is_array($cfields) )
+		$cfields = array();
+	
+	// $fields = wp_parse_args( $cfields, $fields);
+	$fields = array_replace_recursive( $fields, $cfields );
 	
 	return $fields;
 }
@@ -1228,6 +1347,7 @@ function wpa_get_metrics_group_by_id($group_id){
 
 function wpa_get_metrics_group_by_category($category){
 	$metrics = wpa_default_metrics();
+	$category = str_replace('awp-', '', $category);
 	
 	$groups = array();
 	foreach($metrics as $field){
@@ -1260,7 +1380,30 @@ function wpa_get_metrics_by_group($group_id){
 	return $groups;
 }
 
-function wpa_get_editable_metrics(){
+function wpas_get_metrics_with_score($group_id = ''){
+	if($group_id){
+		$objects = wpa_get_metrics_by_group($group_id);
+	} else {
+		$objects = wpa_default_metrics();
+	}
+	
+	$metrics = array();
+	
+	foreach( $objects as $id=>$metric ){
+		if($metric['type'] == 'subheading'){
+			continue;
+		} elseif($metric['type'] == 'heading') {
+			continue;
+		} elseif($metric['type'] == 'separator') {
+			continue;
+		} else {
+			if( $metric['score'] == true ){
+				$metrics[$metric['id']] = $metric['id'];
+			}
+		}
+	}
+	
+	return $metrics;
 }
 
 function wpa_get_metrics_by_id($id){
@@ -1301,6 +1444,16 @@ function wpa_get_host( $url ){
 	return $urlData['host'];
 }
 
+function Is_Valid_Url($url){
+	$allowed = array(200, 302, 304);
+	$exists = true;
+    $file_headers = @get_headers($URL);
+	if(!in_array($file_headers[0], $allowed)){
+		$exists = false;
+	}
+    return $exists;
+}
+
 function wpas_get_social_counts($social, $url, $page){
 	switch($social){
 		case 'Twitter':
@@ -1330,6 +1483,9 @@ function wpas_get_tweets($url){
 }
 
 function wpas_get_likes($page) {
+	if( $page == '' )
+		return 0;
+	
 	$json_string = file_get_contents('http://graph.facebook.com/?ids=' . $page);
 	$json = json_decode($json_string, true);
 	

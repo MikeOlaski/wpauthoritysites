@@ -553,7 +553,7 @@ class Sites_CPT{
 				$check4Au
 			);
 		$content .= '</ul>';
-		
+		$content .= '<p class="error" style="color:#F00;"></p>';
         $content .= sprintf('<img src="%s" class="preloader" align="preload" style="display:none;" />', PLUGINURL . '/images/preload.gif');
 		
 		echo $content;
@@ -785,7 +785,7 @@ class Sites_CPT{
 							?><input type="text" class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>_upload" value="<?php echo $metavalue; ?>" /><?php
 					}
 					
-					?> <span class="button manual_update_button">Update</span>
+					?> <span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span>
                     <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader" style="display:none;"><?php
 					
 					if( $control['programmatic'] ){
@@ -835,7 +835,7 @@ class Sites_CPT{
 					?><label for="<?php echo $metaID.'-followers'; ?>"><?php echo $control['name'].' followers' ?></label>
 					<div class="awp-controls">
                     	<input type="text" class="regular-text small" name="<?php echo $metaname; ?>" id="<?php echo $metaID.'-followers'; ?>" value="<?php echo get_post_meta($post_id, $metaname, true); ?>" />
-                        <span class="button manual_update_button">Update</span>
+                        <span class="button manual_update_button" data-field="#<?php echo $metaID.'-followers'; ?>">Update</span>
                         <span class="button run_audit_button">Audit</span>
                         
                         <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader" style="display:none;"><?php
@@ -853,6 +853,21 @@ class Sites_CPT{
 						);
 						
 					?></div><?php
+				}
+				
+				if($control['score']){
+					$metaname = $metaname.'-score';
+					$metavalue = get_post_meta($post_id, $metaname, true);
+					$metaID = $metaID.'-score';
+					
+					?><label for="<?php echo $metaID; ?>"><?php _e('Score', 'wpas'); ?></label>
+					<div class="awp-controls">
+                    	<input type="text" class="regular-text score" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>" value="<?php echo ($metavalue) ? $metavalue : ''; ?>" />
+                        <span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span>
+                        <span class="button compute_score_button">Calculate</span>
+                        <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader alignright" style="display:none;">
+                        <span class="description"><?php echo sprintf(__('Computed score of %s'), $control['name']); ?></span>
+					</div><?php
 				}
 				
                 ?><div class="clear"></div><?php
@@ -885,6 +900,10 @@ class Sites_CPT{
 					update_post_meta( $post_id, $fl['id'], $_POST[$fl['id']] );
 				} else {
 					delete_post_meta( $post_id, $fl['id'] );
+				}
+				
+				if($fl['score']){
+					update_post_meta( $post_id, $fl['id'].'-score', $_POST[$fl['id'] . '-score']);
 				}
 				
 				if($fl['programmatic']){

@@ -16,10 +16,12 @@ load_template( trailingslashit( PLUGINPATH ) . 'classes/TwitterAPIExchange.php' 
 load_template( trailingslashit( PLUGINPATH ) . 'classes/whois.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/majestic/APIService.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/grabzit/GrabzItClient.class.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/external/subscribe.php' );
 
 load_template( trailingslashit( PLUGINPATH ) . 'functions.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/simple_html_dom.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/admin-ajax.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/domainage.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/posts.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/cron.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/integration.class.php' );
@@ -53,6 +55,7 @@ function wpas_set_options() {
 	add_option('awp_requests', array());
 	add_option('awp_settings', array());
 	add_option('wpa_metrics', array());
+	add_option('wpas_subsriber', array());
 	
 	// Default Authority Business Builder departments
 	add_option('bb_builder_depts', array(
@@ -678,16 +681,18 @@ function wpas_options_handle(){
 		$fields = get_option('wpa_metrics'); // wpa_default_metrics();
 		if( empty($fields) ){ $fields = array(); }
 		
+		
+		//$fields[$wpa_metrics['id']]['id'] = $wpa_metrics['id'];
+		//$fields[$wpa_metrics['id']]['type'] = $wpa_metrics['type'];
+		//$fields[$wpa_metrics['id']]['group'] = $wpa_metrics['group'];
+		
 		$fields[$wpa_metrics['id']]['name'] = $wpa_metrics['name'];
-		$fields[$wpa_metrics['id']]['id'] = $wpa_metrics['id'];
-		$fields[$wpa_metrics['id']]['type'] = $wpa_metrics['type'];
-		$fields[$wpa_metrics['id']]['group'] = $wpa_metrics['group'];
 		$fields[$wpa_metrics['id']]['description'] = $wpa_metrics['description'];
-		$fields[$wpa_metrics['id']]['tip'] = $wpa_metrics['tip'];
 		$fields[$wpa_metrics['id']]['data_source'] = $wpa_metrics['data_source'];
 		$fields[$wpa_metrics['id']]['unit'] = $wpa_metrics['unit'];
+		$fields[$wpa_metrics['id']]['tip'] = $wpa_metrics['tip'];
 		
-		if( $wpa_metrics['readonly'] ){
+		/*if( $wpa_metrics['readonly'] ){
 			$fields[$wpa_metrics['id']]['readonly'] = true;
 		}
 		
@@ -707,11 +712,15 @@ function wpas_options_handle(){
 			$fields[$wpa_metrics['id']]['link_text'] = $wpa_metrics['link_text'];
 		}
 		
+		if( $wpa_metrics['score'] ){
+			$fields[$wpa_metrics['id']]['score'] = true;
+		}*/
+		
 		// Record and save metrics
 		$return = update_option('wpa_metrics', $fields);
 		
 		// Redirect to metrics page
-		$redirect = isset($_POST['redirect']) ? $_POST['redirect'] : admin_url('admin.php?page=wpauthority&tab=metrics&settings-updated=1');
+		$redirect = isset($_POST['redirect']) ? $_POST['redirect'] : admin_url('admin.php?page=wpauthority&tab=metrics&settings-updated=true');
 		if( $return ){
 			header('Location:'.$redirect); exit;
 		} else {
@@ -777,7 +786,6 @@ function wpas_options_handle(){
 }
 
 function wpas_register_pages(){
-	remove_submenu_page('edit.php?post_type=site', 'post-new.php?post_type=site');
 	remove_submenu_page('edit.php?post_type=site', 'edit-tags.php?taxonomy=site-category&post_type=site');
 	remove_submenu_page('edit.php?post_type=site', 'edit-tags.php?taxonomy=site-tag&post_type=site');
 	remove_submenu_page('edit.php?post_type=site', 'edit-tags.php?taxonomy=site-action&post_type=site');
@@ -788,10 +796,45 @@ function wpas_register_pages(){
 	remove_submenu_page('edit.php?post_type=site', 'edit-tags.php?taxonomy=site-location&post_type=site');
 	remove_submenu_page('edit.php?post_type=site', 'edit-tags.php?taxonomy=site-assigment&post_type=site');
 	
-	add_submenu_page( 'edit.php?post_type=site', 'Add New Site', 'Add New', 'manage_options', 'post-new.php?post_type=site' );
-	add_submenu_page( 'edit.php?post_type=site', 'Action Tags', 'Action Tags', 'manage_options', 'javascript:void(0);' );
-	add_submenu_page( 'edit.php?post_type=site', 'Import', 'Import', 'manage_options', 'wpa_import', 'wpas_import_callback' );
-	add_submenu_page( 'edit.php?post_type=site', 'Settings', 'Settings', 'manage_options', 'wpauthority', 'wpas_admin_pages' );
+	add_submenu_page(
+		'edit.php?post_type=site',
+		__('Action Tags', 'wpas'),
+		__('Action Tags', 'wpas'),
+		'manage_options',
+		'javascript:void(0);'
+	);
+	add_submenu_page(
+		'edit.php?post_type=site',
+		__('Revisions', 'wpas'),
+		__('Revisions', 'wpas'),
+		'manage_options',
+		'wpas_metric_revisions',
+		'wpas_admin_pages_callback'
+	);
+	add_submenu_page(
+		'edit.php?post_type=site',
+		__('Subscribers', 'wpas'),
+		__('Subscribers', 'wpas'),
+		'manage_options',
+		'wpas_site_subscribers',
+		'wpas_admin_pages_callback'
+	);
+	add_submenu_page(
+		'edit.php?post_type=site',
+		__('Import', 'wpas'),
+		__('Import', 'wpas'),
+		'manage_options',
+		'wpa_import',
+		'wpas_admin_pages_callback'
+	);
+	add_submenu_page(
+		'edit.php?post_type=site',
+		__('Settings', 'wpas'),
+		__('Settings', 'wpas'),
+		'manage_options',
+		'wpauthority',
+		'wpas_admin_pages'
+	);
 	
 	add_action( "admin_print_scripts", 'wpas_admin_scripts' );
 }
@@ -801,142 +844,29 @@ function wpas_admin_scripts(){
 	wp_enqueue_style( 'awpstyles', PLUGINURL . 'css/admin.css' );
 }
 
-function wpas_import_callback(){
+function wpas_admin_pages_callback(){
+	$screen = get_current_screen();;
 	
 	?><div class="wrap">
-        <div id="icon-ows" class="icon32"><img src="<?php echo PLUGINURL; ?>images/icon32.jpg" alt="WP Sites" /></div>
-        <h2><?php _e('Import', 'wpa'); ?></h2><div>&nbsp;</div><?php
-        
-        if( isset( $_REQUEST['settings-updated'] ) ){
-            if( $_REQUEST['settings-updated'] == 'true' ){
-                ?><div id="setting-error" class="updated settings-error">
-                    <p><strong>Request complete. links was recorded to the database.</strong></p>
-                </div><?php
-            } else {
-                ?><div id="setting-error" class="error settings-error">
-                    <p><strong><?php
-                        switch($_REQUEST['message']){
-                            case '1':
-                                _e('Request unseccessful. Please setup the <a href="'. admin_url('admin.php?page=wpauthority') .'">API Settings</a>.');
-                                break;
-                            case '2':
-                                _e('Request unseccessful. API Server error.');
-                                break;
-                            case '3':
-                                _e('Upload error. file is broken.');
-                                break;
-                            case '4':
-                                _e('Please upload a valid CSV file.');
-                                break;
-                            case '5':
-                                _e('Error. No file choosen.');
-                                break;
-                            default:
-                                _e('Request unsuccesful. 0 links recorded.');
-                                break;
-                        }
-                    ?></strong></p>
-                </div><?php
-            }
-        }
-        
-        ?><form name="awp_settings" method="post" action="<?php admin_url('edit.php?post_type=site&page=wpauthority'); ?>" enctype="multipart/form-data">
-        
-            <h3>Alexa AWIS API Request</h3>
-            
-            <table class="form-table">
-                <tr>
-                    <th scope="row"><label for="subject"><strong>Subject Name</strong></label></th>
-                    <td>
-                        <input type="text" name="subject" id="subject" value="" class="regular-text" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="rank_start"><strong>Start on Rank</strong></label></th>
-                    <td>
-                        <input type="text" name="rank_start" id="rank_start" value="" class="regular-text" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="request_limit"><strong>Number of Request</strong></label></th>
-                    <td>
-                        <input type="text" name="request_limit" id="request_limit" value="" class="regular-text" /><br />
-                        <span class="description">Response time depends on the number of request.</span>
-                    </td>
-                </tr>
-            </table>
-            
-            <p><input type="submit" value="Make Request" class="button-primary" id="submit" name="awp_request" /></p>
-            
-            <h3>Import a CSV</h3>
-            
-            <table class="form-table">
-            	<tr valign="top" style="display:none;">
-                	<th scope="row" colspan="2"><label>
-                    	<input type="checkbox" id="has_custom_row" value="1" /> <?php _e('Start on a custom row'); ?>
-                    </label></th>
-                </tr>
-                
-                <tr valign="top" class="csv_cutom_row" style="display:none;">
-                	<th scope="row"><label for="row_start"><strong><?php _e('Starting row'); ?></strong></label></th>
-                    <td><input type="text" name="csv_start_row" id="row_start" value="" /></td>
-                </tr>
-                
-                <tr valign="top" class="csv_cutom_row" style="display:none;">
-                	<th scope="row"><label for="row_end"><strong><?php _e('End row'); ?></strong></label></th>
-                    <td><input type="text" name="csv_limit_row" id="row_end" value="" /></td>
-                </tr>
-                
-                <tr valign="top">
-                    <th scope="row">
-                    	<label for="awp_file"><strong>Upload CSV</strong></label><br>
-                        <small class="description"><a href="<?php echo PLUGINURL; ?>/uploads/cron.csv" target="_blank">Click here</a> to download a sample CSV file format.</small>
-                    </th>
-                    <td align="top">
-                        <input type="file" name="awp_file" id="awp_file" value="" class="regular-text" />
-                        <input type="submit" value="Upload" class="button-primary" id="submit" name="awp_upload" />
-                        <br /><span class="description">Maximum of <?php echo (int)(ini_get('upload_max_filesize')); ?>mb filesize.</span>
-                    </td>
-                </tr>
-            </table>
-            
-            <h3>Bulk Add Import</h3>
-            
-            <table class="form-table">
-            	<tr>
-                	<th scope="row">
-                    	<label for="awp_domain"><strong><?php _e('Domains', 'wpa'); ?></strong></label><br>
-                        <small class="description">One per line</small>
-                    </th>
-                    <td><textarea name="awp_domain" id="awp_domain" class="large-text" rows="7"></textarea></td>
-                </tr>
-                <tr>
-                	<th scope="row">
-                    	<label for="awp_domain_tags"><strong><?php _e('Tags', 'wpa'); ?></strong></label><br>
-                        <small class="description">Separate each tag with comma</small>
-                    </th>
-                    <td>
-                    	<input type="text" name="awp_domain_tags" id="awp_domain_tags" class="regular-text" value="" />
-                    </td>
-                </tr>
-            </table>
-            
-            <p><input type="submit" value="Import Domains" class="button-primary" id="submit" name="awp_import_domain" /></p>
-            
-            <h3><?php _e('BuySellAds – Crawler', 'wpa'); ?></h3>
-            
-            <table class="form-table">
-            
-            </table>
-            
-            <h3><?php _e('Technorati Crawler', 'wpa'); ?></h3>
-            
-            <table class="form-table">
-            
-            </table>
-            
-        </form>
-	</div><?php
+    <div id="icon-ows" class="icon32"><img src="<?php echo PLUGINURL; ?>images/icon32.jpg" alt="WP Sites" /></div><?php
+	
+	switch( $screen->id ):
+		case 'site_page_wpas_metric_revisions':
+			load_template( trailingslashit( PLUGINPATH ) . 'admin/revisions.php' );
+		break;
+		
+		case 'site_page_wpa_import':
+			load_template( trailingslashit( PLUGINPATH ) . 'admin/import.php' );
+		break;
+		
+		case 'site_page_wpas_site_subscribers':
+			load_template( trailingslashit( PLUGINPATH ) . 'admin/subscribers.php' );
+		break;
+	endswitch;
+	
+	?></div><?php
+	
+	// wp_die('<pre>' . print_r($screen, true) . '</pre>');
 }
 
 function wpas_admin_pages(){

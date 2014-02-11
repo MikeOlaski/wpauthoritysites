@@ -19,9 +19,30 @@ add_action('wp_ajax_nopriv_submit_departments', 'submit_departments_callback');
 
 // Update single metric field
 add_action('wp_ajax_update_metric', 'update_metric_callback');
+add_action('wp_ajax_calculate_metric', 'calculate_metric_score');
 add_action('wp_ajax_audit_metric', 'audit_metric_callback');
 
 define('GOOGLE_MAGIC', 0xE6359A60);
+
+function calculate_metric_score(){
+	if( !isset($_POST['id']) )
+		die();
+	
+	if( !isset($_POST['field']) )
+		die();
+	
+	$post_id = $_POST['id'];
+	$metric = $_POST['field'];
+	
+	$score = wpas_calculate_score($post_id, $metric);
+	
+	if( $score ){
+		update_post_meta($post_id, $metric, $score);
+		echo $score;
+	}
+	
+	die();
+}
 
 function audit_metric_callback(){
 	if( !isset($_POST['id']) )
@@ -42,9 +63,11 @@ function audit_metric_callback(){
 		update_post_meta( $_POST['id'], $_POST['field'].'-updated', date('c'));
 		update_post_meta( $_POST['id'], $_POST['field'].'-through', 'programmatically');
 		update_post_meta( $_POST['id'], $_POST['field'].'-author', $user_ID);
+		
+		echo $result;
 	}
 	
-	if( $return ){ echo $result; die(); } else { die(); }
+	die();
 }
 
 function update_metric_callback(){
@@ -234,6 +257,7 @@ function evaluate_js_callback( $args = null ){
 		'date-founded' => 'awp-date',
 		'location' => 'awp-location',
 		'language' => 'awp-language',
+		'domain-age' => 'awp-domain-age',
 		
 		// Shares and Likes
 		'googleplus' => 'awp-shares-goolgeplus',
@@ -279,13 +303,29 @@ function evaluate_js_callback( $args = null ){
 		'speed' => 'awp-page-speed'
 	);
 	
-	if( isset($_POST) && '' != $_POST['url'] ){
+	if( isset($_POST['url']) ){
 		$url = $_POST['url'];
 		$id = $_POST['id'];
 		$die = true;
 	} else {
 		$url = $args['url'];
 		$id = $args['id'];
+	}
+	
+	// Check for valid URL
+	if(!filter_var($url, FILTER_VALIDATE_URL) ){
+		echo 'Invalid URL. Please provide a valid web address.'; die();
+	}
+	
+	// Check if URL is not 404
+	$valid = Is_Valid_Url($url);
+	if($valid){
+		echo 'Invalid URL. Please check if the domain is properly written.' . $valid; die();
+	}
+	
+	// Check if ID is not empty and valid
+	if(empty($id) or $id == '' or $id == null){
+		echo 'Please publish this post first then Run Auditor again.'; die();
 	}
 	
 	// Get values of each fields
@@ -404,8 +444,55 @@ function evaluate_js_callback( $args = null ){
 function awp_evaluate($url, $for, $pID = ''){
 	switch( $for ){
 		// Site
+		case 'awp-thumbnail':
+			// Create thumbnail
+			$grabApiKey = 'OTcwZTYzOTBmZDEyNDdhZWE3NjFhOTRlNzdmZTRhMmI=';
+			$grabApiSecret = 'Nz9HTT9yMhk/SVRAPzM5IklgPwhFPz8/HT8/GT83Pwo=';
+			$grabzIt = new GrabzItClient($grabApiKey, $grabApiSecret);
+			
+			// Take a screenshot
+			/* Upgrade your acount from GrabzIt to allow you
+			 * to grab a custom size of the screenshot..
+			 * $grabzIt->SetImageOptions( $url, null, null, null, '720', '480' );
+			 * The maximum size your current package allows is 200.
+			 */
+			$grabzIt->SetImageOptions( $url, null, null, null, '500', '500' );
+			// $grabzIt->SetImageOptions( $url );
+			
+			$file = $name;
+			$filepath = PLUGINPATH . "uploads/$file.jpg";
+			$grabzIt->SaveTo($filepath);
+			
+			// Move upload file into WP Upload DIR
+			$upload_dir = wp_upload_dir();
+			$filename = $upload_dir['basedir'] . "/$file.jpg";
+			$fileurl = $upload_dir['baseurl'] . "/$file.jpg";
+			rename($filepath, $upload_dir['basedir'] . "/$file.jpg");
+			
+			// Create attachment post
+			$wp_filetype = wp_check_filetype(basename($filename), null );
+			$attachment = array(
+				'guid' => $fileurl,
+				'post_mime_type' => $wp_filetype['type'],
+				'post_title' => preg_replace('/\.[^.]+$/', '', basename($filename)),
+				'post_content' => '',
+				'post_status' => 'inherit'
+			);
+			
+			$attach_id = wp_insert_attachment( $attachment, "$file.jpg", $id );
+			$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
+			wp_update_attachment_metadata( $attach_id, $attach_data );
+			
+			set_post_thumbnail( $pID, $attach_id );
+			
+			// Update additional Custom Fields
+			return $fileurl;
 		case 'awp-language':
 			return awp_sharecounts($url, 'language');
+		
+		case 'awp-domain-age':
+			global $domain_age;
+			return $domain_age->age(strtolower($url));
 		
 		case 'awp-location':
 			return awp_sharecounts($url, 'location');

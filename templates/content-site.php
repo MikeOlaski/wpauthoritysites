@@ -41,5 +41,3 @@ wpa_post_before();
 ?></article><!-- /.post --><?php
 
 wpa_post_after();
-
-comments_template();

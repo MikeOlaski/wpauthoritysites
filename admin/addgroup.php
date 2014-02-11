@@ -33,6 +33,9 @@ if( isset($_REQUEST['id']) && '' != $_REQUEST['id'] ){
 $editable = ($field['readonly']) ? false : true;
 
 ?><form name="awp_settings" method="post" action="<?php echo admin_url('edit.php?post_type=site&page=wpauthority'); ?>">
+
+	<h2><em><?php echo $field['name']; ?></em>: metric details</h2>
+	
     <table class="form-table">
     	<tr valign="top">
         	<th scope="row"><label for="wpas_description"><?php _e('Description', 'wpas'); ?></label></th>
@@ -79,6 +82,10 @@ $editable = ($field['readonly']) ? false : true;
 	
 	if($field['link_text']){
 		?><input type="hidden" name="wpa_metrics[format]" value="<?php echo $field['link_text']; ?>" /><?php
+	}
+	
+	if($field['score']){
+		?><input type="hidden" name="wpa_metrics[score]" value="1" /><?php
 	}
     
     ?><input type="submit" value="Save Field" class="button-primary" id="submit" name="wpa_save_metric" />
