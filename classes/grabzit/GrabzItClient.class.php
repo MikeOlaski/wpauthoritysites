@@ -138,6 +138,8 @@ class GrabzItClient
 	*/
 	public function SaveTo($saveToFile)
 	{
+		set_time_limit(500); //  Increased the timeout
+		
 		$id = $this->Save();
 
 		//Wait for it to be ready.

@@ -1,16 +1,40 @@
 jQuery(document).ready(function($) {
 	
+	$('.attach_content_button').click(function(e) {
+        if( $(this).hasClass('disabled') ){
+			$(this).removeClass('disabled').siblings('.preloader').hide();
+			return;
+		} else {
+			button = $(this);
+			button.addClass('disabled');
+			loader = $('.wpas-control-loader[rel=template]').clone();
+			loader.appendTo(button.parents('.awp-control-group')).show();
+			
+			var id = $('#post_ID').val();
+			var input = $('input[name='+ button.attr('data-target') + ']');
+			var field = input.attr('name');
+		}
+		
+		e.preventDefault();
+    });
+	
+	if( $.fn.select2 ){
+		$(".wpas-select").select2({ allowClear: true });
+	}
+	
 	$('.compute_score_button').click(function(e) {
         if( $(this).hasClass('disabled') ){
 			$(this).removeClass('disabled').siblings('.preloader').hide();
 			return;
 		} else {
 			button = $(this);
-			button.addClass('disabled').siblings('.preloader').show();
+			button.addClass('disabled');
+			loader = $('.wpas-control-loader[rel=template]').clone();
 			
 			var id = $('#post_ID').val();
 			var field = button.siblings('input:first-child').attr('name');
 			var input = $('input[name=' + field + ']');
+			loader.appendTo(button.parents('.awp-control-group')).show();
 			
 			var data = {
 				action: 'calculate_metric',
@@ -21,11 +45,13 @@ jQuery(document).ready(function($) {
 			jQuery.post(WPAJAX_OBJ.ajax_url, data, function(response) {
 				if( response ){
 					input.val( response );
-					button.removeClass('disabled').siblings('.preloader').hide();
-					button.parents('.awp-control-group').css('background-color','yellow').animate({backgroundColor:"#F8F8F8"},1000);
 				}
 				
-				console.log( response );
+				button.removeClass('disabled');
+				button.parents('.awp-control-group')
+					.css('background-color','yellow')
+					.animate({backgroundColor:"#F8F8F8"},1000)
+					.find('.wpas-control-loader').hide();
 			});
 		}
 		
@@ -38,13 +64,13 @@ jQuery(document).ready(function($) {
 			return;
 		} else {
 			button = $(this);
-			button.addClass('disabled').siblings('.preloader').show();
+			button.addClass('disabled');
+			loader = $('.wpas-control-loader[rel=template]').clone();
 			
 			var id = $('#post_ID').val();
 			var field = $( $(this).attr('data-field') ).attr('name');
 			var value = $( $(this).attr('data-field') ).val();
-			
-			console.log( value );
+			loader.appendTo(button.parents('.awp-control-group')).show();
 			
 			var data = {
 				action: 'update_metric',
@@ -55,11 +81,16 @@ jQuery(document).ready(function($) {
 			
 			jQuery.post(WPAJAX_OBJ.ajax_url, data, function(response) {
 				if( response == 'true' ){
-					button.removeClass('disabled').siblings('.preloader').hide();
-					button.parents('.awp-control-group').css('background-color','yellow').animate({backgroundColor:"#F8F8F8"},1000);
+					// nothing
+				} else {
+					alert('Update metric failed. Try again.');
 				}
 				
-				console.log( response );
+				button.removeClass('disabled');
+				button.parents('.awp-control-group')
+					.css('background-color','yellow')
+					.animate({backgroundColor:"#F8F8F8"},1000)
+					.find('.wpas-control-loader').hide();
 			});
 		}
 		
@@ -72,13 +103,15 @@ jQuery(document).ready(function($) {
 			return;
 		} else {
 			button = $(this);
-			button.addClass('disabled').siblings('.preloader').show();
+			button.addClass('disabled');
+			loader = $('.wpas-control-loader[rel=template]').clone();
 			
 			var id = $('#post_ID').val();
 			var url = $('#awp-awp-url').val();
 			var field = button.siblings('input:first-child').attr('name');
 			var input = $('input[name=' + field + ']');
 			var value = input.val();
+			loader.appendTo(button.parents('.awp-control-group')).show();
 			
 			if('' == url){ url = 'http://' + $('#title').val(); }
 			
@@ -95,11 +128,15 @@ jQuery(document).ready(function($) {
 			jQuery.post(WPAJAX_OBJ.ajax_url, data, function(response) {
 				if( response != 'false' ){
 					input.val( response );
-					button.removeClass('disabled').siblings('.preloader').hide();
-					button.parents('.awp-control-group').css('background-color','yellow').animate({backgroundColor:"#F8F8F8"},1000);
+				} else {
+					alert('Metric Audit failed! Please try again later.');
 				}
 				
-				console.log(response);
+				button.removeClass('disabled');
+				button.parents('.awp-control-group')
+					.css('background-color','yellow')
+					.animate({backgroundColor:"#F8F8F8"},1000)
+					.find('.wpas-control-loader').hide();
 			});
 		}
     });

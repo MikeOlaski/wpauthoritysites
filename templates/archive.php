@@ -325,13 +325,17 @@ get_header();
 					$post_id = get_the_ID();
 					$metrics = get_post_meta( $post_id );
 					
-					$class = (is_sticky()) ? 'sticky-site' : '';
+					$class = 'wpas';
+					$class .= (is_sticky()) ? ' sticky-site' : '';
 					$class .= (current_user_can('edit_post')) ? ' edit-enabled' : '';
 					
-					$default_img = sprintf('<span>%s</span>', __('NO IMAGE', 'wpas') ); 
+					$default_img = PLUGINURL . 'timthumb.php?a=tl&w=290&h=250&src=' . $wpa_settings['default_site_image'];
 					$attachment = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ) );
-					$attachmentURL = ($attachment) ? PLUGINURL.'/timthumb.php?src='.$attachment[0].'&w=150&h=150' : null;
-					$thumbnail = sprintf('<img src="%s" alt="%s" />', $attachmentURL, get_the_title());
+					$attachmentURL = ($attachment) ? PLUGINURL.'/timthumb.php?src='.$attachment[0].'&w=290&h=250' : null;
+					$thumbnail = sprintf(
+						'<img src="%s" alt="%s" />',
+						($attachmentURL) ? $attachmentURL : $default_img, get_the_title()
+					);
 					
 					?><article id="post-<?php the_ID(); ?>" <?php post_class($class); ?>>
 						
@@ -346,7 +350,7 @@ get_header();
 							<header class="entry-header">
 								<div class="thumbnail alignleft">
 									<a href="<?php the_permalink(); ?>"><?php
-										echo ($attachmentURL) ? $thumbnail : $default_img;
+										echo $thumbnail;
 									?></a>
                                 </div>
                                 
@@ -376,7 +380,7 @@ get_header();
                         	<a href="javascript:void(0);" class="wpas-detail-more"><?php _e('See more', 'wpas'); ?></a>
                         	<div class="wpas-detail-view-col">
                             	<a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>"><?php
-									echo ($attachmentURL) ? $thumbnail : $default_img;
+									echo $thumbnail;
 								?></a><?php
                                 wpas_get_authority_level(true, get_the_ID());
                                 

@@ -366,7 +366,7 @@ function evaluate_js_callback( $args = null ){
 		 * $grabzIt->SetImageOptions( $url, null, null, null, '720', '480' );
 		 * The maximum size your current package allows is 200.
 		 */
-		$grabzIt->SetImageOptions( $url, null, null, null, '500', '500' );
+		$grabzIt->SetImageOptions( $url, null, 500, 500, 500, 500 );
 		// $grabzIt->SetImageOptions( $url );
 		
 		$file = $name;
@@ -445,6 +445,9 @@ function awp_evaluate($url, $for, $pID = ''){
 	switch( $for ){
 		// Site
 		case 'awp-thumbnail':
+			$name = str_replace('http://', '', $url);
+			$name = str_replace('www.', '', $name);
+			
 			// Create thumbnail
 			$grabApiKey = 'OTcwZTYzOTBmZDEyNDdhZWE3NjFhOTRlNzdmZTRhMmI=';
 			$grabApiSecret = 'Nz9HTT9yMhk/SVRAPzM5IklgPwhFPz8/HT8/GT83Pwo=';

@@ -104,17 +104,33 @@ function wpa_survey_post_class( $classes ){
 	return $classes;
 }
 
+add_filter( 'excerpt_length', 'wpas_excerpt_length', 999 );
+function wpas_excerpt_length( $length ) {
+	return 40;
+}
+
 // Get featured and custom site images
-function wpa_get_image(){
+function wpas_get_image(){
 	global $post;
+	$settings = get_option('awp_settings');
 	
 	if( is_singular() ){
-		?><div class="wpa-sgl-image image-300x240"><?php
-			$post_image = get_post_meta($post->ID, 'awp-thumbnail', true);
-			if(!$post_image == ''){
-				?><img src="<?php echo $post_image; ?>" alt="<?php get_the_title($post->ID); ?>" /><?php
+		?><div class="wpas-image-screenshot"><?php
+			$thumb = get_post_meta($post->ID, 'awp-thumbnail', true);
+			$src = PLUGINURL . 'timthumb.php?a=tl&w=290&h=250&src=' . $thumb;
+			if(!$thumb == ''){
+				echo sprintf(
+					'<img src="%s" alt="%s" />',
+					$src, get_the_title($post->ID)
+				);
+			} elseif( has_post_thumbnail( $post->ID ) ) {
+				the_post_thumbnail(array(290, 250));
 			} else {
-				the_post_thumbnail('full');
+				$default = PLUGINURL . 'timthumb.php?a=tl&w=290&h=250&src=' . $settings['default_site_image'];
+				echo sprintf(
+					'<img src="%s" alt="%s" />',
+					$default, get_the_title($post->ID)
+				);
 			}
 		?></div><?php
 	}
@@ -212,7 +228,6 @@ function wpa_excerpt_more( $more ) {
 	return $more;
 }
 
-add_action('wpa_post_inside_after', 'wpa_site_footer');
 function wpa_site_footer(){
 	global $post;
 	
@@ -346,7 +361,7 @@ function wpas_site_coveraged(){
 		$shows = array_merge($generals, $directs);
 		
 		?><div class="wpa-sgl-coverage">
-			<ul class="wpa-coverage-filter alignright">
+			<ul class="wpas-coverage wpas-filter-list alignright">
 				<li class="first"><a href="javascript:void(0);" data-type="all"><?php _e('All', 'wpas'); ?></a></li>
                 <li><a href="javascript:void(0);" data-type="interviews"><?php _e('Interviews', 'wpas'); ?></a></li>
 				<li><a href="javascript:void(0);" data-type="reviews"><?php _e('Reviews', 'wpas'); ?></a></li>
@@ -365,8 +380,8 @@ function wpas_site_coveraged(){
                         jQuery('#wpa-coverage-flexslider').flexslider({
                             animation: "slide",
                             animationLoop: false,
-                            itemWidth: 175,
-                            maxItems: 5,
+                            itemWidth: 355,
+                            maxItems: 3,
                             itemMargin: 42,
                             slideshow: false,
                             controlNav: false
@@ -374,7 +389,7 @@ function wpas_site_coveraged(){
                     });
 					
 					jQuery(document).ready(function($) {
-                        $('.wpa-coverage-filter li a').click(function(e) {
+                        $('.wpas-coverage li a').click(function(e) {
 							filter = $(this).attr('data-type');
 							$('#wpa-coverage-flexslider li').each(function(i, e) {
                                 if( $(this).hasClass(filter) ){
@@ -382,6 +397,7 @@ function wpas_site_coveraged(){
 								} else {
 									$(this).hide();
 								}
+								$('ul.flex-direction-nav li').show();
                             });
 							
 							e.preventDefault();
@@ -408,7 +424,7 @@ function wpa_site_most_shared(){
 			
 			$filters = wpas_site_network_feed_categories();
 			if( $filters ){
-				?><ul class="wpas-popular-filter alignright">
+				?><ul class="wpas-popular wpas-filter-list alignright">
 					<li class="first"><a href="javascript:void(0);" data-type="all"><?php _e('All', 'wpas'); ?></a></li><?php
 					$i = 1;
 					foreach( $filters as $filter=>$label ){
@@ -424,7 +440,7 @@ function wpa_site_most_shared(){
 				?></ul><?php
 			}
 			
-			?><h3><?php _e('Most Shared Content on', 'wpas'); ?> <?php echo get_the_title($post->ID); ?>'s Network</h3>
+			?><h3><?php _e('Top Content on', 'wpas'); ?> <?php echo get_the_title($post->ID); ?></h3>
 			
 			<div id="wpas-popular-flexslider" class="wpa-flexslider flexslider"><?php
 				
@@ -437,8 +453,8 @@ function wpa_site_most_shared(){
 					jQuery('#wpas-popular-flexslider').flexslider({
 						animation: "slide",
 						animationLoop: false,
-						itemWidth: 175,
-						maxItems: 5,
+						itemWidth: 355,
+						maxItems: 3,
 						itemMargin: 42,
 						slideshow: false,
 						controlNav: false
@@ -446,7 +462,7 @@ function wpa_site_most_shared(){
 				});
 				
 				jQuery(document).ready(function($) {
-					$('.wpas-popular-filter li a').click(function(e) {
+					$('.wpas-popular li a').click(function(e) {
 						filter = $(this).attr('data-type');
 						$('#wpas-popular-flexslider li').each(function(i, e) {
 							if( $(this).hasClass(filter) ){
@@ -454,6 +470,7 @@ function wpa_site_most_shared(){
 							} else {
 								$(this).hide();
 							}
+							$('ul.flex-direction-nav li').show();
 						});
 						
 						e.preventDefault();
@@ -471,27 +488,27 @@ function wpa_audit_site_score(){
 	$fields = wpa_default_metrics();
 	
 	if( is_single() && 'site' == $post->post_type ){
-		?><div class="wpa-sgl-audits">
-			<ul class="wpa-units-filter alignright">
-				<li class="first"><a href="#">Points</a></li>
-				<li><a href="#">Grades</a></li>
-				<li><a href="#">Change</a></li>
-				<li class="last"><a href="#">Rank</a></li>
-			</ul>
+		?><div class="wpas-audits">
+			<ul class="wpas-data wpas-filter-list alignright">
+				<li class="first"><a href="javascript:void(0);" data-toggle="grade"><?php _e('Grade', 'wpas'); ?></a></li>
+                <li><a href="javascript:void(0);" data-toggle="score"><?php _e('Score', 'wpas'); ?></a></li>
+				<li><a href="javascript:void(0);" data-toggle="change score"><?php _e('Change','wpas'); ?></a></li>
+				<li class="last"><a href="javascript:void(0);" data-toggle="rank"><?php _e('Rank', 'wpas'); ?></a></li>
+			</ul><?php
 			
-			<ul class="wpa-type-filter alignright">
-				<li class="first"><a href="#">Wordpress</a></li>
-				<li><a href="#">Authority</a></li>
-				<li class="last"><a href="#">Site</a></li>
-			</ul>
+			/*<ul class="wpas-metric wpas-filter-list alignright">
+				<li class="first"><a href="javascript:voidd(0);" data-toggle="wordpress"><?php _e('Wordpress', 'wpas'); ?></a></li>
+				<li><a href="javascript:voidd(0);" data-toggle="authority"><?php _e('Authority', 'wpas'); ?></a></li>
+				<li class="last"><a href="javascript:voidd(0);" data-toggle="site"><?php _e('Site', 'wpas'); ?></a></li>
+			</ul>*/
 			
-			<h3><?php _e('Authority Audit Score'); ?></h3>
+			?><h3><?php _e('Authority Audit Score'); ?></h3>
 			
             <div id="wpa-scores" class="wpa-score-tabs">
             	<a class="wpas-score-tabs-prev" href="#">Prev</a>
 				<a class="wpas-score-tabs-next" href="#">Next</a>
 				
-				<div style="overflow: hidden; margin: 0 25px;"><?php
+				<div style="overflow: hidden; width: 100%;"><?php
             		wpas_site_metrics_grade(true, $post->ID);
 				?></div>
                 
@@ -530,49 +547,66 @@ function wpa_audit_site_score(){
 							<h3><?php echo $head['name']; ?></h3>
 							<table class="wpa-metrics-table">
 								<thead><tr>
-									<th class="metric"><?php _e('Metric Name', 'wpas'); ?></th>
-									<th class="result"><?php _e('Audit Result', 'wpas'); ?></th>
-									<th class="score"><?php _e('Score', 'wpas'); ?></th>
-									<th class="solutions"><?php _e('Solutions', 'wpas'); ?></th>
+									<th class="metric"><h4><?php _e('Metric Name', 'wpas'); ?></h4></th>
+									<th class="result"><h4><?php _e('Audit Result', 'wpas'); ?></h4></th>
+									<th class="score"><h4><?php _e('Score', 'wpas'); ?></h4></th>
+									<th class="solutions"><h4><?php _e('Solutions', 'wpas'); ?></h4></th>
 								</tr></thead>
 								
 								<tbody><?php
 									foreach( $metrics as $metric ){
-										$value = get_post_meta($post->ID, $metric['id'], true);
-										$points = get_post_meta($post->ID, $metric['id'] . '-score', true);
-										switch($metric['format']):
-											case 'date':
-												$result = date('F j, Y', strtotime($value)); break;
-											case 'link':
-												$text = ($metric['link_text']) ? $metric['link_text'] : $value;
-												$result = sprintf('<a href="%s" target="_blank">%s</a>', $value, $text);
-												break;
-											case 'meta':
-												$text = get_post_meta($post->ID, $metric['meta_value'], true);
-												$result = sprintf('<a href="%s" target="_blank">%s</a>', $value, $text);
-												break;
-											case 'image':
-												$result = sprintf('<img src="%s" alt="%s" />', $value, get_the_title($post->ID)); break;
-											default:
-												$result = $value;
-										endswitch;
-										
-										?><tr valign="top">
-											<th class="metric" scope="row"><?php
-												echo sprintf('<i title="%1$s">%1$s</i>', stripslashes($metric['tip']));
-												echo sprintf('<strong>%s</strong>', $metric['name']);
-												echo sprintf('<span class="description">%s</span>', $metric['data_source']);
-											?></th>
-											<td class="result"><?php
-												echo sprintf('<em>%s</em> <span class="description">%s</span>', $result, $metric['unit']);
-											?></td>
-											<td class="score"><?php
-												echo ($points) ? sprintf('<em>%s</em> <span>Points</span>', $points) : '';
-											?></td>
-											<td class="solutions"><?php
-												echo sprintf('<h3>%s</h3> <p>%s</>', __('Get Radar Detector', 'wpas'), __('Your\'e going way to fast, your\'e going to get a ticket.', 'wpas'));
-											?></td>
-										</tr><?php
+										if($metric['display'] != 'hidden'){
+											$classes = array();
+											$classes[] = $metric['metric_type'];
+											
+											$value = get_post_meta($post->ID, $metric['id'], true);
+											$points = get_post_meta($post->ID, $metric['id'] . '-score', true);
+											switch($metric['format']):
+												case 'date':
+													$result = date('F j, Y', strtotime($value)); break;
+												case 'link':
+													$text = ($metric['link_text']) ? $metric['link_text'] : $value;
+													$result = sprintf('<a href="%s" target="_blank">%s</a>', $value, $text);
+													break;
+												case 'meta':
+													$text = get_post_meta($post->ID, $metric['meta_value'], true);
+													$result = sprintf('<a href="%s" target="_blank">%s</a>', $value, $text);
+													break;
+												case 'image':
+													$result = sprintf('<img src="%s" alt="%s" />', $value, get_the_title($post->ID)); break;
+												default:
+													$result = $value;
+											endswitch;
+											
+											?><tr valign="top" class="<?php echo implode(' ', $classes); ?>">
+												<th class="metric" scope="row"><?php
+													echo sprintf('<i title="%1$s">%1$s</i>', stripslashes($metric['tip']));
+													echo sprintf('<strong>%s</strong>', $metric['name']);
+													echo sprintf('<span class="description">%s</span>', $metric['data_source']);
+												?></th>
+												<td class="result"><?php
+													echo sprintf('<em>%s</em> <span class="description">%s</span>', $result, $metric['unit']);
+												?></td>
+												<td class="score"><?php
+													echo ($points) ? sprintf('<em>%s</em> <span>Points</span>', $points) : '';
+												?></td>
+												<td class="solutions"><?php
+													$contentID = get_post_meta($post->ID, $metric['id'].'-content', true);
+													if($contentID){
+														$contentPost = get_post($contentID);
+														$contentTitle = get_the_title($contentID);
+														$contentDesc = substr(strip_tags($contentPost->post_content), 0, 80);
+														
+														echo sprintf(
+															'<h3><a href="%s">%s</a></h3> <p>%s</p>',
+															get_permalink($contentID),
+															$contentTitle,
+															$contentDesc
+														);
+													}
+												?></td>
+											</tr><?php
+										}
 									}
 								?></tbody>
 							</table>
@@ -585,6 +619,64 @@ function wpa_audit_site_score(){
         <script type="text/javascript">
 			jQuery(document).ready(function($) {
                 $("#wpa-scores").tabs();
+				
+				<?php /*$('.wpas-metric li a').click(function(e) {
+					toggler = $(this);
+					metric_type = $(this).attr('data-toggle');
+					metric_type = metric_type.split(' ');
+					
+					jQuery.each(metric_type, function(i, e){
+						// hide = ($(this).hasClass('hidden')) ? false : true;
+						toggler.toggleClass('hidden');
+						console.log(e);
+						fieldClass = e;
+						
+						$('table.wpa-metrics-table tbody tr').each(function(i, e) {
+							if( $(this).hasClass(fieldClass) ){
+								$(this).toggleClass('hide');
+							}
+						});
+					});
+					
+					e.preventDefault();
+                });*/ ?>
+				
+				$('.wpas-data li a').click(function(e) {
+					data_column = $(this).attr('data-toggle');
+					data_column = data_column.split(' ');
+					toggler = $(this);
+					
+					hide = ($(this).hasClass('hidden')) ? false : true;
+					$(this).toggleClass('hidden');
+					
+					jQuery.each(data_column, function(i, e){
+						console.log(e);
+						fieldClass = e;
+					
+						$('table.wpa-metrics-table th, table.wpa-metrics-table td').each(function(i, e) {
+							if( $(this).hasClass(fieldClass) ){
+								$(this).toggleClass('hide');
+							}
+						});
+						
+						$('.wpas-metric-groups-tab li span, .wpas-metric-groups-tab li em, .wpas-metric-groups-tab li small').each(function(i, e) {
+							if( $(this).hasClass(fieldClass) ){
+								// $(this).toggleClass('hide');
+								$(this).toggle('hide');
+							}
+						});
+					});
+					
+					if( $('.wpas-data li a[data-toggle="change score"]').hasClass('hidden') ){
+						$('span.wpas-metric-grade').removeClass('alignright');
+					} else {
+						if( !$('span.wpas-metric-grade').hasClass('alignright') ){
+							$('span.wpas-metric-grade').addClass('alignright');
+						}
+					}
+					
+					e.preventDefault();
+                });
             });
 		</script>
         

@@ -63,7 +63,7 @@ $revisions = new WP_Query(
                         	echo sprintf(
 								'<strong><a class="row-title" href="%s" title="%2$s">%2$s</a></strong>',
 								admin_url('revision.php?revision=' . get_the_ID()),
-								get_the_title()
+								get_the_title($parent_id)
 							);
                         ?></td>
                         <td class="post-date page-date column-date"><?php

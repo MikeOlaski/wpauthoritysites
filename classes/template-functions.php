@@ -1,4 +1,73 @@
 <?php
+/*
+ *
+ */
+
+function wpas_claim_form($echo = true, $post_id = null){
+	global $post;
+	$post_id = (!$post_id) ? $post->ID : $post_id;
+	
+	$users_can_register = get_option('users_can_register');
+	
+	$html = sprintf('<form action="%s" method="post">', get_permalink($post_id));
+	$html .= sprintf('<h3>%s : %s</h3>', __('Claim', 'wpas'), get_the_title($post_id));
+	
+	$html .= '<table class="form-table" width="100%">';
+		$html .= '<tr valign="top">';
+			$html .= sprintf(
+				'<th scope="row" align="left"><label for="wpas_claimed_fname">%s:</label></th>',
+				__('First name', 'wpas')
+			);
+			$html .= '<td><input type="text" name="wpas_claimed[fname]" id="wpas_claimed_fname" value="" /></td>';
+		$html .= '</tr>';
+		
+		$html .= '<tr valign="top">';
+			$html .= sprintf(
+				'<th scope="row" align="left"><label for="wpas_claimed_lname">%s:</label></th>',
+				__('Last name')
+			);
+			$html .= '<td><input type="text" name="wpas_claimed[lname]" id="wpas_claimed_lname" value="" /></td>';
+		$html .= '</tr>';
+		
+		$html .= '<tr valign="top">';
+			$html .= sprintf(
+				'<th scope="row" align="left"><label for="wpas_claimed_email">%s:</label></th>',
+				__('Email', 'wpas')
+			);
+			$html .= '<td><input type="text" name="wpas_claimed[email]" id="wpas_claimed_email" value="" /></td>';
+		$html .= '</tr>';
+	$html .= '</table>';
+	
+	$html .= sprintf('<input type="hidden" name="wpas_claimed[post_id]" value="%s" />', $post_id);
+	$html .= '<input type="hidden" name="wpas_claimed[status]" value="Y" />';
+	$html .= sprintf('<input type="hidden" name="redirect_to" value="%s" />', get_permalink($post_id));
+	$html .= '<input class="alignright" type="submit" name="wpas_claim" value="Submit" />';
+	
+	$html .= '<div class="clear"></div> </form>';
+	
+	if(!$users_can_register){
+		$html = __('User registration is not allowed. Please contact the site administrator.', 'wpas');
+	}
+	
+	if($echo){ echo $html; } else { return $html; }
+}
+
+function wpas_get_claim_popup($echo = true, $post_id = '', $single = false){
+	global $post;
+	$post_id = (!$post_id) ? $post->ID : $post_id;
+	
+	$html = sprintf(
+		'<a href="#wpas_claim_form_%s" class="wpas-claim-btn">%s</a>',
+		$post_id,
+		__('CLAIM', 'wpas')
+	);
+	
+	$html .= sprintf('<div style="display:none;"><div id="wpas_claim_form_%s" class="colorboxPopup">', $post_id);
+	$html .= wpas_claim_form(false, $post_id);
+	$html .= '</div></div>';
+	
+	if($echo){ echo $html; } else { return $html; }
+}
 
 function wpas_calculate_score($post_id, $metric){
 	
@@ -377,7 +446,7 @@ function wpas_people_social_places($echo = true, $post_id = '', $type = 'people'
 	foreach($places as $key=>$social){
 		$url = get_post_meta($post_id, $key, true);
 		$html .= sprintf(
-			'<li><a href="%s" title="%s" target="_blank"><i class="fi-social-%3$s"></i></a></li>',
+			'<li><a href="%s" title="%s" target="_blank"><i class="fa fa-%3$s fa-big"></i></a></li>',
 			$url,
 			sprintf(__('Follow %s on %s', 'wpas'), get_the_title($post_id), $social),
 			$social
@@ -389,15 +458,24 @@ function wpas_people_social_places($echo = true, $post_id = '', $type = 'people'
 	if($echo){ echo $html; } else { return $html; }
 }
 
-function wpas_get_watch_popup($echo = true, $post_id = ''){
+function wpas_get_watch_popup($echo = true, $post_id = '', $single = false){
 	global $post;
 	$post_id = (!$post_id) ? $post->ID : $post_id;
 	
-	$html = sprintf(
-		'<a href="#wpas_subscriber_form_%s" class="wpa-watch-button">%s</a>',
-		$post_id,
-		__('Watch This', 'wpas')
-	);
+	if( $single ){
+		$html = sprintf(
+			'<a class="wpas-watch-btn" href="#wpas_subscriber_form_%s">%s</a>',
+			$post_id,
+			__('WATCH', 'wpas')
+		);
+	} else {
+		$html = sprintf(
+			'<a href="#wpas_subscriber_form_%s" class="wpa-watch-button">%s</a>',
+			$post_id,
+			__('Watch This', 'wpas')
+		);
+	}
+	
 	$html .= sprintf('<div style="display:none;"><div id="wpas_subscriber_form_%s" class="colorboxPopup">', $post_id);
 	$html .= wpas_subscribe_form(false, $post_id);
 	$html .= '</div></div>';
@@ -527,6 +605,7 @@ function wpas_archive_view_groups(){
 function wpas_archive_list_content($echo = true, $post_id = ''){
 	global $post;
 	$post_id = (!$post_id) ? $post->ID : $post_id;
+	$wpa_settings = get_option('awp_settings');
 	
 	$metrics = get_post_meta( $post_id );
 	$heads = wpa_get_metrics_groups();
@@ -561,10 +640,13 @@ function wpas_archive_list_content($echo = true, $post_id = ''){
 		}
 	}
 	
-	$default_img = sprintf('<span>%s</span>', __('NO IMAGE', 'wpas') ); 
+	$default_img = PLUGINURL . 'timthumb.php?a=tl&w=290&h=250&src=' . $wpa_settings['default_site_image'];
 	$attachment = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ) );
-	$attachmentURL = ($attachment) ? PLUGINURL.'/timthumb.php?src='.$attachment[0].'&w=150&h=150' : null;
-	$thumbnail = sprintf('<img src="%s" alt="%s" />', $attachmentURL, get_the_title($post_id));
+	$attachmentURL = ($attachment) ? PLUGINURL.'/timthumb.php?src='.$attachment[0].'&a=tl&w=290&h=250' : null;
+	$thumbnail = sprintf(
+		'<img src="%s" alt="%s" />',
+		($attachmentURL) ? $attachmentURL : $default_img, get_the_title()
+	);
 	
 	$html = '<div class="wpa-td wpa-td-change">';
 	$html .= wpas_get_authority_level(false, $post_id, 'single');
@@ -762,7 +844,11 @@ function wpas_count_metric_scores($post_id, $metric){
 			
 			$total = $total + $metric_score;
 		}
-		$score = $total / $divider;
+		if($divider > 0):
+			$score = $total / $divider;
+		else:
+			$score = $total;
+		endif;
 	}
 	
 	return number_format($score, 2);
@@ -802,7 +888,24 @@ function wpas_site_metrics_grade($echo = true, $post_id = ''){
 		
 		$score = (int)wpas_get_metric_score($post_id, $head['name']);
 		$grade = wpas_get_metric_grade($post_id, $head['name']);
-		$change = '163 VS 163';
+		
+		// Get latest site revision and changes
+		$change = 0;
+		$revisions = new WP_Query(array( 
+			'post_parent' => $post_id,
+			'post_type'   => 'revision', 
+			'numberposts' => 1,
+			'post_status' => 'inherit',
+			'orderby' => 'date'
+		));
+		
+		if($revisions->have_posts()){
+			while($revisions->have_posts()) : $revisions->the_post();
+				$change = number_format((int)get_post_meta(get_the_ID(),'awp-scores-' . strtolower($head['name']), true));
+			endwhile;
+		}
+		
+		wp_reset_query();
 		
 		$classes[] = 'grade-' . $grade;
 		
@@ -818,11 +921,11 @@ function wpas_site_metrics_grade($echo = true, $post_id = ''){
 		
 		$html .=  sprintf(
 			'<li><a class="%1$s" href="#%2$s">
-				<span class="alignright wpas-metric-grade grade-%3$s">%3$s</span>
-				<span><strong>%4$s</strong></span>
+				<span class="group"><strong>%4$s</strong></span>
+				<span class="alignright wpas-metric-grade grade-%3$s grade">%3$s</span>
 				<span class="description">Sample muna %5$s</span>
-				<em>%6$s</em>
-				<small>%7$s</small>
+				<em class="score">%6$s</em>
+				<small class="change">%7$s VS %8$s</small>
 			</a></li>',
 			implode(' ', $classes),
 			$head['id'],
@@ -830,7 +933,8 @@ function wpas_site_metrics_grade($echo = true, $post_id = ''){
 			$head['name'],
 			$head['desc'],
 			$label,
-			$change
+			$change,
+			$score
 		);
 	}
 	$html .= '</ul>';
@@ -841,6 +945,7 @@ function wpas_site_metrics_grade($echo = true, $post_id = ''){
 function wpas_site_network_feed($scho = true, $post_id = '', $limit = 10){
 	global $post;
 	if( !$post_id ){ $post_id = $post->ID; }
+	$settings = get_option('awp_settings');
 	
 	$feedURL = get_post_meta($post_id, 'awp-rss', true);
 	
@@ -870,17 +975,49 @@ function wpas_site_network_feed($scho = true, $post_id = '', $limit = 10){
 				}
 			endif;
 			
+			set_time_limit(100);
+			
+			$thumbnail = null;
+			$output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $item->get_content(), $matches);
+			
+			if( $matches ){
+				$i = 0;
+				while($thumbnail === null){
+					if( isset($matches[1][$i]) ){
+						$args = getimagesize( $matches[1][$i] );
+						if( $args[0] >= 150 && $args[1] >= 80 ):
+							$thumbnail = PLUGINURL . 'timthumb.php?a=tl&w=355&h=170&src=' . $matches[1][$i];
+						else:
+							$thumbnail = null;
+						endif;
+					} else {
+						$thumbnail = '';
+					}
+					$i++;
+				}
+			}
+			
+			if(empty($thumbnail)){ $thumbnail = PLUGINURL . 'timthumb.php?a=tl&w=355&h=170&src=' . $settings['default_feed_image']; }
+			
 			$title = (strlen($item->get_title()) > 30) ? substr($item->get_title(), 0, 27).'...' : $item->get_title();
 			$excerpt = (strlen($item->get_content()) > 55) ? substr(strip_tags($item->get_content()), 0, 50).'...' : strip_tags($item->get_content());
 			
-			$html .= sprintf('<li class="all %s"><strong>
-				<a href="%2$s" title="Posted %3$s" target="_blank">%4$s</a>
-				</strong><p>%5$s</p></li>',
+			$details = sprintf(
+				'<h3><a href="%s" title="%s">%s</a></h3> <p>%s <a href="%1$s" class="more">%s</a></p>',
+				$item->get_permalink(),
+				$item->get_title(),
+				$title,
+				$excerpt,
+				__('Read more', 'wpas')
+			);
+			
+			$html .= sprintf(
+				'<li class="all %s"><a href="%2$s" title="Posted %3$s" target="_blank">%4$s</a> <div class="detail">%5$s</div></li>',
 				implode(' ', $classes),
 				$item->get_permalink(),
 				$item->get_date('j F Y | g:i a'),
-				$title,
-				$excerpt
+				sprintf('<img src="%s" alt="%s" />', $thumbnail, $item->get_title()),
+				$details
 			);
 		}
 	else:
@@ -930,6 +1067,7 @@ function wpas_site_network_feed_categories($post_id = ''){
 function wpas_site_coveraged_feed($echo = true, $post_id = ''){
 	global $post;
 	if( !$post_id ){ $post_id = $post->ID; }
+	$settings = get_option('awp_settings');
 	
 	$directs = array();
 	if( $coveraged = get_the_terms($post_id, array('site-include')) ){
@@ -956,35 +1094,32 @@ function wpas_site_coveraged_feed($echo = true, $post_id = ''){
 				$classes = array('all');
 				$classes[] = get_post_type($show->ID);
 				
-				$thumbnail = get_the_post_thumbnail($show->ID, array(166, 95));
+				$thumbnail = get_the_post_thumbnail($show->ID, array(345, 170));
 				$default_img = sprintf(
-					'<img src="%s" alt="Image:%s" width="70" class="%s" />',
-					PLUGINURL . 'images/placeholder.jpg',
+					'<img src="%s" alt="Image:%s" width="345" class="%s" />',
+					PLUGINURL . 'timthumb.php?a=tl&w=355&h=170&src=' . $settings['default_' . $show->post_type . '_image'],
 					get_the_title($show->ID),
 					is_archive() ? 'alignleft' : ''
 				);
 				
-				if( has_post_thumbnail($show->ID) ){
-					$html .= sprintf(
-						'<li class="%s"><a href="%s" title="%s">%s</a></li>',
-						implode(' ', $classes),
-						get_permalink($show->ID),
-						get_the_title($show->ID),
-						$thumbnail
-					);
-				} else {
-					$html .= sprintf(
-						'<li class="%s">
-							<strong><a href="%s" title="%s">%s</a></strong>
-							<p>%s</p>
-						</li>',
-						implode(' ', $classes),
-						get_permalink($show->ID),
-						get_the_title($show->ID),
-						(strlen(get_the_title($show->ID)) > 30) ? substr(get_the_title($show->ID), 0, 27).'...' : get_the_title($show->ID),
-						(strlen(strip_tags($show->post_content)) > 55) ? substr(strip_tags($show->post_content), 0, 52).'...' : strip_tags($show->post_content)
-					);
-				}
+				$details = sprintf(
+					'<h3><a href="%s" title="%s">%s</a></h3> <p>%s <a href="%1$s" class="more">%s</a> %s</p>',
+					get_permalink($show->ID),
+					get_the_title($show->ID),
+					(strlen(get_the_title($show->ID)) > 30) ? substr(get_the_title($show->ID), 0, 27).'...' : get_the_title($show->ID),
+					(strlen(strip_tags($show->post_content)) > 50) ? substr(strip_tags($show->post_content), 0, 47).'...' : strip_tags($show->post_content),
+					__('Read more', 'wpas'),
+					sprintf('<span class="alignleft post_type">%s</span>', $show->post_type)
+				);
+				
+				$html .= sprintf(
+					'<li class="%s"><a href="%s" title="%s">%s</a> <div class="detail">%s</div></a></li>',
+					implode(' ', $classes),
+					get_permalink($show->ID),
+					get_the_title($show->ID),
+					( has_post_thumbnail($show->ID) ) ? $thumbnail : $default_img,
+					$details
+				);
 			}
 			
 			$i++;
@@ -1067,7 +1202,8 @@ function wpas_get_authorit_ranks($echo = true, $post_id = ''){
 		'OneRank' => 'awp-one-rank',
 		'Alexa' => 'awp-alexa-rank',
 		// 'SEOMoz' => 'awp-moz-rank'
-		'Technorati' => 'awp-tachnorati-rank'
+		'Technorati' => 'awp-tachnorati-rank',
+		'Compete' => 'awp-compete-rank'
 	);
 	
 	$return = '';
@@ -1076,7 +1212,7 @@ function wpas_get_authorit_ranks($echo = true, $post_id = ''){
 		foreach($ranks as $label=>$rank){
 			$score = get_post_meta($post_id, $rank, true);
 			$return .= sprintf(
-				'<li><span class="wpas-%1$s-icon">%s</span>%s<br class="clear" /></li>',
+				'<li><span class="rank-icon wpas-%1$s-icon">%s</span>%s<br class="clear" /></li>',
 				$label,
 				($score) ? wpas_numbers_to_readable_size($score) : 0
 			);
@@ -1085,7 +1221,7 @@ function wpas_get_authorit_ranks($echo = true, $post_id = ''){
 		if( is_archive() ){
 			$return .= sprintf(
 				'<li class="sites-subscription">
-					<span class="wpas-%1$s-icon">%s</span>%s<span class="socials">%s</span><br class="clear" />
+					<span class="rank-icon wpas-%1$s-icon">%s</span>%s<span class="socials">%s</span><br class="clear" />
 				</li>',
 				__('Subscribers', 'wpas'),
 				wpas_count_total_suscribers($post_id),
@@ -1093,7 +1229,7 @@ function wpas_get_authorit_ranks($echo = true, $post_id = ''){
 			);
 			
 			$return .= sprintf(
-				'<li><span class="wpas-%1$s-icon">%s</span>%s<br class="clear" /></li>',
+				'<li><span class="rank-icon wpas-%1$s-icon">%s</span>%s<br class="clear" /></li>',
 				__('Shares', 'wpas'),
 				wpas_count_total_shares($post_id)
 			);
@@ -1104,28 +1240,76 @@ function wpas_get_authorit_ranks($echo = true, $post_id = ''){
 	if( $echo ){ echo $return; } else { return $return; }
 }
 
+function wpas_site_team($echo = true, $post_id = ''){
+	global $post;
+	if( !$post_id ){ $post_id = $post->ID; }
+	
+	$teams = array();
+	if( $include_list = get_the_terms( $post_id, 'site-include' ) ) {
+		foreach($include_list as $inc){
+			$tagName = str_replace('@', '', $inc->name);
+			$people = get_page_by_title($tagName, 'OBJECT', 'people');
+			if( $people ){
+				if( $tag_list = get_the_terms( $people, 'people-include' ) ){
+					foreach($tag_list as $tag):
+						$peopleTagName = str_replace('@', '', $tag->name);
+						if($peopleTagName == get_the_title($post_id)){
+							if( $user = get_user_by_display_name( $tagName ) ) {
+								$teams[] = sprintf(
+									'<li><a href="%1$s" title="%2$s">%3$s</a> %4$s</li>',
+									get_author_posts_url($user->ID),
+									$clean_name,
+									get_avatar( $user->ID, 48 ),
+									wpas_people_social_places(false, $user->ID, 'user')
+								);
+							} else {
+								$email = get_post_meta($people->ID, '_base_people_email', true);
+								$teams[] = sprintf(
+									'<li><a href="%1$s" title="%2$s">%3$s</a> %4$s</li>',
+									get_permalink($people->ID),
+									get_the_title($people->ID),
+									get_avatar( $email, 48 ),
+									wpas_people_social_places(false, $people->ID)
+								);
+							}
+						}
+					endforeach;
+				}
+			}
+		}
+	}
+	
+	if( $teams ){
+		$return = sprintf( '<ul class="wpas-site-team">%s</ul>', implode(' ', $teams));
+	} else {
+		$return = sprintf( '<p>%s</p>', __('No one is set as member of this team', 'wpas') );
+	}
+	
+	if( $echo ){ echo $return; } else { return $return; }
+}
+
 function wpas_site_subscribers($echo = true, $post_id = ''){
 	global $post;
 	$post_id = (!$post_id) ? $post->ID : $post_id;
 	
 	$socials = array(
-		'awp-facebook' => 'fi-social-facebook',
-		'awp-twitter' => 'fi-social-twitter',
-		'awp-googleplus' => 'fi-social-google-plus',
-		'awp-linkedin' => 'fi-social-linkedin',
-		'awp-youtube' => 'fi-social-youtube',
-		'awp-pinterest' => 'fi-social-pinterest',
-		'awp-rss' => 'fi-rss'
+		'awp-facebook' => 'fa-facebook',
+		'awp-twitter' => 'fa-twitter',
+		'awp-googleplus' => 'fa-google-plus',
+		'awp-linkedin' => 'fa-linkedin',
+		'awp-youtube' => 'fa-youtube',
+		'awp-pinterest' => 'fa-pinterest',
+		'awp-rss' => 'fa-rss'
 	);
 	
 	$labels = array(
-		'fi-social-facebook' => 'Facebook',
-		'fi-social-twitter' => 'Twitter',
-		'fi-social-google-plus' => 'Google+',
-		'fi-social-linkedin' => 'LinkedIn',
-		'fi-social-youtube' => 'YouTube',
-		'fi-social-pinterest' => 'Pinterest',
-		'fi-rss' => 'RSS'
+		'fa-facebook' => 'Facebook',
+		'fa-twitter' => 'Twitter',
+		'fa-google-plus' => 'Google+',
+		'fa-linkedin' => 'LinkedIn',
+		'fa-youtube' => 'YouTube',
+		'fa-pinterest' => 'Pinterest',
+		'fa-rss' => 'RSS'
 	);
 	
 	$html = '<ul class="wpas-social-subscribers">';
@@ -1139,7 +1323,7 @@ function wpas_site_subscribers($echo = true, $post_id = ''){
 		
 		if($page){
 			$html .= sprintf(
-				'<li><a href="%s" data-type="%s" data-text="%s" target="_blank" class="%s"> <i class="%2$s"></i></a>
+				'<li><a href="%s" data-type="%s" data-text="%s" target="_blank" class="%s"><i class="fa %2$s fa-big"></i></a>
 				%s %s</li>',
 				$page,
 				$media,
@@ -1147,7 +1331,7 @@ function wpas_site_subscribers($echo = true, $post_id = ''){
 				'wpa-sgl-icon '. $meta_key . '-icon',
 				sprintf('<span class="count">%s</span>', wpas_numbers_to_readable_size($count) ),
 				sprintf(
-					'<a class="hover" href="%s" target="_blank"><i class="%s"></i> %s</a>',
+					'<a class="hover" href="%s" target="_blank"><i class="fa %s"></i> %s</a>',
 					$page,
 					$media,
 					$labels[$media]
@@ -1177,7 +1361,7 @@ function wpas_get_authority_level($echo = true, $post_id = '', $type = 'full'){
 			while($i <= 5){
 				$active = ($i <= $authority_level) ? 'active' : '';
 				$return .= sprintf(
-					'<li><a href="javascript:void(0);" data-title="%s"><i class="fi-score-%s %s"></i></a></li>',
+					'<li><a href="javascript:void(0);" data-title="%s"><i class="auth-level fi-score-%s %s"></i></a></li>',
 					__('Custom Tooltip text on hover', 'wpas'),
 					$i,
 					$active

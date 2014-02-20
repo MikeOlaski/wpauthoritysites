@@ -265,7 +265,7 @@ function wpas_subscribe_callback_notice($array){
 	$html = '';
 	
 	if( isset($_REQUEST['subcription']) && is_single() ){
-		$html .= '<div class="';
+		$html .= '<div class="wpas-subscription-notice ';
 		if( $_REQUEST['subcription'] == 'false' ){
 			$html .= 'wpas-error"><p>';
 			switch( $_REQUEST['message'] ){
@@ -282,6 +282,14 @@ function wpas_subscribe_callback_notice($array){
 		}
 		$html .= '</p></div>';
 	}
+	
+	$html .= '<script type="text/javascript">';
+		$html .= 'jQuery(document).ready(function($){';
+			$html .= 'setTimeout(function(){';
+				$html .= '$(".wpas-subscription-notice").fadeOut();';
+			$html .= '}, 8000);';
+		$html .= '});';
+	$html .= '</script>';
 	
 	echo $html;
 }

@@ -17,6 +17,7 @@ load_template( trailingslashit( PLUGINPATH ) . 'classes/whois.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/majestic/APIService.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/grabzit/GrabzItClient.class.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/external/subscribe.php' );
+load_template( trailingslashit( PLUGINPATH ) . 'classes/external/claim.php' );
 
 load_template( trailingslashit( PLUGINPATH ) . 'functions.php' );
 load_template( trailingslashit( PLUGINPATH ) . 'classes/simple_html_dom.php' );
@@ -56,6 +57,7 @@ function wpas_set_options() {
 	add_option('awp_settings', array());
 	add_option('wpa_metrics', array());
 	add_option('wpas_subsriber', array());
+	add_option('wpas_claimed', array());
 	
 	// Default Authority Business Builder departments
 	add_option('bb_builder_depts', array(
@@ -583,7 +585,15 @@ function wpas_options_handle(){
 				'action_taxonomy_status',
 				'xtype',
 				'xStatus',
-				'hide_timestamp'
+				'hide_timestamp',
+				
+				// Display
+				'default_image',
+				'default_site_image',
+				'default_interviews_image',
+				'default_reviews_image',
+				'default_show_image',
+				'default_feed_image'
 			);
 			
 			foreach( $fields as $fl ){
@@ -691,6 +701,7 @@ function wpas_options_handle(){
 		$fields[$wpa_metrics['id']]['data_source'] = $wpa_metrics['data_source'];
 		$fields[$wpa_metrics['id']]['unit'] = $wpa_metrics['unit'];
 		$fields[$wpa_metrics['id']]['tip'] = $wpa_metrics['tip'];
+		$fields[$wpa_metrics['id']]['metric_type'] = $wpa_metrics['metric_type'];
 		
 		/*if( $wpa_metrics['readonly'] ){
 			$fields[$wpa_metrics['id']]['readonly'] = true;
@@ -840,8 +851,9 @@ function wpas_register_pages(){
 }
 
 function wpas_admin_scripts(){
-	wp_enqueue_script('wpadminjs', PLUGINURL . 'js/admin.js', array('jquery'));
+	wp_enqueue_script( 'wpadminjs', PLUGINURL . 'js/admin.js', array('jquery'));
 	wp_enqueue_style( 'awpstyles', PLUGINURL . 'css/admin.css' );
+	wp_enqueue_media();
 }
 
 function wpas_admin_pages_callback(){
@@ -887,16 +899,13 @@ function wpas_admin_pages(){
 				load_template( trailingslashit( PLUGINPATH ) . 'admin/general.php' );
 				break;
 			
-			case 'connect':
-				load_template( trailingslashit( PLUGINPATH ) . 'admin/connect.php' );
-				break;
-			
 			case 'bots':
-				//load_template( trailingslashit( PLUGINPATH ) . 'admin/bots.php' );
-				break;
-			
+			case 'connect':
 			case 'cron':
-				load_template( trailingslashit( PLUGINPATH ) . 'admin/cron.php' );
+			case 'content-seo':
+			case 'templates':
+			case 'display':
+				load_template( trailingslashit( PLUGINPATH ) . 'admin/' . $tab . '.php' );
 				break;
 			
 			case 'metrics':
@@ -912,14 +921,6 @@ function wpas_admin_pages(){
 			case 'addmetric':
 			case 'editmetric':
 				load_template( trailingslashit( PLUGINPATH ) . 'admin/addgroup.php' );
-				break;
-			
-			case 'content-seo':
-				load_template( trailingslashit( PLUGINPATH ) . 'admin/content-seo.php' );
-				break;
-			
-			case 'templates':
-				load_template( trailingslashit( PLUGINPATH ) . 'admin/templates.php' );
 				break;
 			
 			case 'checker':
@@ -970,7 +971,8 @@ function wpa_admin_nav_tabs(){
 		'cron' => 'Cron',
 		'metrics' => 'Metrics',
 		'content-seo' => 'Content & SEO',
-		'templates' => 'Templates'
+		'templates' => 'Templates',
+		'display' => 'Display'
 	);
 	
 	?><div id="icon-ows" class="icon32"><img src="<?php echo PLUGINURL; ?>images/icon32.jpg" alt="WP Sites" /></div>

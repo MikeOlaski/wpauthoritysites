@@ -56,6 +56,16 @@ $editable = ($field['readonly']) ? false : true;
         	<th scope="row"><label for="wpas_tip"><?php _e('ToolTip Content', 'wpas'); ?></label></th>
             <td><textarea rows="5" cols="40" type="text" name="wpa_metrics[tip]" id="wpas_tip"><?php echo ($field['tip']) ? $field['tip'] : ''; ?></textarea></td>
         </tr>
+        
+        <tr valign="top">
+        	<th scope="row"><label for="wpas_metric_type"><?php _e('Metric Type', 'wpas'); ?></label></th>
+            <td><select name="wpa_metrics[metric_type]" id="wpas_metric_type">
+                	<option value="authority" <?php selected($field['metric_type'], 'authority'); ?>>Authority</option>
+                    <option value="site" <?php selected($field['metric_type'], 'site'); ?>>Site</option>
+                	<option value="wordpress" <?php selected($field['metric_type'], 'wordpress'); ?>>Wordpress</option>
+                </select>
+            </td>
+        </tr>
     </table>
     
     <input type="hidden" name="metric_id" value="<?php echo $field['id']; ?>" />

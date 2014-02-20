@@ -675,8 +675,12 @@ class Sites_CPT{
 				}
 				
             ?></div>
-            <div class="clear"></div>
             
+            <div class="wpas-control-loader" rel="template" style="display:none;">
+            	<img src="<?php echo PLUGINURL; ?>images/130.gif" class="preloader" />
+            </div>
+            
+            <div class="clear"></div>
 		</div>
 		<script type="text/javascript">
 			jQuery(document).ready(function($){
@@ -718,6 +722,12 @@ class Sites_CPT{
 			return;
 		
 		$post_id = $post->ID;
+		
+		$problems = get_posts(array(
+			'posts_per_page' => -1,
+			'orderby' => 'title',
+			'post_type' => 'problems'
+		));
 		
 		foreach($controls as $control){
 			
@@ -785,8 +795,7 @@ class Sites_CPT{
 							?><input type="text" class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>_upload" value="<?php echo $metavalue; ?>" /><?php
 					}
 					
-					?> <span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span>
-                    <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader" style="display:none;"><?php
+					?> <span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span><?php
 					
 					if( $control['programmatic'] ){
 						echo sprintf(' <span class="button run_audit_button">%s</span>', __('Audit', 'wpas') );
@@ -815,6 +824,10 @@ class Sites_CPT{
 						echo sprintf('<span class="description">%s</span>', $control['field_desc']);
 					}
 					
+					if( $control['metric_type'] != '' ){
+						echo sprintf('<span class="description">Metric Type: %s</span>', $control['metric_type']);
+					}
+					
 					if( $control['programmatic'] ){
 						$lastUpdate = get_post_meta($post_id, $metaname.'-updated', true);
 						$through = get_post_meta($post_id, $metaname.'-through', true);
@@ -836,9 +849,7 @@ class Sites_CPT{
 					<div class="awp-controls">
                     	<input type="text" class="regular-text small" name="<?php echo $metaname; ?>" id="<?php echo $metaID.'-followers'; ?>" value="<?php echo get_post_meta($post_id, $metaname, true); ?>" />
                         <span class="button manual_update_button" data-field="#<?php echo $metaID.'-followers'; ?>">Update</span>
-                        <span class="button run_audit_button">Audit</span>
-                        
-                        <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader" style="display:none;"><?php
+                        <span class="button run_audit_button">Audit</span><?php
 						
 						$lastUpdate = get_post_meta($post_id, $metaname.'-updated', true);
 						$through = get_post_meta($post_id, $metaname.'-through', true);
@@ -865,12 +876,41 @@ class Sites_CPT{
                     	<input type="text" class="regular-text score" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>" value="<?php echo ($metavalue) ? $metavalue : ''; ?>" />
                         <span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span>
                         <span class="button compute_score_button">Calculate</span>
-                        <img src="<?php echo PLUGINURL; ?>images/preload.gif" class="preloader alignright" style="display:none;">
                         <span class="description"><?php echo sprintf(__('Computed score of %s'), $control['name']); ?></span>
 					</div><?php
 				}
 				
-                ?><div class="clear"></div><?php
+				$metaname = $control['id'].'-content';
+				$metavalue = get_post_meta($post_id, $metaname, true);
+				$typevalue = get_post_meta($post_id, $metaname.'-type', true);
+				$titlevalue = get_post_meta($post_id, $metaname.'-title', true);
+				$metaID = $control['id'].'-content';
+				
+				/*?><label for="<?php echo $metaID; ?>"><?php _e('Content', 'wpas'); ?></label>
+                <div class="awp-controls">
+                    <input type="hidden" name="<?php echo $metaname; ?>" value="<?php echo ($metavalue) ? $metavalue : ''; ?>" />
+                    <input type="hidden" name="<?php echo $metaname.'-type'; ?>" value="<?php echo ($typevalue) ? $typevalue : ''; ?>" />
+                    <input type="text" name="<?php echo $metaname.'-title'; ?>" class="regular-text small content" id="<?php echo $metaID; ?>" value="<?php echo ($titlevalue) ? $titlevalue : (($metavalue) ? get_the_title($metavalue) : ''); ?>" />
+                    <span class="button attach_content_button" data-target="<?php echo $metaname; ?>"><?php _e('Attach', 'wpas'); ?></span>
+                </div>*/
+				
+				?><label for="<?php echo $metaID; ?>"><?php _e('Content', 'wpas'); ?></label>
+                <div class="awp-controls">
+                    <select class="regular-select wpas-select" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>">
+                    	<option value="0">Select to return to default</option><?php
+						foreach($problems as $problem){
+							echo sprintf(
+								'<option value="%s" %s>%s</option>',
+								$problem->ID,
+								selected($problem->ID, $metavalue, false),
+								$problem->post_title
+							);
+						}
+                    ?></select>
+                    <span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span>
+                </div>
+                
+                <div class="clear"></div><?php
 			}
             ?></div><?php
 		}
@@ -919,6 +959,10 @@ class Sites_CPT{
 					update_post_meta( $post_id, $fieldname.'-through', 'manually');
 					update_post_meta( $post_id, $fieldname.'-author', $user_ID);
 				}
+				
+				update_post_meta( $post_id, $fl['id'].'-content', $_POST[$fl['id'].'-content'] );
+				// update_post_meta( $post_id, $fl['id'].'-content-type', $_POST[$fl['id'].'-content-type'] );
+				// update_post_meta( $post_id, $fl['id'].'-content-title', $_POST[$fl['id'].'-content-title'] );
 			}
 		}
 		
@@ -930,8 +974,11 @@ class Sites_CPT{
 		global $post, $user_ID;
 		
 		if( ('site' == $post->post_type) || ('site' == $_GET['post_type']) ){
-			wp_enqueue_script('jquery');
 			wp_enqueue_style( 'awpeditor', PLUGINURL . '/css/editor.css' );
+			wp_enqueue_style( 'select2', PLUGINURL . '/css/select2.css' );
+			
+			wp_enqueue_script('jquery');
+			wp_enqueue_script( 'select2', PLUGINURL . '/js/select2.js', array('jquery') );
 			wp_enqueue_script( 'awpeditor', PLUGINURL . '/js/editor.js', array('jquery') );
 			
 			$view = get_user_meta($user_ID, 'user_defined_view', true);

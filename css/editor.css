@@ -181,9 +181,26 @@ select[name=seo_filter]{
 	padding: 0;
 }
 
+.wpas-control-loader{
+	background: rgba(33,40,52,0.7);
+	position: absolute;
+	top: 0; left: 0;
+	height: 100%;
+	width: 100%;
+	
+	text-align: center;
+}
+
+.wpas-control-loader img{
+	position: absolute;
+	top: 59%;
+}
+
 .panel .awp-control-group{
 	border-top: solid 1px #fff;
 	border-bottom: solid 1px #d5d5d5;
+	
+	position: relative;
 	padding: 10px;
 }
 
@@ -232,6 +249,10 @@ select[name=seo_filter]{
 	width: 65%;
 }
 
+.awp-controls .wpas-content{
+	width: 78%;
+}
+
 .awp-controls .regular-checkbox{
 	vertical-align: middle;
 }
@@ -258,7 +279,6 @@ select[name=seo_filter]{
 
 .awp-controls .description{
 	color: #aaa;
-	padding-bottom: 10px;
 	display: block;
 	font-size: 10px;
 }

@@ -44,46 +44,6 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 	});
 	
-	/*$('body').click(function(e){
-		var target = $(e.target).attr('class');
-		
-		if( target == 'wpa-control search' ){
-			$('.wpa-screen-options').fadeToggle('fast');
-			$('.wpa-filter-groups').fadeOut('fast');
-			$('.wpa-export-options').fadeOut('fast');
-		} else if( target == 'wpa-screen-options' ) {
-			$('.wpa-filter-groups').fadeOut('fast');
-			$('.wpa-export-options').fadeOut('fast');
-		} else if( $(e.target).parents('.wpa-screen-options').length ) {
-			$('.wpa-filter-groups').fadeOut('fast');
-			$('.wpa-export-options').fadeOut('fast');
-		} else if( target == 'wpa-control export' ) {
-			$('.wpa-export-options').fadeToggle('fast');
-			$('.wpa-screen-options').fadeOut('fast');
-			$('.wpa-filter-groups').fadeOut('fast');
-		} else if( target == 'wpa-export-options' ) {
-			$('.wpa-screen-options').fadeOut('fast');
-			$('.wpa-filter-groups').fadeOut('fast');
-		} else if( $(e.target).parents('.wpa-export-options').length ) {
-			$('.wpa-screen-options').fadeOut('fast');
-			$('.wpa-filter-groups').fadeOut('fast'); 
-		} else if( target == 'wpa-filterg-btn' ) {
-			$('.wpa-export-options').fadeOut('fast');
-			$('.wpa-screen-options').fadeOut('fast');
-			$('.wpa-filter-groups').fadeToggle('fast');
-		} else if( target == 'wpa-filter-groups' ) {
-			$('.wpa-export-options').fadeOut('fast');
-			$('.wpa-screen-options').fadeOut('fast');
-		} else if( $(e.target).parents('.wpa-filter-groups').length ) {
-			$('.wpa-export-options').fadeOut('fast');
-			$('.wpa-screen-options').fadeOut('fast');
-		} else {
-			$('.wpa-filter-groups').fadeOut('fast');
-			$('.wpa-screen-options').fadeOut('fast');
-			$('.wpa-export-options').fadeOut('fast');
-		}
-	});*/
-	
 	$('#addFilterButton').click(function(e) {
         target = $('.wpa-filter-form');
 		
@@ -96,33 +56,6 @@ jQuery(document).ready(function($) {
 			$('#wpa-filter-button').before( $cloned );
 		}
 		e.preventDefault();
-    });
-	
-	$('.wpa-rating').each(function(i,e) {
-        $(this).click(function(e) {
-            if( $(this).hasClass('checked') && $(this).find('input').is(':checked') ){
-				value = $(this).find('input').val();
-				$(this).siblings().each(function(index, element) {
-                    if( $(this).find('input').val() < value ){
-						$(this).addClass('checked').find('input').attr('checked', true);
-					} else {
-						$(this).removeClass('checked').find('input').attr('checked', false);
-					}
-                });
-				$(this).removeClass('checked').find('input').attr('checked', false);
-			} else {
-				value = $(this).find('input').val();
-				$(this).siblings().each(function(index, element) {
-                    if( $(this).find('input').val() < value ){
-						$(this).addClass('checked').find('input').attr('checked', true);
-					} else {
-						$(this).removeClass('checked').find('input').attr('checked', false);
-					}
-                });
-				$(this).addClass('checked').find('input').attr('checked', true);
-			}
-			e.preventDefault();
-        });
     });
 	
 	$('#posts_per_page').change(function(){
@@ -179,11 +112,6 @@ jQuery(document).ready(function($) {
 			setListScrollArea();
 			e.preventDefault();
         });
-    });
-	
-	$('.wpa-collapse-btn').click(function(e) {
-        $(this).next('.wpa-collapse').slideToggle();
-		$(this).find('span').toggle();
     });
 	
 	$('#wpa-taxonomy').change(function(e){
@@ -252,6 +180,8 @@ jQuery(document).ready(function($) {
 			inline: true,
 			width: '75%'
 		});
+		
+		$(".wpa-watch-button, .wpas-watch-btn, .wpas-claim-btn").colorbox({inline:true, href:$(this).attr('href')});
 	}
 	
 	$('.wpa-grid-item .entry-title > a').click(function(e) {
@@ -268,14 +198,14 @@ jQuery(document).ready(function($) {
     });
 	
 	$('a.wpas-score-tabs-prev').click(function(e) {
-		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) + 140;
+		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) + 152;
         $('.wpas-metric-groups-tab').css('margin-left', (marginLleft > 0) ? 0 : marginLleft );
 		e.preventDefault();
     });
 	
 	$('a.wpas-score-tabs-next').click(function(e) {
-		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) - 140;
-        $('.wpas-metric-groups-tab').css('margin-left', (marginLleft < -824) ? -824 : marginLleft );
+		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) - 152;
+        $('.wpas-metric-groups-tab').css('margin-left', (marginLleft < -675) ? -675 : marginLleft );
 		e.preventDefault();
     });
 	
@@ -311,7 +241,7 @@ jQuery(document).ready(function($) {
 		});
 	});
 	
-	$('.wpas-site-rates li a, .wpa-control, .filterButtons a').each(function(){
+	$('.wpa-control, .filterButtons a').each(function(){
 		$(this).qtip({
 			content: $(this).attr('data-title'),
 			position: { target: 'mouse', adjust: { mouse: true } },
@@ -320,21 +250,12 @@ jQuery(document).ready(function($) {
 		});
 	});
 	
-	$('.single-site .wpas-site-syndicate li').each(function(){
-		$(this).qtip({
-			content: $(this).find('.wpas-people-places'),
-			position: { corner: { target: 'leftMiddle', tooltip: 'rightMiddle' } },
-			hide: { fixed: true },
-			style: { background: 'none', width: 70, name: 'light', border: { width: 0 } }
-		});
-	});
-	
 	$('.single-site .wpas-site-team li').each(function(){
 		$(this).qtip({
 			content: $(this).find('.wpas-people-places'),
-			position: { corner: { target: 'leftMiddle', tooltip: 'rightMiddle' } },
+			position: { corner: { target: 'bottomMiddle', tooltip: 'topMiddle' } },
 			hide: { fixed: true },
-			style: { background: 'none', width: 70, name: 'light', border: { width: 0 } }
+			style: { background: 'none', width: 240, name: 'light', border: { width: 0 } }
 		});
 	});
 	
@@ -346,6 +267,4 @@ jQuery(document).ready(function($) {
 			style: { background: 'none', width: 70, name: 'light', border: { width: 0 } }
 		});
 	});
-	
-	$(".wpa-watch-button").colorbox({inline:true, href:$(this).attr('href')});
 });
