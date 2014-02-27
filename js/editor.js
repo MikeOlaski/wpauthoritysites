@@ -1,50 +1,40 @@
 jQuery(document).ready(function($) {
 	
-	$('.attach_content_button').click(function(e) {
-        if( $(this).hasClass('disabled') ){
-			$(this).removeClass('disabled').siblings('.preloader').hide();
-			return;
-		} else {
-			button = $(this);
-			button.addClass('disabled');
-			loader = $('.wpas-control-loader[rel=template]').clone();
-			loader.appendTo(button.parents('.awp-control-group')).show();
-			
-			var id = $('#post_ID').val();
-			var input = $('input[name='+ button.attr('data-target') + ']');
-			var field = input.attr('name');
-		}
-		
-		e.preventDefault();
-    });
+	var loader;
+	loader = $('.wpas-control-loader[rel=template]').clone();
+	loader.addClass(loader.attr('rel')).removeAttr('rel').prependTo('.awp-control-group');
 	
 	if( $.fn.select2 ){
 		$(".wpas-select").select2({ allowClear: true });
 	}
 	
 	$('.compute_score_button').click(function(e) {
-        if( $(this).hasClass('disabled') ){
-			$(this).removeClass('disabled').siblings('.preloader').hide();
+		button = $(this);
+		
+        if( button.hasClass('disabled') ){
+			button.removeClass('disabled');
+			button.parents('.awp-control-group').find('.wpas-control-loader').hide();
 			return;
 		} else {
-			button = $(this);
 			button.addClass('disabled');
-			loader = $('.wpas-control-loader[rel=template]').clone();
+			button.parents('.awp-control-group').find('.wpas-control-loader').show();
 			
 			var id = $('#post_ID').val();
 			var field = button.siblings('input:first-child').attr('name');
 			var input = $('input[name=' + field + ']');
-			loader.appendTo(button.parents('.awp-control-group')).show();
 			
 			var data = {
 				action: 'calculate_metric',
 				id: id,
 				field: field
 			};
+			// console.log( data );
 			
 			jQuery.post(WPAJAX_OBJ.ajax_url, data, function(response) {
-				if( response ){
+				if( response != 'false' ){
 					input.val( response );
+				} else {
+					alert('Score computation failed! Please try again later.');
 				}
 				
 				button.removeClass('disabled');
@@ -59,18 +49,18 @@ jQuery(document).ready(function($) {
     });
 	
 	$('.manual_update_button').click(function(e) {
-		if( $(this).hasClass('disabled') ){
-			$(this).removeClass('disabled').siblings('.preloader').hide();
+		button = $(this);
+		if( button.hasClass('disabled') ){
+			button.removeClass('disabled');
+			button.parents('.awp-control-group').find('.wpas-control-loader').hide();
 			return;
 		} else {
-			button = $(this);
 			button.addClass('disabled');
-			loader = $('.wpas-control-loader[rel=template]').clone();
+			button.parents('.awp-control-group').find('.wpas-control-loader').show();
 			
 			var id = $('#post_ID').val();
 			var field = $( $(this).attr('data-field') ).attr('name');
 			var value = $( $(this).attr('data-field') ).val();
-			loader.appendTo(button.parents('.awp-control-group')).show();
 			
 			var data = {
 				action: 'update_metric',
@@ -98,23 +88,23 @@ jQuery(document).ready(function($) {
 	});
 	
 	$('.run_audit_button').click(function(e) {
-		if( $(this).hasClass('disabled') ){
-			$(this).removeClass('disabled').siblings('.preloader').hide();
+		button = $(this);
+		
+		if( button.hasClass('disabled') ){
+			button.removeClass('disabled');
+			button.parents('.awp-control-group').find('.wpas-control-loader').hide();
 			return;
 		} else {
-			button = $(this);
 			button.addClass('disabled');
-			loader = $('.wpas-control-loader[rel=template]').clone();
+			button.parents('.awp-control-group').find('.wpas-control-loader').show();
 			
 			var id = $('#post_ID').val();
 			var url = $('#awp-awp-url').val();
 			var field = button.siblings('input:first-child').attr('name');
 			var input = $('input[name=' + field + ']');
 			var value = input.val();
-			loader.appendTo(button.parents('.awp-control-group')).show();
 			
 			if('' == url){ url = 'http://' + $('#title').val(); }
-			
 			console.log( 'current values are ', id, url, field, value );
 			
 			var data = {
@@ -131,6 +121,7 @@ jQuery(document).ready(function($) {
 				} else {
 					alert('Metric Audit failed! Please try again later.');
 				}
+				console.log( response );
 				
 				button.removeClass('disabled');
 				button.parents('.awp-control-group')
@@ -146,7 +137,7 @@ jQuery(document).ready(function($) {
 	$('#awp-wp-checker').click(function(e) {
         // Set Preloader
 		$(this).parents('ul').next('.preloader').show();
-		console.log('Collecting data...');
+		// console.log('Collecting data...');
 		
 		var url = $('#awp-awp-url').val();
 		var id = $('#post_ID').val();
@@ -160,12 +151,10 @@ jQuery(document).ready(function($) {
 			id: id
 		};
 		
-		console.log('Posting variables...');
-		
+		// console.log('Posting variables...');
 		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
 		$.post(WPAJAX_OBJ.ajax_url, data, function(response) {
-			console.log( 'response is ', response );
-			
+			// console.log( 'response is ', response );
 			if('true' == response){
 				window.location.href = WPAJAX_OBJ.post_url + '?post=' + id + '&action=edit&message=1';
 			} else {
@@ -231,8 +220,7 @@ jQuery(document).ready(function($) {
             var $t = $(this);
 			var column = $t.val();
 			//if ( $t.prop('checked') ){
-			
-			console.log( $t.prop('checked') );
+			// console.log( $t.prop('checked') );
 			
 			if( $t.is(':checked') ){
 				$('.column-' + column).show();
@@ -275,7 +263,7 @@ jQuery(document).ready(function($) {
 				screenoptionnonce: $('#screenoptionnonce').val(),
 				page: pagenow
 			}, function(a) {
-				console.log( a );
+				// console.log( a );
 			});
 		});
         
@@ -478,14 +466,14 @@ jQuery(document).ready(function($) {
 	$('#doaction, #doaction2').bind('click', function(e){
 		if( $(this).siblings('select').val() == 'evaluate' ){
 			$('#awp-popup').center();
-			console.log('Collecting data');
+			// console.log('Collecting data');
 			
 			posts = $('input[name*=post]:checked').map(function(e){
                 return $(this).val();
             }).get();
 			
 			if(posts == ''){
-				console.log( 'Auditor is terminated' );
+				// console.log( 'Auditor is terminated' );
 				$('#awp-popup .awp-popup-message').html('Audit unsuccessful!');
 				$('#awp-popup').addClass('awp-popup-error').show('slow', '', function(){
 					$('#awp-popup').center();
@@ -502,14 +490,14 @@ jQuery(document).ready(function($) {
 				post: posts
 			};
 			
-			console.log( 'Auditor Initializing' );
+			// console.log( 'Auditor Initializing' );
 			$('#awp-popup').removeClass('awp-popup-error');
 			$('#awp-popup .awp-popup-message').html('Initializing Auditor');
 			$('#awp-popup').show('slow', '', function(){
 				$('#awp-popup').center();
 			});
 			
-			console.log('Auditor Running in Background');
+			// console.log('Auditor Running in Background');
 			setTimeout(function(e){
 				$('#awp-popup').removeClass('awp-popup-error');
 				$('#awp-popup .awp-popup-message').html('Auditor Running in Background');
@@ -519,7 +507,7 @@ jQuery(document).ready(function($) {
 			}, 3000);
 			
 			$.post(WPAJAX_OBJ.ajax_url, data, function(response) {
-				console.log( 'response is ', response );
+				// console.log( 'response is ', response );
 				if('true' == response){
 					$('#awp-popup .awp-popup-message').html('Audit Successful!');
 					$('#awp-popup').removeClass('awp-popup-error').center();
@@ -548,12 +536,12 @@ jQuery(document).ready(function($) {
 	
 	$('.auditinline').click(function(e) {
 		$('#awp-popup').center();
-		console.log('Collecting data');
+		// console.log('Collecting data');
 		
 		posts = [$(this).attr('data-id')];
 		
 		if(posts == ''){
-			console.log( 'Auditor is terminated' );
+			// console.log( 'Auditor is terminated' );
 			$('#awp-popup .awp-popup-message').html('Audit unsuccessful!');
 			$('#awp-popup').addClass('awp-popup-error').show('slow', '', function(){
 				$('#awp-popup').center();
@@ -570,14 +558,14 @@ jQuery(document).ready(function($) {
 			post: posts
 		};
 		
-		console.log( 'Auditor Initializing' );
+		// console.log( 'Auditor Initializing' );
 		$('#awp-popup').removeClass('awp-popup-error');
 		$('#awp-popup .awp-popup-message').html('Initializing Auditor');
 		$('#awp-popup').show('slow', '', function(){
 			$('#awp-popup').center();
 		});
 		
-		console.log('Auditor Running in Background');
+		// console.log('Auditor Running in Background');
 		setTimeout(function(e){
 			$('#awp-popup').removeClass('awp-popup-error');
 			$('#awp-popup .awp-popup-message').html('Auditor Running in Background');
@@ -587,7 +575,7 @@ jQuery(document).ready(function($) {
 		}, 3000);
 		
 		$.post(WPAJAX_OBJ.ajax_url, data, function(response) {
-			console.log( 'response is ', response );
+			// console.log( 'response is ', response );
 			if('true' == response){
 				$('#awp-popup .awp-popup-message').html('Audit Successful!');
 				$('#awp-popup').removeClass('awp-popup-error').center();

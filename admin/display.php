@@ -23,7 +23,7 @@ if( isset( $_REQUEST['settings-updated'] ) ){
 	}
 }
 
-$post_types = array('site', 'interviews', 'reviews', 'show', 'feed');
+$post_types = array('site', 'interviews', 'reviews', 'shows', 'feed');
 
 ?><form name="awp_settings" method="post" action="<?php admin_url('edit.php?post_type=site&page=wpauthority'); ?>">
 	<h3><?php _e('WPAS Display Settings', 'wpas'); ?></h3>

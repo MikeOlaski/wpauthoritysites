@@ -90,6 +90,22 @@ switch($current_nav){
                 </tr>*/ ?>
             </table>
             
+            <h3>Welcome Message</h3>
+            
+            <table class="form-table">
+            	<tr valign="top">
+                    <th><label for="wpas_subscribe_welcome_subject"><?php _e('Welcome subject', 'wpas'); ?></label></th>
+                    <td><input type="text" name="wpas_subscribe[welcome_subject]" id="wpas_subscribe_welcome_subject" value="<?php echo ($wpas_notification['welcome_subject']) ? $wpas_notification['welcome_subject'] : ''; ?>" class="regular-text" /><br />
+                    <span class="description"><?php _e('Subject of the welcome email for new subscribers. Allowed tag: [post_title]', 'wpas'); ?></span></td>
+                </tr>
+                
+                <tr valign="top">
+                    <th><label for="wpas_subscribe_welcome_content"><?php _e('Welcome message', 'wpas'); ?></label></th>
+                    <td><textarea cols="40" rows="5" name="wpas_subscribe[welcome_content]" id="wpas_subscribe_welcome_content"><?php echo ($wpas_notification['welcome_content']) ? $wpas_notification['welcome_content'] : ''; ?></textarea><br />
+                    <span class="description"><?php _e('Content of the welcome email for new subscribers. Allowed tags: [post_title], [post_permalink], [post_author], [post_content], [manager_link], [change]', 'wpas'); ?></span></td>
+                </tr>
+            </table>
+            
             <p><input type="hidden" name="wpas_tab_identifier" value="notification">
             <input type="submit" value="Update option" class="button-primary" id="submit" name="wpas_subscribe_submit"></p>
 		

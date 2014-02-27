@@ -36,9 +36,13 @@ function calculate_metric_score(){
 	
 	$score = wpas_calculate_score($post_id, $metric);
 	
-	if( $score ){
+	if( $score === null ){
+		echo 'false';
+	} else {
 		update_post_meta($post_id, $metric, $score);
-		echo $score;
+		wpas_update_metric_group_scores($post_id);
+		wpas_count_authority_level($post_id);
+		echo (string)$score;
 	}
 	
 	die();
@@ -46,23 +50,28 @@ function calculate_metric_score(){
 
 function audit_metric_callback(){
 	if( !isset($_POST['id']) )
-		die();
+		wp_die('false');
 	
 	if( !isset($_POST['field']) )
-		die();
+		wp_die('false');
 	
 	if( !isset($_POST['url']) )
-		die();
+		wp_die('false');
 	
 	$user_ID = get_current_user_id();
 	
 	$result = awp_evaluate($_POST['url'], $_POST['field'], $_POST['id']);
-	if( $result ){
+	if( $result === null ){
+		wp_die('false');
+	} else {
 		$return = update_post_meta($_POST['id'], $_POST['field'], $result);
 		
 		update_post_meta( $_POST['id'], $_POST['field'].'-updated', date('c'));
 		update_post_meta( $_POST['id'], $_POST['field'].'-through', 'programmatically');
 		update_post_meta( $_POST['id'], $_POST['field'].'-author', $user_ID);
+		
+		wpas_update_metric_group_scores($_POST['id']);
+		wpas_count_authority_level($_POST['id']);
 		
 		echo $result;
 	}
@@ -84,6 +93,9 @@ function update_metric_callback(){
 	update_post_meta( $_POST['id'], $_POST['field'].'-updated', date('c'));
 	update_post_meta( $_POST['id'], $_POST['field'].'-through', 'manually');
 	update_post_meta( $_POST['id'], $_POST['field'].'-author', $user_ID);
+	
+	wpas_update_metric_group_scores($_POST['id']);
+	wpas_count_authority_level($_POST['id']);
 	
 	if( $return ){ die( 'true' ); } else { die(); }
 }
@@ -265,7 +277,9 @@ function evaluate_js_callback( $args = null ){
 		'facebook-likes' => 'awp-likes-facebook',
 		'twitter' => 'awp-shares-twitter',
 		'pinterest' => 'awp-shares-pinterest',
+		'stumbleUpon' => 'awp-shares-stumble',
 		'linkedin' => 'awp-shares-linkedin',
+		
 		'klout' => 'awp-score-klout',
 		
 		// Community
@@ -418,7 +432,9 @@ function evaluate_js_callback( $args = null ){
 		wp_set_object_terms( $id, $term, 'site-status', true );
 		wp_remove_object_terms( $id, '!NotAudited', 'site-status' );
 		
-		wpa_update_scores($id);
+		wpas_update_metric_group_scores($id);
+		wpas_count_authority_level($id);
+		// wpa_update_scores($id);
 		
 		if($die){
 			header( 'HTTP/1.1 200 OK' );
@@ -519,6 +535,9 @@ function awp_evaluate($url, $for, $pID = ''){
 		case 'awp-shares-pinterest':
 			return awp_sharecounts($url, 'pinterest');
 		
+		case 'awp-shares-stumble':
+			return awp_sharecounts($url, 'stumble');
+		
 		case 'awp-shares-linkedin':
 			return awp_sharecounts($url, 'linkedin');
 		
@@ -612,6 +631,13 @@ function awp_evaluate($url, $for, $pID = ''){
 		case 'awp-scores-shares':
 		case 'awp-scores-ranks':
 			return wpas_count_metric_scores($pID, $for);
+		
+		// Authority Level
+		case 'awp-authority-level':
+			return wpas_count_authority_level($pID);
+		
+		default:
+			return null;
 	}
 }
 
@@ -679,6 +705,12 @@ function awp_sharecounts($url, $type, $pID = ''){
 				} else {
 					$result = new WP_Error(__('Broke'), __('Error: Pinterest shares count'));
 				}
+				break;
+			
+			case 'stumble':
+				$content = parse_curl("http://www.stumbleupon.com/services/1.01/badge.getinfo?url=".$url);
+				$json = json_decode($content, true);
+				$result = isset($json['result']['views']) ? intval($json['result']['views']) : 0;
 				break;
 			
 			case 'linkedin':
@@ -956,7 +988,7 @@ function awp_sharecounts($url, $type, $pID = ''){
 				break;
 			
 			default:
-				$result = '';
+				$result = null;
 				break;
 		endswitch;
 	} else {
@@ -971,7 +1003,7 @@ function awp_sharecounts($url, $type, $pID = ''){
 	return $result;
 }
 
-function wpa_update_scores($pID){
+/*function wpa_update_scores($pID){
 	$gLink = get_post_meta($pID, 'awp-google', true);
 	$aLink = get_post_meta($pID, 'awp-alexa', true);
 	$ylink = get_post_meta($pID, 'awp-yahoo', true);
@@ -1045,7 +1077,7 @@ function wpa_update_scores($pID){
 	
 	$authorsScore = ($authors + $biotype + $bylines + $pagetyp + $profile);
 	update_post_meta($pID, 'awp-authors-scores', $authorsScore);
-}
+}*/
 
 function url_exists($url) {
     if (!$fp = curl_init($url)) return false;
@@ -1060,9 +1092,10 @@ function url_exists($url) {
 }
 
 function parse_social_links($url, $type = 'facebook'){
+	/*$userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36'; // tell them we're Chrome
 	$ch = curl_init();
+	$links = null;
 	$timeout = 5;
-	$userAgent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)'; // tell them we're Mozilla
 	
 	curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
 	curl_setopt($ch, CURLOPT_URL, $url);
@@ -1073,8 +1106,9 @@ function parse_social_links($url, $type = 'facebook'){
 	curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 	
 	$data = curl_exec($ch);
-	curl_close($ch);
+	curl_close($ch);*/
 	
+	$data = parse($url);
 	$page = str_get_html($data);
 	
 	switch($type){
@@ -1083,9 +1117,9 @@ function parse_social_links($url, $type = 'facebook'){
 		case 'twitter':
 			$find = 'a[href*=twitter.com]'; break;
 		case 'linkedin':
-			$find = 'a[href*=linkedin.com]'; break;
+			$find = 'a[href*=www.linkedin.com]'; break;
 		case 'pinterest':
-			$find = 'a[href*=pinterest.com]'; break;
+			$find = 'a[href*=www.pinterest.com]'; break;
 		case 'plus.google':
 			$find = 'a[href*=plus.google.com]'; break;
 		case 'klout':
@@ -1094,17 +1128,12 @@ function parse_social_links($url, $type = 'facebook'){
 			$find = 'link[type*=rss]'; break;
 	}
 	
-	foreach($page->find($find) as $element) {
-		// from the page find DOM elements that have attributes of "href" with values starting with "$find"
+	$query = $page->find($find);
+	foreach($query as $element) {
 		$links = $element->href; // get the value of the attribute
-		/*$string = str_replace("'", "|", $value); // for easier formatting of the value I substitute single quote for pipe
-		if(preg_match('/\|(.*)\|/', $string, $matches) === 1){
-			$links[] = $matches[1]; // add links to array
-		}*/
 	}
 	
 	return $links;
-	
 }
 
 function parse($encUrl){

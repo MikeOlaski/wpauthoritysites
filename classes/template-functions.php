@@ -235,13 +235,19 @@ function wpas_calculate_score($post_id, $metric){
 			}
 			break;
 		
-		case 'awp-facebook-followers-score':
-		case 'awp-twitter-followers-score':
-		case 'awp-youtube-followers-score':
-		case 'awp-googleplus-followers-score':
-		case 'awp-linkedin-followers-score':
-		case 'awp-pinterest-followers-score':
-			if($base < 100){
+		case 'awp-facebook-score':
+		case 'awp-twitter-score':
+		case 'awp-youtube-score':
+		case 'awp-googleplus-score':
+		case 'awp-linkedin-score':
+		case 'awp-pinterest-score':
+			$meta_key = substr($metric, 0, -6);
+			$standard = get_post_meta($post_id, $meta_key.'-followers', true);
+			$base = preg_replace('/\D/', '', $standard);
+			
+			if( empty($standard) ){
+				$score = null;
+			} elseif($base < 100){
 				$score = 0;
 			} elseif($base >= 100 and $base < 1000) {
 				$score = 60;
@@ -300,6 +306,8 @@ function wpas_calculate_score($post_id, $metric){
 		case 'awp-shares-facebook-score':
 		case 'awp-shares-twitter-score':
 		case 'awp-shares-linkedin-score':
+		case 'awp-shares-pinterest-score':
+		case 'awp-shares-stumble-score':
 			if($base <= 0){
 				$score = 0;
 			} elseif($base >= 1 and $base <= 10) {
@@ -400,6 +408,14 @@ function wpas_calculate_score($post_id, $metric){
 			}
 			break;
 		
+		case 'awp-rss-score':
+			if( !empty($standard) or $standard != null){
+				$score = 100;
+			} else {
+				$score = 0;
+			}
+			break;
+		
 		case 'awp-date-score':
 		case 'awp-contributors-score':
 		case 'awp-authors-aggregated-authority-score':
@@ -409,7 +425,6 @@ function wpas_calculate_score($post_id, $metric){
 		case 'awp-valuation-ttm-score':
 		case 'awp-valuation-income-score':
 		case 'awp-valuation-expenses-score':
-		case 'awp-rss-score':
 		case 'awp-email-score':
 		case 'awp-websites-score':
 		case 'awp-buzz-klout-score':
@@ -430,6 +445,28 @@ function wpas_calculate_score($post_id, $metric){
 	return $score;
 }
 
+function wpas_update_metric_group_scores($post_id){
+	$metricTabs = array(
+		'awp-scores-site',
+		'awp-scores-team',
+		'awp-scores-authors',
+		'awp-scores-framework',
+		'awp-scores-content',
+		'awp-scores-systems',
+		'awp-scores-valuation',
+		'awp-scores-links',
+		'awp-scores-subscribers',
+		'awp-scores-buzz',
+		'awp-scores-shares',
+		'awp-scores-ranks'
+	);
+	
+	foreach( $metricTabs as $metric ){
+		$score = wpas_count_metric_scores($post_id, $metric);
+		update_post_meta($post_id, $metric, $score);
+	}
+}
+
 function wpas_people_social_places($echo = true, $post_id = '', $type = 'people'){
 	global $post;
 	$post_id = (!$post_id) ? $post->ID : $post_id;
@@ -441,16 +478,27 @@ function wpas_people_social_places($echo = true, $post_id = '', $type = 'people'
 		'_base_people_li' => 'linkedin'
 	);
 	
+	$counts = array(
+		'_base_people_fb' => 'Facebook',
+		'_base_people_tw' => 'Twitter',
+		'_base_people_gg' => 'Google+',
+		'_base_people_li' => 'LinkedIn'
+	);
+	
 	$html = '<ul class="wpas-people-places">';
 	
 	foreach($places as $key=>$social){
 		$url = get_post_meta($post_id, $key, true);
-		$html .= sprintf(
-			'<li><a href="%s" title="%s" target="_blank"><i class="fa fa-%3$s fa-big"></i></a></li>',
-			$url,
-			sprintf(__('Follow %s on %s', 'wpas'), get_the_title($post_id), $social),
-			$social
-		);
+		
+		if( $url != '' ){
+			$html .= sprintf(
+				'<li><a href="%s" title="%s" target="_blank"><i class="fa fa-%3$s fa-big"></i></a> <span class="count">%4$s</span></li>',
+				$url,
+				sprintf(__('Follow %s on %s', 'wpas'), get_the_title($post_id), $social),
+				$social,
+				wpas_get_social_counts($counts[$key], $url, $url)
+			);
+		}
 	}
 	
 	$html .= '</ul>';
@@ -818,7 +866,32 @@ function wpas_archive_list_header($page = ''){
     }
 }
 
-function wpas_count_metric_scores($post_id, $metric){
+function wpas_count_authority_level($post_id){
+	$metricGroups = array(
+		'site',
+		'team',
+		'authors',
+		'framework',
+		'content',
+		'systems',
+		'valuation',
+		'links',
+		'subscribers',
+		'buzz',
+		'shares',
+		'ranks'
+	);
+	
+	$level = 0;
+	foreach($metricGroups as $metric){
+		$level = $level + (int)wpas_get_metric_grade($post_id, $metric, true);
+	}
+	$level = ($level / count($metricGroups));
+	
+	return number_format($level, 0);
+}
+
+function wpas_count_metric_scores($post_id, $metric, $echo = 'changed'){
 	$groups = array();
 	
 	$group_id = str_replace('scores-', '', $metric);
@@ -829,16 +902,12 @@ function wpas_count_metric_scores($post_id, $metric){
 	if(!empty($groups)) {
 		$divider = 0;
 		foreach( $groups as $group ){
-			if( $group_id == 'awp-subscribers' ):
-				$meta_key = $group . '-followers-score';
-			else:
-				$meta_key = $group . '-score';
-			endif;
+			$meta_key = $group . '-score';
 			
 			$metric_score = get_post_meta($post_id, $meta_key, true);
 			preg_replace('/\D/', '', $metric_score);
 			
-			if( !empty($metric_score) || $metric_score != '' ){
+			if( !empty($metric_score) || $metric_score != '' || $metric_score != null ){
 				$divider++;
 			}
 			
@@ -851,25 +920,37 @@ function wpas_count_metric_scores($post_id, $metric){
 		endif;
 	}
 	
-	return number_format($score, 2);
+	if($echo == 'changed')
+		return number_format($score, 2);
+	else
+		return number_format($total, 2);
 }
 
 function wpas_get_metric_score($post_id, $metric){
 	return get_post_meta($post_id, 'awp-scores-' . strtolower($metric), true);
 }
 
-function wpas_get_metric_grade($post_id, $metric){
+function wpas_get_metric_grade($post_id, $metric, $is_numeric = false){
 	$s = get_post_meta($post_id, 'awp-scores-' . strtolower($metric), true);
 	
 	$grade = 'F';
+	$equivalent = 0;
 	if($s >= 60 and $s < 70){
 		$grade = 'D';
+		$equivalent = 2;
 	} elseif($s >= 70 and $s < 80) {
 		$grade = 'C';
+		$equivalent = 3;
 	} elseif($s >= 80 and $s < 90) {
 		$grade = 'B';
+		$equivalent = 4;
 	} elseif($s >= 90 and $s <= 100) {
 		$grade = 'A';
+		$equivalent = 5;
+	}
+	
+	if($is_numeric){
+		return $equivalent;
 	}
 	
 	return $grade;
@@ -886,7 +967,8 @@ function wpas_site_metrics_grade($echo = true, $post_id = ''){
 	foreach( $heads as $head ){
 		$classes = array('clear');
 		
-		$score = (int)wpas_get_metric_score($post_id, $head['name']);
+		$changePCT = (int)wpas_get_metric_score($post_id, $head['name']);
+		$score = (int)wpas_count_metric_scores($post_id, $head['id'], 'score');
 		$grade = wpas_get_metric_grade($post_id, $head['name']);
 		
 		// Get latest site revision and changes
@@ -909,22 +991,24 @@ function wpas_site_metrics_grade($echo = true, $post_id = ''){
 		
 		$classes[] = 'grade-' . $grade;
 		
+		$changePCT = number_format($changePCT, 0);
 		$score = number_format($score, 0);
 		$tens = substr($score, -1);
 		if($tens <= 2){
-			$label = "-{$score}%";
+			$label = "-{$changePCT}%";
 		} elseif($tens >= 7 and $tens <= 9) {
-			$label = "+{$score}%";
+			$label = "+{$changePCT}%";
 		} else {
-			$label = "{$score}%";
+			$label = "{$changePCT}%";
 		}
 		
 		$html .=  sprintf(
 			'<li><a class="%1$s" href="#%2$s">
 				<span class="group"><strong>%4$s</strong></span>
-				<span class="alignright wpas-metric-grade grade-%3$s grade">%3$s</span>
+				<span class="wpas-metric-grade grade-%3$s grade" style="display:block;">%3$s</span>
 				<span class="description">Sample muna %5$s</span>
-				<em class="score">%6$s</em>
+				<em class="score">%8$s</em>
+				<em class="change">%6$s</em>
 				<small class="change">%7$s VS %8$s</small>
 			</a></li>',
 			implode(' ', $classes),
@@ -1073,7 +1157,7 @@ function wpas_site_coveraged_feed($echo = true, $post_id = ''){
 	if( $coveraged = get_the_terms($post_id, array('site-include')) ){
 		foreach( $coveraged as $coverage ):
 			$page_title = str_replace('@', '', $coverage->name);
-			if( $post = get_page_by_title($page_title, OBJECT, 'show') )
+			if( $post = get_page_by_title($page_title, OBJECT, 'shows') )
 				$directs[] = $post;
 			if( $post = get_page_by_title($page_title, OBJECT, 'interviews') )
 				$directs[] = $post;
@@ -1094,10 +1178,16 @@ function wpas_site_coveraged_feed($echo = true, $post_id = ''){
 				$classes = array('all');
 				$classes[] = get_post_type($show->ID);
 				
-				$thumbnail = get_the_post_thumbnail($show->ID, array(345, 170));
-				$default_img = sprintf(
+				if(has_post_thumbnail($show->ID)){
+					$image = wp_get_attachment_image_src( get_post_thumbnail_id($show->ID), 'full', false, '' );
+					$img_src = $image[0];
+				} else {
+					$img_src = $settings['default_' . $show->post_type . '_image'];
+				}
+				// get_the_post_thumbnail($show->ID, array(345, 170));
+				$thumbnail = sprintf(
 					'<img src="%s" alt="Image:%s" width="345" class="%s" />',
-					PLUGINURL . 'timthumb.php?a=tl&w=355&h=170&src=' . $settings['default_' . $show->post_type . '_image'],
+					PLUGINURL . 'timthumb.php?a=tl&w=355&h=170&src=' . $img_src,
 					get_the_title($show->ID),
 					is_archive() ? 'alignleft' : ''
 				);
@@ -1117,7 +1207,7 @@ function wpas_site_coveraged_feed($echo = true, $post_id = ''){
 					implode(' ', $classes),
 					get_permalink($show->ID),
 					get_the_title($show->ID),
-					( has_post_thumbnail($show->ID) ) ? $thumbnail : $default_img,
+					$thumbnail,
 					$details
 				);
 			}
@@ -1199,7 +1289,7 @@ function wpas_get_authorit_ranks($echo = true, $post_id = ''){
 	if( !$post_id ){ $post_id = $post->ID; }
 	
 	$ranks = array(
-		'OneRank' => 'awp-one-rank',
+		// 'OneRank' => 'awp-one-rank',
 		'Alexa' => 'awp-alexa-rank',
 		// 'SEOMoz' => 'awp-moz-rank'
 		'Technorati' => 'awp-tachnorati-rank',
@@ -1401,7 +1491,7 @@ function wpas_get_sites_generally_related_posts($post_id = ''){
 	
 	$query = new WP_Query(
 		array(
-			'post_type' => array('show', 'interviews', 'reviews'),
+			'post_type' => array('shows', 'interviews', 'reviews'),
 			'post_status' => array('future', 'publish'),
 			'posts_per_page' => -1,
 			'orderby' => 'title',

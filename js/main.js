@@ -198,14 +198,17 @@ jQuery(document).ready(function($) {
     });
 	
 	$('a.wpas-score-tabs-prev').click(function(e) {
-		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) + 152;
+		step = $('.wpas-metric-groups-tab li:first-child').outerWidth();
+		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) + parseInt(step);
         $('.wpas-metric-groups-tab').css('margin-left', (marginLleft > 0) ? 0 : marginLleft );
 		e.preventDefault();
     });
 	
 	$('a.wpas-score-tabs-next').click(function(e) {
-		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) - 152;
-        $('.wpas-metric-groups-tab').css('margin-left', (marginLleft < -675) ? -675 : marginLleft );
+		offset = Math.floor( $('.wpas-metric-groups-tab').parent('div').outerWidth() - $('.wpas-metric-groups-tab').outerWidth() );
+		step = $('.wpas-metric-groups-tab li:first-child').outerWidth();
+		marginLleft = parseInt($('.wpas-metric-groups-tab').css('margin-left')) - parseInt(step);
+        $('.wpas-metric-groups-tab').css('margin-left', (marginLleft < offset) ? offset : marginLleft );
 		e.preventDefault();
     });
 	
@@ -255,7 +258,7 @@ jQuery(document).ready(function($) {
 			content: $(this).find('.wpas-people-places'),
 			position: { corner: { target: 'bottomMiddle', tooltip: 'topMiddle' } },
 			hide: { fixed: true },
-			style: { background: 'none', width: 240, name: 'light', border: { width: 0 } }
+			style: { background: 'none', width: 260, name: 'light', border: { width: 0 } }
 		});
 	});
 	

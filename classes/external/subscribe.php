@@ -3,6 +3,11 @@
  * WPAS Subscriber/Watch plugin
  */
 
+add_action( 'save_post', 'wpas_notice_subscribers', 1);
+add_action( 'loop_start', 'wpas_subscribe_callback_notice');
+add_action( 'init', 'wpas_subscribe_form_callback');
+add_action( 'admin_init', 'wpas_subscribe_save_options');
+
 if( ! class_exists( 'WP_List_Table' ) ) {
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
@@ -174,7 +179,6 @@ class Subscribers_List extends WP_List_Table {
 	}
 }
 
-add_action('save_post', 'wpas_notice_subscribers', 1);
 function wpas_notice_subscribers( $post_id ){
 	$wpas_subscribe = get_option('wpas_subscribe');
 	$wpas_notification = $wpas_subscribe['notification'];
@@ -255,7 +259,6 @@ function wpas_subscribers_manager(){
 	$subscribers->display();
 }
 
-add_action('loop_start', 'wpas_subscribe_callback_notice');
 function wpas_subscribe_callback_notice($array){
 	global $wp_query;
     if($array != $wp_query){
@@ -294,11 +297,11 @@ function wpas_subscribe_callback_notice($array){
 	echo $html;
 }
 
-add_action('init', 'wpas_subscribe_form_callback');
 function wpas_subscribe_form_callback(){
 	if(isset($_POST['wpas_subscriber']) && $_POST['wpas_subscriber'] != ''){
 		$subsribers = get_option('wpas_subsriber');
 		if(!$subsribers){ $subsribers = array(); }
+		$is_new_subscriber = true;
 		
 		foreach($_POST as $key=>$val){
 			$$key = $val;
@@ -322,6 +325,10 @@ function wpas_subscribe_form_callback(){
 			wp_redirect(add_query_arg(array('subcription' => 'false', 'message' => 2), $redirect_to)); exit;
 		}
 		
+		if(wpas_is_subscriber($wpas_subsriber['email'])){
+			$is_new_subscriber = false;
+		}
+		
 		$subsribers[$wpas_subsriber['post_id']][$wpas_subsriber['email']] = array(
 			'fname' => $wpas_subsriber['fname'],
 			'lname' => $wpas_subsriber['lname'],
@@ -333,12 +340,61 @@ function wpas_subscribe_form_callback(){
 		
 		$return = update_option('wpas_subsriber', $subsribers);
 		
+		// Welcome new subscribers
+		if( $is_new_subscriber ){
+			wpas_acknowledge_subscribers($subsribers[$wpas_subsriber['post_id']][$wpas_subsriber['email']]);
+		}
+		
 		if($return){
 			wp_redirect(add_query_arg(array('subcription' => 'true'), $redirect_to)); exit;
 		}
 	}
 	
 	return;
+}
+
+function wpas_acknowledge_subscribers($subsriber){
+	$wpas_notification = $wpas_subscribe['notification'];
+	
+	$post_title = get_the_title( $subsriber['post_id'] );
+	$post_url = get_permalink( $subsriber['post_id'] );
+	
+	$shortcodes = array(
+		'[post_title]' => $post_title,
+		'[post_permalink]' => $post_url,
+		'[post_author]' => $post_author,
+		'[post_content]' => stripslashes(nl2br($_POST['post_content'])),
+		'[manager_link]' => $manager_link,
+		'[change]' => $change_table
+	);
+	
+	$subject = $wpas_notification['welcome_subject'];
+	$message = stripslashes(nl2br($wpas_notification['welcome_content']));
+	foreach($shortcodes as $find=>$replace){
+		$message = str_replace($find, $replace, $message);
+		$subject = str_replace($find, $replace, $subject);
+	}
+	
+	$from = $wpas_notification['sender_name'] . '<' . $wpas_notification['sender_email'] . '>';
+	$from = (!$from) ? get_bloginfo('admin_email') : $from;
+	$headers = 'From: ' . $from . "\r\n";
+	// $headers.= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+
+	// Send email to subscribers
+	$to = $subsriber['fname'] . ' ' . $subsriber['lname'] . '<' . $subsriber['email'] . '>';
+	wp_mail( $to, $subject, $message, $headers );
+}
+
+function wpas_is_subscriber($email){
+	$subsribers = get_option('wpas_subsriber');
+	if(!empty($subsribers)){
+		foreach($subsribers as $subscription){
+			if( isset($subscription['email']) and $subscription['email'] == $email )
+				return true;
+		}
+	}
+	
+	return false;
 }
 
 function wpas_subscribe_form($echo = true, $post_id = ''){
@@ -430,7 +486,6 @@ function wpas_track_post_changes($post_id, $data){
 	return $changes;
 }
 
-add_action('admin_init', 'wpas_subscribe_save_options');
 function wpas_subscribe_save_options(){
 	$wpas_subscribe = get_option('wpas_subscribe');
 	

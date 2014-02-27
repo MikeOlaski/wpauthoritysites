@@ -1130,7 +1130,7 @@ function wpa_default_metrics(){
 			'metric_type' => 'site'
 		);
 		
-		$fields[$shortname.'-shares-site-googleplus'] = array(
+		/*$fields[$shortname.'-shares-site-googleplus'] = array(
 			'name' => 'Google+ Site Shares',
 			'id' => $shortname.'-shares-site-googleplus',
 			'type' => 'text',
@@ -1168,7 +1168,7 @@ function wpa_default_metrics(){
 			'score' => true,
 			'readonly' => true,
 			'metric_type' => 'site'
-		);
+		);*/
 		
 		$fields[$shortname.'-shares-googleplus'] = array(
 			'name' => 'Google+ Home Shares',
@@ -1213,6 +1213,28 @@ function wpa_default_metrics(){
 			'readonly' => true,
 			'metric_type' => 'site'
 		);
+		
+		$fields[$shortname.'-shares-pinterest'] = array(
+			'name' => 'Pinterest Home Shares',
+			'id' => $shortname.'-shares-pinterest',
+			'type' => 'text',
+			'group' => $shortname.'-shares',
+			'programmatic' => true,
+			'score' => true,
+			'readonly' => true,
+			'metric_type' => 'site'
+		);
+		
+		$fields[$shortname.'-shares-stumble'] = array(
+			'name' => 'StumbleUpon Home Shares',
+			'id' => $shortname.'-shares-stumble',
+			'type' => 'text',
+			'group' => $shortname.'-shares',
+			'programmatic' => true,
+			'score' => true,
+			'readonly' => true,
+			'metric_type' => 'site'
+		);
 		/********	 END OF SHARES	  **********/
 		
 		/********	 SCORES	  **********/
@@ -1239,6 +1261,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-scores',
 			'programmatic' => true,
+			'autoUpdate' => true,
 			'readonly' => true
 		);
 		
@@ -1248,41 +1271,25 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-scores',
 			'programmatic' => true,
+			'autoUpdate' => true,
 			'readonly' => true
 		);
 		
-		$fields[$shortname.'-scores-project'] = array(
+		/*$fields[$shortname.'-scores-project'] = array(
 			'name' => 'Project',
 			'id' => $shortname.'-scores-project',
 			'type' => 'text',
 			'group' => $shortname.'-scores',
 			'readonly' => true
-		);
+		);*/
 		
-		$fields[$shortname.'-scores-links'] = array(
-			'name' => 'Links',
-			'id' => $shortname.'-scores-links',
+		$fields[$shortname.'-scores-authors'] = array(
+			'name' => 'Authors',
+			'id' => $shortname.'-scores-authors',
 			'type' => 'text',
 			'group' => $shortname.'-scores',
 			'programmatic' => true,
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-scores-buzz'] = array(
-			'name' => 'Buzz',
-			'id' => $shortname.'-scores-buzz',
-			'type' => 'text',
-			'group' => $shortname.'-scores',
-			'programmatic' => true,
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-scores-shares'] = array(
-			'name' => 'Shares',
-			'id' => $shortname.'-scores-shares',
-			'type' => 'text',
-			'group' => $shortname.'-scores',
-			'programmatic' => true,
+			'autoUpdate' => true,
 			'readonly' => true
 		);
 		
@@ -1292,24 +1299,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-scores',
 			'programmatic' => true,
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-scores-subscribers'] = array(
-			'name' => 'Subscribers',
-			'id' => $shortname.'-scores-subscribers',
-			'type' => 'text',
-			'group' => $shortname.'-scores',
-			'programmatic' => true,
-			'readonly' => true
-		);
-		
-		$fields[$shortname.'-scores-authors'] = array(
-			'name' => 'Authors',
-			'id' => $shortname.'-scores-authors',
-			'type' => 'text',
-			'group' => $shortname.'-scores',
-			'programmatic' => true,
+			'autoUpdate' => true,
 			'readonly' => true
 		);
 		
@@ -1319,6 +1309,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-scores',
 			'programmatic' => true,
+			'autoUpdate' => true,
 			'readonly' => true
 		);
 		
@@ -1328,6 +1319,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-scores',
 			'programmatic' => true,
+			'autoUpdate' => true,
 			'readonly' => true
 		);
 		
@@ -1337,6 +1329,47 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-scores',
 			'programmatic' => true,
+			'autoUpdate' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-scores-links'] = array(
+			'name' => 'Links',
+			'id' => $shortname.'-scores-links',
+			'type' => 'text',
+			'group' => $shortname.'-scores',
+			'programmatic' => true,
+			'autoUpdate' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-scores-subscribers'] = array(
+			'name' => 'Subscribers',
+			'id' => $shortname.'-scores-subscribers',
+			'type' => 'text',
+			'group' => $shortname.'-scores',
+			'programmatic' => true,
+			'autoUpdate' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-scores-buzz'] = array(
+			'name' => 'Buzz',
+			'id' => $shortname.'-scores-buzz',
+			'type' => 'text',
+			'group' => $shortname.'-scores',
+			'programmatic' => true,
+			'autoUpdate' => true,
+			'readonly' => true
+		);
+		
+		$fields[$shortname.'-scores-shares'] = array(
+			'name' => 'Shares',
+			'id' => $shortname.'-scores-shares',
+			'type' => 'text',
+			'group' => $shortname.'-scores',
+			'programmatic' => true,
+			'autoUpdate' => true,
 			'readonly' => true
 		);
 		
@@ -1346,6 +1379,7 @@ function wpa_default_metrics(){
 			'type' => 'text',
 			'group' => $shortname.'-scores',
 			'programmatic' => true,
+			'autoUpdate' => true,
 			'readonly' => true
 		);
 		
@@ -1362,6 +1396,7 @@ function wpa_default_metrics(){
 			'id' => $shortname.'-authority-level',
 			'type' => 'text',
 			'group' => $shortname.'-scores',
+			'programmatic' => true,
 			'score' => true,
 			'readonly' => true
 		);

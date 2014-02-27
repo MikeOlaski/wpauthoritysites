@@ -1424,27 +1424,6 @@ span.displayOptionshead{
 	display: none;
 }
 
-.wpas-people-places li a{
-	background: none !important;
-	font-size: 60px !important;
-	padding: 0 !important;
-	margin: 0 5px 0 0;
-	line-height: 35px;
-	height: 44px;
-	width: 48px;
-}
-
-.wpas-people-places li:last-child a{ margin: 0; }
-
-.wpas-people-places li a i{
-	float: left;
-	height: 44px;
-}
-
-.wpas-people-places li a i:before{
-	line-height: 44px !important;
-}
-
 .sites-subscription{
 	position: relative;
 }
@@ -1466,8 +1445,6 @@ span.displayOptionshead{
 	-moz-box-shadow: 0px 0px 10px #f8f8f8;
 	-webkit-box-shadow: 0px 0px 10px #f8f8f8;
 }
-
-.wpas-people-places{ width: 207px; }
 
 .socials:after, .wpas-people-places:after,
 .socials:before, .wpas-people-places:before {
@@ -1513,7 +1490,43 @@ span.displayOptionshead{
 	margin-left: -11px;
 }
 
-.wpas-people-places li{ display: inline-block; }
+.wpas-people-places{ width: 222px; }
+
+.wpas-people-places li{
+	display: inline-block;
+	margin: 0 10px 0 0;
+	
+	vertical-align: top;
+	text-align: center;
+}
+
+.wpas-people-places li a{
+	background: none !important;
+	font-size: 60px !important;
+	padding: 0 !important;
+	margin: 0;
+	
+	line-height: 35px;
+	height: 44px;
+	width: 48px;
+}
+
+.wpas-people-places li:last-child{ margin: 0; }
+
+.wpas-people-places li .count{
+	font-size: 14px;
+	font-weight: bold;
+	display: block;
+}
+
+.wpas-people-places li a i{
+	float: left;
+	height: 44px;
+}
+
+.wpas-people-places li a i:before{
+	line-height: 44px !important;
+}
 
 .wpas-social-subscribers li{
 	text-align: center;
@@ -1709,6 +1722,7 @@ i.fa-big:before{
 	text-indent: -999px;
 	color: transparent;
 	font-size: 0;
+	display: none;
 }
 
 .wpas-score-tabs-prev{
@@ -1730,7 +1744,6 @@ i.fa-big:before{
 .wpa-score-tabs .wpas-metric-groups-tab{
 	margin-bottom: 15px;
 	background: none;
-	width: 1824px;
 	padding: 0;
 	
 	border: 0;
@@ -1740,13 +1753,13 @@ i.fa-big:before{
 	-moz-border-radius: 0;
 	-webkit-border-radius: 0;
 	
-	height: 66px;
+	max-height: 66px;
 	overflow: hidden;
 }
 
 .wpa-score-tabs .wpas-metric-groups-tab li{
 	margin: 0;
-	height: 65px;
+	max-height: 65px;
 	/*width: 150px;*/
 	
 	border-radius: 0;
@@ -1851,6 +1864,7 @@ i.fa-big:before{
 	display: block;
 	clear: left;
 	width: 95px;
+	float: left;
 	
 	font-size: 10px;
 	font-style: italic;
@@ -1859,6 +1873,13 @@ i.fa-big:before{
 
 .wpa-score-tabs .ui-tabs-panel{
 	padding: 0;
+}
+
+.single-site .wpa-score-tabs .wpas-metric-groups-tab li em.change,
+.single-site .wpa-score-tabs .wpas-metric-groups-tab li em.score,
+.single-site .wpas-metric-groups-tab li span.wpas-metric-grade,
+.single-site .wpa-score-tabs .wpas-metric-groups-tab li small.change{
+	display: none;
 }
 
 /*	 Metrics Table	 */

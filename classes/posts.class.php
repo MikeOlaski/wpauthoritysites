@@ -677,7 +677,7 @@ class Sites_CPT{
             ?></div>
             
             <div class="wpas-control-loader" rel="template" style="display:none;">
-            	<img src="<?php echo PLUGINURL; ?>images/130.gif" class="preloader" />
+            	<img src="<?php echo PLUGINURL; ?>images/130.GIF" class="preloader" />
             </div>
             
             <div class="clear"></div>
@@ -795,7 +795,9 @@ class Sites_CPT{
 							?><input type="text" class="<?php echo implode(' ', $classes); ?>" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>_upload" value="<?php echo $metavalue; ?>" /><?php
 					}
 					
-					?> <span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span><?php
+					if(!$control['autoUpdate']){
+						?> <span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span><?php
+					}
 					
 					if( $control['programmatic'] ){
 						echo sprintf(' <span class="button run_audit_button">%s</span>', __('Audit', 'wpas') );
@@ -867,9 +869,9 @@ class Sites_CPT{
 				}
 				
 				if($control['score']){
-					$metaname = $metaname.'-score';
+					$metaname = $control['id'].'-score';
 					$metavalue = get_post_meta($post_id, $metaname, true);
-					$metaID = $metaID.'-score';
+					$metaID = $control['id'].'-score';
 					
 					?><label for="<?php echo $metaID; ?>"><?php _e('Score', 'wpas'); ?></label>
 					<div class="awp-controls">
@@ -894,23 +896,25 @@ class Sites_CPT{
                     <span class="button attach_content_button" data-target="<?php echo $metaname; ?>"><?php _e('Attach', 'wpas'); ?></span>
                 </div>*/
 				
-				?><label for="<?php echo $metaID; ?>"><?php _e('Content', 'wpas'); ?></label>
-                <div class="awp-controls">
-                    <select class="regular-select wpas-select" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>">
-                    	<option value="0">Select to return to default</option><?php
-						foreach($problems as $problem){
-							echo sprintf(
-								'<option value="%s" %s>%s</option>',
-								$problem->ID,
-								selected($problem->ID, $metavalue, false),
-								$problem->post_title
-							);
-						}
-                    ?></select>
-                    <span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span>
-                </div>
+				if(!$control['autoUpdate']){
+					?><label for="<?php echo $metaID; ?>"><?php _e('Content', 'wpas'); ?></label>
+					<div class="awp-controls">
+						<select class="regular-select wpas-select" name="<?php echo $metaname; ?>" id="<?php echo $metaID; ?>">
+							<option value="0">Select to return to default</option><?php
+							foreach($problems as $problem){
+								echo sprintf(
+									'<option value="%s" %s>%s</option>',
+									$problem->ID,
+									selected($problem->ID, $metavalue, false),
+									$problem->post_title
+								);
+							}
+						?></select>
+						<span class="button manual_update_button" data-field="#<?php echo $metaID; ?>">Update</span>
+					</div><?php
+				}
                 
-                <div class="clear"></div><?php
+                ?><div class="clear"></div><?php
 			}
             ?></div><?php
 		}
@@ -942,6 +946,10 @@ class Sites_CPT{
 					delete_post_meta( $post_id, $fl['id'] );
 				}
 				
+				update_post_meta( $post_id, $fl['id'].'-content', $_POST[$fl['id'].'-content'] );
+				// update_post_meta( $post_id, $fl['id'].'-content-type', $_POST[$fl['id'].'-content-type'] );
+				// update_post_meta( $post_id, $fl['id'].'-content-title', $_POST[$fl['id'].'-content-title'] );
+				
 				if($fl['score']){
 					update_post_meta( $post_id, $fl['id'].'-score', $_POST[$fl['id'] . '-score']);
 				}
@@ -959,12 +967,11 @@ class Sites_CPT{
 					update_post_meta( $post_id, $fieldname.'-through', 'manually');
 					update_post_meta( $post_id, $fieldname.'-author', $user_ID);
 				}
-				
-				update_post_meta( $post_id, $fl['id'].'-content', $_POST[$fl['id'].'-content'] );
-				// update_post_meta( $post_id, $fl['id'].'-content-type', $_POST[$fl['id'].'-content-type'] );
-				// update_post_meta( $post_id, $fl['id'].'-content-title', $_POST[$fl['id'].'-content-title'] );
 			}
 		}
+		
+		wpas_update_metric_group_scores($post_id);
+		wpas_count_authority_level($post_id);
 		
 		return $post_id;
 	}

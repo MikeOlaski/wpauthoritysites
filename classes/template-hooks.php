@@ -348,7 +348,7 @@ function wpas_site_coveraged(){
 		if( $coveraged = get_the_terms($post->ID, array('site-include')) ){
 			foreach( $coveraged as $coverage ):
 				$page_title = str_replace('@', '', $coverage->name);
-				if( $post = get_page_by_title($page_title, OBJECT, 'show') )
+				if( $post = get_page_by_title($page_title, OBJECT, 'shows') )
 					$directs[] = $post;
 				if( $post = get_page_by_title($page_title, OBJECT, 'interviews') )
 					$directs[] = $post;
@@ -490,11 +490,11 @@ function wpa_audit_site_score(){
 	if( is_single() && 'site' == $post->post_type ){
 		?><div class="wpas-audits">
 			<ul class="wpas-data wpas-filter-list alignright">
-				<li class="first"><a href="javascript:void(0);" data-toggle="grade"><?php _e('Grade', 'wpas'); ?></a></li>
+				<li class="first"><a class="hidden" href="javascript:void(0);" data-toggle="grade"><?php _e('Grade', 'wpas'); ?></a></li>
                 <li><a href="javascript:void(0);" data-toggle="score"><?php _e('Score', 'wpas'); ?></a></li>
-				<li><a href="javascript:void(0);" data-toggle="change score"><?php _e('Change','wpas'); ?></a></li>
-				<li class="last"><a href="javascript:void(0);" data-toggle="rank"><?php _e('Rank', 'wpas'); ?></a></li>
-			</ul><?php
+				<li class="last"><a href="javascript:void(0);" data-toggle="change"><?php _e('Change','wpas'); ?></a></li><?php
+                /* <li><a href="javascript:void(0);" data-toggle="rank"><?php _e('Rank', 'wpas'); ?></a></li>*/
+			?></ul><?php
 			
 			/*<ul class="wpas-metric wpas-filter-list alignright">
 				<li class="first"><a href="javascript:voidd(0);" data-toggle="wordpress"><?php _e('Wordpress', 'wpas'); ?></a></li>
@@ -510,10 +510,9 @@ function wpa_audit_site_score(){
 				
 				<div style="overflow: hidden; width: 100%;"><?php
             		wpas_site_metrics_grade(true, $post->ID);
-				?></div>
-                
-                <a href="#" class="wpa-sgl-compare-button alignright">+ Compare Site</a>
-                
+				?></div><?php
+				
+				/*<a href="#" class="wpa-sgl-compare-button alignright">+ Compare Site</a>
                 <ul class="wpa-display-controls">
                     <li class="openSearch">
                         <a href="javascript:void(0);" class="wpa-control search" data-title="<?php _e('Display Options', 'wpas'); ?>"><?php _e('Display Options', 'wpas'); ?></a><?php
@@ -523,7 +522,7 @@ function wpa_audit_site_score(){
                         <a href="#export" class="wpa-control export" title="Export Options">Export</a>
                         <div class="wpa-export-options hide"></div>
                     </li>
-                </ul><?php
+                </ul><?php */
                 
                 $site = array('domain', 'tld', 'url', 'date', 'networked', 'location', 'language');
                 $links = array('google', 'alexa', 'yahoo', 'majestic');
@@ -549,7 +548,7 @@ function wpa_audit_site_score(){
 								<thead><tr>
 									<th class="metric"><h4><?php _e('Metric Name', 'wpas'); ?></h4></th>
 									<th class="result"><h4><?php _e('Audit Result', 'wpas'); ?></h4></th>
-									<th class="score"><h4><?php _e('Score', 'wpas'); ?></h4></th>
+									<th class="score hide"><h4><?php _e('Score', 'wpas'); ?></h4></th>
 									<th class="solutions"><h4><?php _e('Solutions', 'wpas'); ?></h4></th>
 								</tr></thead>
 								
@@ -587,8 +586,8 @@ function wpa_audit_site_score(){
 												<td class="result"><?php
 													echo sprintf('<em>%s</em> <span class="description">%s</span>', $result, $metric['unit']);
 												?></td>
-												<td class="score"><?php
-													echo ($points) ? sprintf('<em>%s</em> <span>Points</span>', $points) : '';
+												<td class="score hide"><?php
+													echo ($points != null) ? sprintf('<em>%s</em> <span>Points</span>', $points) : '';
 												?></td>
 												<td class="solutions"><?php
 													$contentID = get_post_meta($post->ID, $metric['id'].'-content', true);
@@ -642,6 +641,7 @@ function wpa_audit_site_score(){
                 });*/ ?>
 				
 				$('.wpas-data li a').click(function(e) {
+					// Primary
 					data_column = $(this).attr('data-toggle');
 					data_column = data_column.split(' ');
 					toggler = $(this);
@@ -650,9 +650,7 @@ function wpa_audit_site_score(){
 					$(this).toggleClass('hidden');
 					
 					jQuery.each(data_column, function(i, e){
-						console.log(e);
 						fieldClass = e;
-					
 						$('table.wpa-metrics-table th, table.wpa-metrics-table td').each(function(i, e) {
 							if( $(this).hasClass(fieldClass) ){
 								$(this).toggleClass('hide');
@@ -660,22 +658,63 @@ function wpa_audit_site_score(){
 						});
 						
 						$('.wpas-metric-groups-tab li span, .wpas-metric-groups-tab li em, .wpas-metric-groups-tab li small').each(function(i, e) {
-							if( $(this).hasClass(fieldClass) ){
-								// $(this).toggleClass('hide');
-								$(this).toggle('hide');
-							}
+							if( $(this).hasClass(fieldClass) ) $(this).toggle('show');
 						});
+						
+						if( $('.wpas-data li a[data-toggle="change"]').hasClass('hidden') || $('.wpas-data li a[data-toggle="score"]').hasClass('hidden') ){
+							if( !$('span.wpas-metric-grade').hasClass('alignright') ){
+								$('span.wpas-metric-grade').addClass('alignright');
+							}
+						} else {
+							$('span.wpas-metric-grade').removeClass('alignright');
+						}
+						
+						if( $('.wpas-data li a[data-toggle="grade"]').hasClass('hidden') ){
+							$('span.wpas-metric-grade').css('display', 'block');
+						}
 					});
 					
-					if( $('.wpas-data li a[data-toggle="change score"]').hasClass('hidden') ){
-						$('span.wpas-metric-grade').removeClass('alignright');
-					} else {
-						if( !$('span.wpas-metric-grade').hasClass('alignright') ){
-							$('span.wpas-metric-grade').addClass('alignright');
+					// Secondary
+					setTimeout(function(){
+						tabContainerWidth = $('.wpas-metric-groups-tab').parent('div').outerWidth();
+						tabWidth = 1;
+						$('.wpas-metric-groups-tab li').each(function(i, e) {
+							tabWidth += $(this).outerWidth();
+						});
+						
+						if( tabWidth > tabContainerWidth ){
+							$('.wpas-metric-groups-tab').css('width', tabWidth);
+							$('a.wpas-score-tabs-prev, a.wpas-score-tabs-next').show();
+						} else {
+							$('.wpas-metric-groups-tab').css({'width' : '100%', 'margin-left' : 0});
+							$('a.wpas-score-tabs-prev, a.wpas-score-tabs-next').hide();
 						}
-					}
+						
+						offset = Math.floor( tabContainerWidth - $('.wpas-metric-groups-tab').outerWidth() );
+						console.log( 'left ', parseInt($('.wpas-metric-groups-tab').css('margin-left')), ' offset ', offset);
+						if( parseInt($('.wpas-metric-groups-tab').css('margin-left')) < offset ){
+							$('.wpas-metric-groups-tab').css('margin-left', offset);
+						}
+						
+					}, 400);
 					
 					e.preventDefault();
+                });
+				
+				$(window).resize(function(e) {
+                    tabContainerWidth = $('.wpas-metric-groups-tab').parent('div').outerWidth();
+					tabWidth = 1;
+					$('.wpas-metric-groups-tab li').each(function(i, e) {
+						tabWidth += $(this).outerWidth();
+					});
+					
+					if( tabWidth > tabContainerWidth ){
+						$('.wpas-metric-groups-tab').css('width', tabWidth);
+						$('a.wpas-score-tabs-prev, a.wpas-score-tabs-next').show();
+					} else {
+						$('.wpas-metric-groups-tab').css({'width' : '100%', 'margin-left' : 0});
+						$('a.wpas-score-tabs-prev, a.wpas-score-tabs-next').hide();
+					}
                 });
             });
 		</script>
